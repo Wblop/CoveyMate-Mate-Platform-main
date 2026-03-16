@@ -1,0 +1,47 @@
+    <section class="sm-page-section">
+      <div class="sm-container">
+        <article class="sm-surface legal-card">
+          <h1>{{ title }}</h1>
+          <p class="sm-muted">{{ subtitle }}</p>
+
+          @if (sections.length) {
+            <nav class="legal-toc" [attr.aria-label]="tocTitle">
+              <h2>{{ tocTitle }}</h2>
+              <ol>
+                @for (section of sections; track section.id) {
+                  <li>
+                    <a [attr.href]="'#' + section.id">{{ section.tocTitle }}</a>
+                  </li>
+                }
+              </ol>
+            </nav>
+
+            <div class="legal-sections">
+              @for (section of sections; track section.id) {
+                <section class="legal-section legal-anchor" [id]="section.id">
+                  <h2>{{ section.title }}</h2>
+
+                  @for (paragraph of section.paragraphs; track paragraph) {
+                    <p>{{ paragraph }}</p>
+                  }
+
+                  @if (section.bullets?.length) {
+                    <ul>
+                      @for (item of section.bullets; track item) {
+                        <li>{{ item }}</li>
+                      }
+                    </ul>
+                  }
+                </section>
+              }
+            </div>
+          } @else {
+            <div class="legal-copy">
+              @for (paragraph of paragraphs; track paragraph) {
+                <p>{{ paragraph }}</p>
+              }
+            </div>
+          }
+        </article>
+      </div>
+    </section>

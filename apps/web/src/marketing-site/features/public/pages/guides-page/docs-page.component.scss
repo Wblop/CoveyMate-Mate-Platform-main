@@ -1,0 +1,320 @@
+    .docs-layout {
+      display: grid;
+      gap: var(--sm-space-5);
+    }
+
+    .docs-frame {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 300px;
+      gap: var(--sm-space-5);
+      align-items: start;
+    }
+
+    .docs-content {
+      display: grid;
+      gap: 0;
+      min-width: 0;
+      background: #ffffff;
+      border: 1px solid #d7e2eb;
+      border-radius: var(--sm-radius-lg);
+      padding: var(--sm-space-5);
+    }
+
+    .docs-section,
+    .docs-callout {
+      padding: var(--sm-space-4) 0;
+      display: grid;
+      gap: var(--sm-space-3);
+    }
+
+    .docs-section + .docs-section,
+    .docs-section + .docs-callout {
+      border-top: 1px solid #d7e2eb;
+    }
+
+    .docs-anchor {
+      scroll-margin-top: calc(var(--sm-header-height) + var(--sm-space-4));
+    }
+
+    .docs-section h2,
+    .docs-callout h2 {
+      font-size: 22px;
+      line-height: 1.25;
+      margin: 0;
+    }
+
+    .docs-section p,
+    .docs-callout p {
+      margin: 0;
+      color: var(--sm-color-text);
+      max-width: 68ch;
+      font-size: 17px;
+      line-height: 1.68;
+    }
+
+    .docs-section ul {
+      margin: 0;
+      padding-left: 22px;
+      display: grid;
+      gap: var(--sm-space-2);
+      max-width: 69ch;
+      font-size: 17px;
+      line-height: 1.64;
+    }
+
+    .docs-pipeline-diagram {
+      margin: 0;
+      border: 0;
+      background: transparent;
+      padding: 0;
+      display: block;
+    }
+
+    .docs-pipeline-diagram svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      min-height: 460px;
+    }
+
+    .docs-stages-diagram {
+      margin: var(--sm-space-2) 0 0;
+      padding: 0;
+      display: block;
+    }
+
+    .docs-stages-diagram svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      min-height: 180px;
+    }
+
+    .stage-node {
+      fill: #edf4fb;
+      stroke: #9bb2c4;
+      stroke-width: 1.2;
+    }
+
+    .stage-node--final {
+      fill: #e5f1fb;
+      stroke: #5f819a;
+      stroke-width: 1.4;
+    }
+
+    .stage-link {
+      stroke: #3f5f75;
+      stroke-width: 1.8;
+      fill: none;
+      marker-end: url(#stage-arrow);
+    }
+
+    .stage-title {
+      fill: #17384f;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: var(--sm-font-body);
+    }
+
+    .stage-copy {
+      fill: #39566a;
+      font-size: 12px;
+      font-weight: 550;
+      font-family: var(--sm-font-body);
+    }
+
+    .pipeline-time-axis {
+      stroke: #b4c7d6;
+      stroke-width: 2;
+    }
+
+    .pipeline-time-tick {
+      stroke: #7b99b0;
+      stroke-width: 1.7;
+    }
+
+    .pipeline-time-label {
+      fill: #3e5d72;
+      font-size: 13px;
+      font-family: var(--sm-font-body);
+      font-weight: 600;
+    }
+
+    .pipeline-flow {
+      stroke: #3e5e74;
+      stroke-width: 1.8;
+      marker-end: url(#pipeline-arrow);
+      fill: none;
+      opacity: 0.9;
+    }
+
+    .pipeline-gate {
+      stroke: #9fb4c5;
+      stroke-width: 1.2;
+    }
+
+    .pipeline-gate--entry {
+      fill: #ecf5fb;
+    }
+
+    .pipeline-gate--trust {
+      fill: #eef3fa;
+    }
+
+    .pipeline-gate--analysis {
+      fill: #f2f7fb;
+    }
+
+    .pipeline-gate--quality {
+      fill: #edf5fa;
+    }
+
+    .pipeline-gate--delivery {
+      fill: #eaf4fb;
+    }
+
+    .pipeline-badge {
+      fill: #0b3c5d;
+      stroke: rgba(255, 255, 255, 0.8);
+      stroke-width: 2;
+    }
+
+    .pipeline-badge-number {
+      fill: #ffffff;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: var(--sm-font-body);
+    }
+
+    .pipeline-gate-title {
+      fill: #153348;
+      font-size: 23px;
+      font-weight: 700;
+      font-family: var(--sm-font-body);
+    }
+
+    .pipeline-gate-copy {
+      fill: #355266;
+      font-size: 15px;
+      font-family: var(--sm-font-body);
+    }
+
+    .pipeline-transition {
+      fill: #4b6679;
+      font-size: 12px;
+      font-weight: 650;
+      font-family: var(--sm-font-body);
+    }
+
+    .pipeline-transition-chip {
+      fill: #f4f8fc;
+      stroke: #c6d6e4;
+      stroke-width: 1;
+    }
+
+    .pipeline-heading {
+      fill: #123247;
+      font-size: 30px;
+      font-weight: 700;
+      font-family: var(--sm-font-body);
+    }
+
+    .pipeline-subheading {
+      fill: #456174;
+      font-size: 17px;
+      font-family: var(--sm-font-body);
+    }
+
+    .docs-callout {
+      margin-top: var(--sm-space-2);
+      padding: var(--sm-space-4);
+      border: 1px solid #a9c1d3;
+      border-radius: var(--sm-radius-md);
+      background: #f3f8fd;
+    }
+
+    .docs-right-rail {
+      position: sticky;
+      top: calc(var(--sm-header-height) + var(--sm-space-4));
+      display: grid;
+      gap: var(--sm-space-3);
+    }
+
+    .docs-rail-card {
+      padding: var(--sm-space-3);
+      display: grid;
+      gap: var(--sm-space-2);
+    }
+
+    .docs-rail-title {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.4;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--sm-color-text-muted);
+    }
+
+    .docs-rail-card nav {
+      display: grid;
+      gap: 4px;
+    }
+
+    .docs-rail-card a {
+      display: block;
+      text-decoration: none;
+      color: var(--sm-color-text-muted);
+      font-size: 14px;
+      line-height: 1.4;
+      border-radius: var(--sm-radius-sm);
+      padding: 7px 9px;
+      border: 1px solid transparent;
+      transition: color var(--sm-motion-fast), background-color var(--sm-motion-fast), border-color var(--sm-motion-fast);
+    }
+
+    .docs-rail-card a:hover {
+      color: var(--sm-color-primary);
+      background: var(--sm-color-surface-emphasis);
+      border-color: #b7cadd;
+    }
+
+    .docs-rail-card a.is-active {
+      color: var(--sm-color-primary);
+      background: var(--sm-color-surface-emphasis);
+      border-color: #9eb8ca;
+      font-weight: 700;
+    }
+
+    .docs-updated {
+      margin: var(--sm-space-1) 0 0;
+      font-size: 12px;
+      line-height: 1.4;
+      color: var(--sm-color-text-muted);
+    }
+
+    @media (max-width: 1080px) {
+      .docs-frame {
+        grid-template-columns: 1fr;
+      }
+
+      .docs-right-rail {
+        position: static;
+      }
+
+      .docs-content {
+        padding: var(--sm-space-4);
+      }
+
+      .docs-section,
+      .docs-callout {
+        padding-top: var(--sm-space-4);
+        padding-bottom: var(--sm-space-4);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .docs-rail-card a {
+        transition: none;
+      }
+    }

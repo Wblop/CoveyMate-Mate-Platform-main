@@ -1,0 +1,50 @@
+{
+  "name": "conveymate-trunk",
+  "private": true,
+  "version": "0.1.0",
+  "engines": {
+    "node": ">=24.13.1",
+    "npm": ">=11.8.0"
+  },
+  "packageManager": "npm@11.8.0",
+  "scripts": {
+    "repo:map": "bash tools/scripts/repo-map.sh",
+    "bootstrap": "bash tools/scripts/with-node24.sh bash tools/scripts/bootstrap.sh",
+    "dev:web": "bash tools/scripts/with-node24.sh npm --prefix apps/web run start",
+    "build:web": "bash tools/scripts/with-node24.sh npm --prefix apps/web run build",
+    "test:web": "bash tools/scripts/with-node24.sh npm --prefix apps/web run test -- --watch=false --browsers=ChromeHeadless --progress=false",
+    "build:worker": "dotnet build ../ConveyMate-AI/ConveyMate-AI.sln",
+    "test:worker": "dotnet test ../ConveyMate-AI/ConveyMate-AI.sln",
+    "local:up": "bash tools/scripts/local-up.sh",
+    "local:down": "docker compose --env-file local/.env -f local/docker-compose.yml down",
+    "local:ssm:bootstrap": "bash scripts/local/bootstrap-ssm.sh",
+    "local:worker:deploy": "bash tools/scripts/localstack-deploy-worker.sh",
+    "local:start": "bash local/start-all.sh",
+    "conveyancers:refresh:all": "python3 tools/conveyancers/refresh_all.py --connection \"$CONVEYMATE_POSTGRES_CONNECTION\"",
+    "conveyancers:refresh:act": "python3 tools/conveyancers/act.py --connection \"$CONVEYMATE_POSTGRES_CONNECTION\"",
+    "data:fetch": "python3 tools/utilities/fetch_act_law_firms.py --output data/raw/act_law_firms.json",
+    "data:sync:web": "bash tools/scripts/sync-web-data.sh",
+    "data:refresh": "npm run data:fetch && npm run data:sync:web",
+    "api:run": "dotnet run --project apps/apis/conveymate-api/src/ConveyMate.Api/ConveyMate.Api.csproj",
+    "infra:cfn:validate": "bash tools/scripts/validate-cfn.sh",
+    "infra:cfn:validate:cognito": "bash tools/scripts/validate-cfn.sh infra/cloudformation/templates/conveymate-cognito.yml",
+    "infra:cfn:validate:admin-stack": "bash tools/scripts/validate-cfn.sh infra/cloudformation/templates/admin/iam-web-ops-group.yml",
+    "infra:cfn:deploy:dev": "bash tools/scripts/deploy-cfn.sh dev",
+    "infra:cfn:deploy:staging": "bash tools/scripts/deploy-cfn.sh staging",
+    "infra:cfn:deploy:prod": "bash tools/scripts/deploy-cfn.sh prod",
+    "infra:cfn:deploy:cognito:dev": "bash tools/scripts/deploy-cfn.sh dev conveymate-cognito-dev infra/cloudformation/templates/conveymate-cognito.yml infra/cloudformation/environments/dev/cognito-parameters.json",
+    "infra:cfn:deploy:cognito:staging": "bash tools/scripts/deploy-cfn.sh staging conveymate-cognito-staging infra/cloudformation/templates/conveymate-cognito.yml infra/cloudformation/environments/staging/cognito-parameters.json",
+    "infra:cfn:deploy:cognito:prod": "bash tools/scripts/deploy-cfn.sh prod conveymate-cognito-prod infra/cloudformation/templates/conveymate-cognito.yml infra/cloudformation/environments/prod/cognito-parameters.json",
+    "infra:cfn:deploy:admin-stack": "bash tools/scripts/deploy-cfn.sh account admin-stack infra/cloudformation/templates/admin/iam-web-ops-group.yml",
+    "deploy:www:core": "bash infra/deploy-www-core.sh",
+    "deploy:www:services": "bash infra/deploy-www-services.sh",
+    "deploy:www:website": "bash ci-cd/deploy-www-website.sh",
+    "deploy:www:api": "bash ci-cd/deploy-www-api.sh",
+    "deploy:www:worker": "bash ci-cd/deploy-www-worker.sh",
+    "www:off": "bash tools/scripts/www-power.sh off",
+    "www:on": "bash tools/scripts/www-power.sh on"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2"
+  }
+}

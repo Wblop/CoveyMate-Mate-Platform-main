@@ -1,0 +1,239 @@
+<section
+  class="sm-page-section landing-section landing-section--subtle landing-reveal landing-reveal--delay-2"
+  aria-labelledby="quote-workflow-title"
+>
+  <div class="sm-container landing-quote-workflow__grid">
+
+    <!-- Inline SVG illustration: quote request flow -->
+    <div class="landing-quote-workflow__art" aria-hidden="true">
+      <svg
+        class="landing-quote-workflow__svg"
+        viewBox="0 0 480 480"
+        fill="none"
+        focusable="false"
+      >
+        <defs>
+          <linearGradient id="qwGradCard" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#f4f8fb"/>
+            <stop offset="100%" stop-color="#eaf2f8"/>
+          </linearGradient>
+          <linearGradient id="qwGradReport" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#134866"/>
+            <stop offset="100%" stop-color="#0b3c5d"/>
+          </linearGradient>
+          <linearGradient id="qwGradAccent" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#2b5f78"/>
+            <stop offset="100%" stop-color="#1a7ba4"/>
+          </linearGradient>
+          <linearGradient id="qwGradReply" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#1f7a3d"/>
+            <stop offset="100%" stop-color="#2a9c52"/>
+          </linearGradient>
+          <filter id="qwShadow" x="-8%" y="-8%" width="116%" height="116%">
+            <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0b3c5d" flood-opacity="0.10"/>
+          </filter>
+          <filter id="qwShadowSm" x="-10%" y="-10%" width="120%" height="120%">
+            <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0b3c5d" flood-opacity="0.08"/>
+          </filter>
+          <marker id="qwArrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0 0 L6 3 L0 6 Z" fill="#7aa9c7"/>
+          </marker>
+          <marker id="qwArrowReply" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0 0 L6 3 L0 6 Z" fill="#2a9c52"/>
+          </marker>
+        </defs>
+
+        <!-- Background subtle grid dots -->
+        <g opacity="0.18">
+          <circle cx="24" cy="24" r="1.5" fill="#7aa9c7"/>
+          <circle cx="64" cy="24" r="1.5" fill="#7aa9c7"/>
+          <circle cx="104" cy="24" r="1.5" fill="#7aa9c7"/>
+          <circle cx="24" cy="64" r="1.5" fill="#7aa9c7"/>
+          <circle cx="64" cy="64" r="1.5" fill="#7aa9c7"/>
+          <circle cx="24" cy="104" r="1.5" fill="#7aa9c7"/>
+        </g>
+
+        <!-- ── REPORT / CONTRACT CARD (top, centred) ──────────────────── -->
+        <g transform="translate(163, 12)" filter="url(#qwShadow)">
+          <rect width="154" height="200" rx="14" fill="url(#qwGradReport)"/>
+          <!-- Header bar -->
+          <rect x="0" y="0" width="154" height="44" rx="14" fill="rgba(255,255,255,0.10)"/>
+          <rect x="0" y="30" width="154" height="14" fill="rgba(255,255,255,0.10)"/>
+          <!-- Shield icon -->
+          <g transform="translate(14, 10)">
+            <path d="M12 2L4 5v5c0 4.9 3.5 8.8 8 10 4.5-1.2 8-5.1 8-10V5L12 2z" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="1.5" stroke-linejoin="round"/>
+            <path d="M9 12l2 2 4-4.5" stroke="rgba(255,255,255,0.85)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+          <!-- Title -->
+          <rect x="42" y="12" width="72" height="8" rx="4" fill="rgba(255,255,255,0.82)"/>
+          <rect x="42" y="24" width="52" height="6" rx="3" fill="rgba(255,255,255,0.42)"/>
+          <!-- Content lines -->
+          <rect x="14" y="58" width="126" height="7" rx="3.5" fill="rgba(255,255,255,0.50)"/>
+          <rect x="14" y="72" width="104" height="7" rx="3.5" fill="rgba(255,255,255,0.35)"/>
+          <rect x="14" y="86" width="116" height="7" rx="3.5" fill="rgba(255,255,255,0.35)"/>
+          <!-- Risk flag chip -->
+          <rect x="14" y="108" width="86" height="22" rx="11" fill="rgba(193,68,52,0.32)"/>
+          <rect x="20" y="116" width="6" height="6" rx="3" fill="rgba(255,120,100,0.9)"/>
+          <rect x="30" y="118" width="56" height="5" rx="2.5" fill="rgba(255,255,255,0.60)"/>
+          <!-- Summary chip -->
+          <rect x="14" y="140" width="112" height="22" rx="11" fill="rgba(42,156,82,0.28)"/>
+          <rect x="20" y="148" width="6" height="6" rx="3" fill="rgba(80,200,120,0.9)"/>
+          <rect x="30" y="150" width="82" height="5" rx="2.5" fill="rgba(255,255,255,0.55)"/>
+          <!-- Questions section -->
+          <rect x="14" y="174" width="126" height="1" fill="rgba(255,255,255,0.12)"/>
+          <rect x="14" y="182" width="90" height="5" rx="2.5" fill="rgba(255,255,255,0.28)"/>
+          <!-- Label inside card bottom -->
+          <text x="77" y="197" text-anchor="middle" font-size="9.5" fill="rgba(255,255,255,0.55)" font-family="Inter,system-ui,sans-serif" font-weight="600" letter-spacing="0.06em">REPORT READY</text>
+        </g>
+
+        <!-- ── SEND ARROWS (blue dashed): contract card → three firms ── -->
+        <!-- To firm 1 (left) -->
+        <path class="landing-quote-workflow__flow-line landing-quote-workflow__flow-line--send" d="M240,212 C240,240 80,248 80,260" marker-end="url(#qwArrow)"/>
+        <path class="landing-quote-workflow__flow-glow landing-quote-workflow__flow-glow--send landing-quote-workflow__flow-glow--delay-1" d="M240,212 C240,240 80,248 80,260"/>
+        <!-- To firm 2 (centre) -->
+        <path class="landing-quote-workflow__flow-line landing-quote-workflow__flow-line--send" d="M240,212 L240,260" marker-end="url(#qwArrow)"/>
+        <path class="landing-quote-workflow__flow-glow landing-quote-workflow__flow-glow--send landing-quote-workflow__flow-glow--delay-2" d="M240,212 L240,260"/>
+        <!-- To firm 3 (right) -->
+        <path class="landing-quote-workflow__flow-line landing-quote-workflow__flow-line--send" d="M240,212 C240,240 400,248 400,260" marker-end="url(#qwArrow)"/>
+        <path class="landing-quote-workflow__flow-glow landing-quote-workflow__flow-glow--send landing-quote-workflow__flow-glow--delay-3" d="M240,212 C240,240 400,248 400,260"/>
+
+        <!-- ── CONVEYANCER FIRM CARDS (three across, middle row) ───────── -->
+        <!-- Firm 1: ACT -->
+        <g transform="translate(8, 260)" filter="url(#qwShadowSm)">
+          <rect width="144" height="76" rx="10" fill="url(#qwGradCard)" stroke="#cfdbe5" stroke-width="1"/>
+          <circle cx="20" cy="26" r="13" fill="#dce8f0"/>
+          <text x="20" y="30" text-anchor="middle" font-size="11" fill="#134866" font-family="Inter,system-ui,sans-serif" font-weight="700">AM</text>
+          <rect x="42" y="14" width="84" height="7" rx="3.5" fill="#c6d5e0"/>
+          <rect x="42" y="26" width="62" height="6" rx="3" fill="#d8e5ed"/>
+          <!-- Jurisdiction badge -->
+          <rect x="42" y="44" width="44" height="18" rx="9" fill="rgba(43,95,120,0.12)"/>
+          <text x="64" y="57" text-anchor="middle" font-size="8" fill="#2b5f78" font-family="Inter,system-ui,sans-serif" font-weight="700">ACT</text>
+          <!-- Secure link badge -->
+          <g transform="translate(94, 44)">
+            <rect width="42" height="18" rx="9" fill="rgba(26,123,164,0.12)"/>
+            <path d="M10 9V7a2 2 0 0 1 4 0v2" stroke="#1a7ba4" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+            <rect x="8" y="9" width="8" height="5" rx="1.5" fill="#1a7ba4" opacity="0.7"/>
+            <text x="28" y="12.5" text-anchor="middle" font-size="6" fill="#1a7ba4" font-family="Inter,system-ui,sans-serif" font-weight="700">LINK</text>
+          </g>
+        </g>
+
+        <!-- Firm 2: ACT -->
+        <g transform="translate(168, 260)" filter="url(#qwShadowSm)">
+          <rect width="144" height="76" rx="10" fill="url(#qwGradCard)" stroke="#cfdbe5" stroke-width="1"/>
+          <circle cx="20" cy="26" r="13" fill="#dce8f0"/>
+          <text x="20" y="30" text-anchor="middle" font-size="11" fill="#134866" font-family="Inter,system-ui,sans-serif" font-weight="700">RK</text>
+          <rect x="42" y="14" width="76" height="7" rx="3.5" fill="#c6d5e0"/>
+          <rect x="42" y="26" width="58" height="6" rx="3" fill="#d8e5ed"/>
+          <rect x="42" y="44" width="44" height="18" rx="9" fill="rgba(43,95,120,0.12)"/>
+          <text x="64" y="57" text-anchor="middle" font-size="8" fill="#2b5f78" font-family="Inter,system-ui,sans-serif" font-weight="700">ACT</text>
+          <g transform="translate(94, 44)">
+            <rect width="42" height="18" rx="9" fill="rgba(26,123,164,0.12)"/>
+            <path d="M10 9V7a2 2 0 0 1 4 0v2" stroke="#1a7ba4" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+            <rect x="8" y="9" width="8" height="5" rx="1.5" fill="#1a7ba4" opacity="0.7"/>
+            <text x="28" y="12.5" text-anchor="middle" font-size="6" fill="#1a7ba4" font-family="Inter,system-ui,sans-serif" font-weight="700">LINK</text>
+          </g>
+        </g>
+
+        <!-- Firm 3: ACT -->
+        <g transform="translate(328, 260)" filter="url(#qwShadowSm)">
+          <rect width="144" height="76" rx="10" fill="url(#qwGradCard)" stroke="#cfdbe5" stroke-width="1"/>
+          <circle cx="20" cy="26" r="13" fill="#dce8f0"/>
+          <text x="20" y="30" text-anchor="middle" font-size="11" fill="#134866" font-family="Inter,system-ui,sans-serif" font-weight="700">SL</text>
+          <rect x="42" y="14" width="80" height="7" rx="3.5" fill="#c6d5e0"/>
+          <rect x="42" y="26" width="56" height="6" rx="3" fill="#d8e5ed"/>
+          <rect x="42" y="44" width="44" height="18" rx="9" fill="rgba(43,95,120,0.12)"/>
+          <text x="64" y="57" text-anchor="middle" font-size="8" fill="#2b5f78" font-family="Inter,system-ui,sans-serif" font-weight="700">ACT</text>
+          <g transform="translate(94, 44)">
+            <rect width="42" height="18" rx="9" fill="rgba(26,123,164,0.12)"/>
+            <path d="M10 9V7a2 2 0 0 1 4 0v2" stroke="#1a7ba4" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+            <rect x="8" y="9" width="8" height="5" rx="1.5" fill="#1a7ba4" opacity="0.7"/>
+            <text x="28" y="12.5" text-anchor="middle" font-size="6" fill="#1a7ba4" font-family="Inter,system-ui,sans-serif" font-weight="700">LINK</text>
+          </g>
+        </g>
+
+        <!-- ── REPLY ARROWS (green): firms → comparison view ─────────── -->
+        <!-- Firm 1 → left column of comparison view -->
+        <path class="landing-quote-workflow__flow-line landing-quote-workflow__flow-line--reply" d="M80,336 C80,362 120,380 120,390" marker-end="url(#qwArrowReply)"/>
+        <path class="landing-quote-workflow__flow-glow landing-quote-workflow__flow-glow--reply landing-quote-workflow__flow-glow--delay-2" d="M80,336 C80,362 120,380 120,390"/>
+        <!-- Firm 2 → centre of comparison view -->
+        <path class="landing-quote-workflow__flow-line landing-quote-workflow__flow-line--reply" d="M240,336 L240,390" marker-end="url(#qwArrowReply)"/>
+        <path class="landing-quote-workflow__flow-glow landing-quote-workflow__flow-glow--reply landing-quote-workflow__flow-glow--delay-4" d="M240,336 L240,390"/>
+        <!-- Firm 3 → right column of comparison view -->
+        <path class="landing-quote-workflow__flow-line landing-quote-workflow__flow-line--reply" d="M400,336 C400,362 360,380 360,390" marker-end="url(#qwArrowReply)"/>
+        <path class="landing-quote-workflow__flow-glow landing-quote-workflow__flow-glow--reply landing-quote-workflow__flow-glow--delay-5" d="M400,336 C400,362 360,380 360,390"/>
+
+        <!-- ── COMPARISON VIEW (bottom) ───────────────────────────────── -->
+        <g transform="translate(50, 390)" filter="url(#qwShadow)">
+          <rect width="380" height="66" rx="10" fill="white" stroke="#cfdbe5" stroke-width="1"/>
+          <!-- Header -->
+          <rect x="0" y="0" width="380" height="24" rx="10" fill="#f0f6fb"/>
+          <rect x="0" y="14" width="380" height="10" fill="#f0f6fb"/>
+          <rect x="12" y="7" width="100" height="8" rx="4" fill="#c6d5e0"/>
+          <!-- Column dividers -->
+          <line x1="127" y1="28" x2="127" y2="62" stroke="#e3eaf0" stroke-width="1"/>
+          <line x1="254" y1="28" x2="254" y2="62" stroke="#e3eaf0" stroke-width="1"/>
+          <!-- Col 1: AM replied -->
+          <rect x="12" y="32" width="6" height="6" rx="3" fill="#2a9c52"/>
+          <rect x="22" y="33" width="54" height="5" rx="2.5" fill="#d0e0d6"/>
+          <rect x="82" y="31" width="38" height="8" rx="4" fill="#e8f5ed"/>
+          <text x="101" y="37.5" text-anchor="middle" font-size="6" fill="#1f7a3d" font-family="Inter,system-ui,sans-serif" font-weight="700">REPLIED</text>
+          <rect x="12" y="46" width="76" height="5" rx="2.5" fill="#d8e5ed"/>
+          <!-- Col 2: RK replied -->
+          <rect x="139" y="32" width="6" height="6" rx="3" fill="#2a9c52"/>
+          <rect x="149" y="33" width="48" height="5" rx="2.5" fill="#d0e0d6"/>
+          <rect x="209" y="31" width="38" height="8" rx="4" fill="#e8f5ed"/>
+          <text x="228" y="37.5" text-anchor="middle" font-size="6" fill="#1f7a3d" font-family="Inter,system-ui,sans-serif" font-weight="700">REPLIED</text>
+          <rect x="139" y="46" width="68" height="5" rx="2.5" fill="#d8e5ed"/>
+          <!-- Col 3: SL pending -->
+          <rect x="266" y="32" width="6" height="6" rx="3" fill="#c6d5e0"/>
+          <rect x="276" y="33" width="52" height="5" rx="2.5" fill="#d8e5ed"/>
+          <rect x="266" y="44" width="100" height="14" rx="7" fill="#f7fafd" stroke="#d3dde6" stroke-width="0.8"/>
+          <rect x="274" y="49" width="84" height="4" rx="2" fill="#c6d5e0"/>
+        </g>
+        <text x="240" y="470" text-anchor="middle" font-size="9.5" fill="#5b8aa8" font-family="Inter,system-ui,sans-serif" font-weight="600" letter-spacing="0.05em">COMPARISON VIEW</text>
+      </svg>
+    </div>
+
+    <div class="landing-quote-workflow__copy">
+      <p class="sm-eyebrow">Built-in quote workflow</p>
+      <h2 id="quote-workflow-title">Send quote requests to conveyancers - all inside the platform</h2>
+      <p class="landing-quote-workflow__lead">
+        Once your report is ready, ConveyMate can automatically send a structured quote request to up to three
+        conveyancers in your state. Your report summary, contract documents, and buyer questions are attached.
+        Responses come back into a single comparison view - without you leaving the platform or sending emails manually.
+      </p>
+
+      <ol class="landing-quote-workflow__steps" aria-label="Quote workflow steps">
+        <li class="landing-quote-workflow__step">
+          <span class="landing-quote-workflow__step-num" aria-hidden="true">01</span>
+          <div class="landing-quote-workflow__step-copy">
+            <strong>Define the request</strong>
+            <p>Choose the service, edit the buyer questions pre-filled from your report, and write an optional email introduction.</p>
+          </div>
+        </li>
+        <li class="landing-quote-workflow__step">
+          <span class="landing-quote-workflow__step-num" aria-hidden="true">02</span>
+          <div class="landing-quote-workflow__step-copy">
+            <strong>Select a shortlist</strong>
+            <p>Browse or search the ConveyMate directory, filtered to your state. Pick up to three firms to receive the request.</p>
+          </div>
+        </li>
+        <li class="landing-quote-workflow__step">
+          <span class="landing-quote-workflow__step-num" aria-hidden="true">03</span>
+          <div class="landing-quote-workflow__step-copy">
+            <strong>ConveyMate sends it automatically</strong>
+            <p>Each firm gets a secure quote link with the brief, your questions, and optional document access. Replies arrive in your dashboard comparison view.</p>
+          </div>
+        </li>
+      </ol>
+
+      <a class="landing-quote-workflow__link" routerLink="/create-report">
+        Start with a report
+        <svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+          <path d="M3 8h10M9 4l4 4-4 4"/>
+        </svg>
+      </a>
+    </div>
+
+  </div>
+</section>

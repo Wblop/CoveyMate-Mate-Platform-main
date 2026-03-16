@@ -1,0 +1,819 @@
+<section class="sm-page-section">
+  <div class="sm-container admin-seo-engine">
+    <ui-page-header
+      eyebrow="SEO Engine"
+      title="Insights editorial workflow"
+      description="Generate buyer-focused draft articles from recent Australian property news, review duplicate risk, and publish polished Insights pages with a clearer editorial queue."
+    ></ui-page-header>
+
+    @if (errorMessage()) {
+      <ui-alert-banner title="SEO Engine error" [message]="errorMessage()" tone="error"></ui-alert-banner>
+    }
+
+    @if (successMessage()) {
+      <ui-alert-banner title="SEO Engine update" [message]="successMessage()" tone="success"></ui-alert-banner>
+    }
+
+    @if (loading()) {
+      <section class="admin-seo-engine__loading">
+        <ui-skeleton-block [height]="220"></ui-skeleton-block>
+        <ui-skeleton-block [height]="680"></ui-skeleton-block>
+      </section>
+    } @else if (overview(); as overview) {
+      <section class="admin-seo-engine__hero">
+        <article class="sm-surface admin-seo-engine__hero-card admin-seo-engine__hero-card--overview">
+          <div class="admin-seo-engine__hero-head">
+            <div>
+              <p class="admin-seo-engine__eyebrow">Editorial board</p>
+              <h2>{{ overview.engineName }}</h2>
+              <p>Generate richer buyer insights, sort the queue by risk, and open every article in a focused editor instead of a crowded split view.</p>
+            </div>
+            <span
+              class="admin-seo-engine__hero-pill"
+              [class.admin-seo-engine__hero-pill--offline]="!overview.engineEnabled || !overview.queueConfigured"
+            >
+              {{ overview.engineEnabled && overview.queueConfigured ? 'Automation ready' : 'Automation limited' }}
+            </span>
+          </div>
+
+          <div class="admin-seo-engine__hero-actions">
+            <ui-button
+              variant="secondary"
+              [loading]="busyAction() === 'generate'"
+              [disabled]="!overview.engineEnabled || !overview.queueConfigured || !!busyAction()"
+              (pressed)="generateArticle()"
+            >
+              {{ busyAction() === 'generate' ? 'Queueing...' : 'Generate article' }}
+            </ui-button>
+            <ui-button
+              variant="secondary"
+              [loading]="busyAction() === 'refresh'"
+              [disabled]="!overview.engineEnabled || !overview.queueConfigured || !!busyAction()"
+              (pressed)="refreshSitemap()"
+            >
+              {{ busyAction() === 'refresh' ? 'Queueing...' : 'Refresh sitemap' }}
+            </ui-button>
+          </div>
+
+          <dl class="admin-seo-engine__hero-metrics">
+            <div>
+              <dt>Needs review</dt>
+              <dd>{{ editorialSummary().needsReview }}</dd>
+            </div>
+            <div>
+              <dt>Ready drafts</dt>
+              <dd>{{ editorialSummary().readyDrafts }}</dd>
+            </div>
+            <div>
+              <dt>Live articles</dt>
+              <dd>{{ editorialSummary().liveArticles }}</dd>
+            </div>
+            <div>
+              <dt>Failed jobs</dt>
+              <dd>{{ overview.failedJobCount }}</dd>
+            </div>
+          </dl>
+
+          <div class="admin-seo-engine__hero-foot">
+            <p><strong>Public host</strong> {{ overview.marketingHost }}</p>
+            <p><strong>Running jobs</strong> {{ overview.runningJobCount }}</p>
+            <p><strong>Queue</strong> {{ overview.queueConfigured ? 'Configured' : 'Not configured' }}</p>
+          </div>
+        </article>
+      </section>
+
+      <section class="admin-seo-engine__workspace">
+        <article class="sm-surface admin-seo-engine__board">
+          <header class="admin-seo-engine__board-header">
+            <div>
+              <p class="admin-seo-engine__eyebrow">{{ boardEyebrow() }}</p>
+              <h2>{{ boardHeading() }}</h2>
+              <p>{{ boardDescription() }}</p>
+            </div>
+
+            @if (boardTab() === 'articles') {
+              <label class="admin-seo-engine__search-field">
+                <span>Search articles</span>
+                <input
+                  type="search"
+                  [value]="articleSearch()"
+                  placeholder="Search title, slug, excerpt, tags, or keywords"
+                  (input)="updateArticleSearch($event)"
+                />
+              </label>
+            } @else if (boardTab() === 'jobs') {
+              <div class="admin-seo-engine__board-header-note">
+                <div>
+                  <p>{{ sortedJobs().length }} jobs loaded</p>
+                  <p>{{ deletableJobCount() }} finished entries can be cleared.</p>
+                </div>
+                <ui-button
+                  variant="secondary"
+                  [disabled]="deletableJobCount() === 0 || !!busyAction()"
+                  [loading]="busyAction() === 'clear-job-history'"
+                  (pressed)="promptClearJobHistory()"
+                >
+                  Clear history
+                </ui-button>
+              </div>
+            } @else {
+              <div class="admin-seo-engine__schedule-header-note">
+                <p>Use EventBridge cron syntax.</p>
+                <p>Comma-separated hours let you publish multiple times per day.</p>
+              </div>
+            }
+          </header>
+
+          <div class="admin-seo-engine__board-tabs" role="tablist" aria-label="SEO engine board views">
+            @for (tab of boardTabOptions; track tab.value) {
+              <button
+                type="button"
+                class="admin-seo-engine__board-tab"
+                [class.is-active]="boardTab() === tab.value"
+                (click)="setBoardTab(tab.value)"
+              >
+                <span>{{ tab.label }}</span>
+                <strong>{{ boardCounts()[tab.value] }}</strong>
+              </button>
+            }
+          </div>
+
+          @if (boardTab() === 'articles') {
+            <div class="admin-seo-engine__filter-row" role="tablist" aria-label="Filter SEO articles">
+              @for (filter of articleFilterOptions; track filter.value) {
+                <button
+                  type="button"
+                  class="admin-seo-engine__filter-chip"
+                  [class.is-active]="articleFilter() === filter.value"
+                  (click)="setArticleFilter(filter.value)"
+                >
+                  <span>{{ filter.label }}</span>
+                  <strong>{{ articleCounts()[filter.value] }}</strong>
+                </button>
+              }
+            </div>
+
+            <div class="admin-seo-engine__board-meta">
+              <p>Showing {{ filteredArticles().length }} of {{ articles().length }} articles</p>
+              <p>Priority is based on duplicate risk first, then the most recently updated drafts.</p>
+            </div>
+
+            <div class="admin-seo-engine__article-list">
+              @for (article of filteredArticles(); track article.id) {
+                <article
+                  class="admin-seo-engine__article-card"
+                  [class.is-selected]="isSelected(article.id)"
+                  [class.is-attention]="article.healthTone === 'attention'"
+                >
+                  <button type="button" class="admin-seo-engine__article-card-open" (click)="openArticle(article.id)">
+                    <div class="admin-seo-engine__article-topline">
+                      <div class="admin-seo-engine__badge-row">
+                        <span
+                          class="admin-seo-engine__badge"
+                          [class.admin-seo-engine__badge--draft]="article.status === 'draft'"
+                          [class.admin-seo-engine__badge--published]="article.status === 'published'"
+                        >
+                          {{ articleStatusLabel(article) }}
+                        </span>
+                        <span
+                          class="admin-seo-engine__badge"
+                          [class.admin-seo-engine__badge--attention]="article.healthTone === 'attention'"
+                          [class.admin-seo-engine__badge--ready]="article.healthTone === 'ready'"
+                          [class.admin-seo-engine__badge--live]="article.healthTone === 'live'"
+                        >
+                          {{ article.healthLabel }}
+                        </span>
+                      </div>
+
+                      <span class="admin-seo-engine__article-date">
+                        {{ articleMetaDateLabel(article) }} {{ articleMetaDate(article) | date: 'mediumDate' }}
+                      </span>
+                    </div>
+
+                    <div class="admin-seo-engine__article-copy">
+                      <h3>{{ article.title }}</h3>
+                      <p>{{ article.excerpt || 'No excerpt yet. Open this article to tighten the metadata and copy.' }}</p>
+                    </div>
+
+                    <div class="admin-seo-engine__article-meta">
+                      <span>{{ article.sourceCount }} sources</span>
+                      <span>{{ article.healthNote }}</span>
+                      <span>Updated {{ article.updatedAt | date: 'short' }}</span>
+                    </div>
+
+                    @if (article.topics.length) {
+                      <div class="admin-seo-engine__topic-row">
+                        @for (topic of article.topics; track topic) {
+                          <span class="admin-seo-engine__topic-chip">{{ topic }}</span>
+                        }
+                      </div>
+                    }
+                  </button>
+
+                  <div class="admin-seo-engine__card-actions">
+                    <ui-button variant="secondary" [disabled]="!!busyAction()" (pressed)="openArticle(article.id)">
+                      Edit
+                    </ui-button>
+                    <ui-button variant="secondary" [disabled]="!!busyAction()" (pressed)="openArticle(article.id, 'preview')">
+                      Preview
+                    </ui-button>
+                    <ui-button variant="destructive" [disabled]="!!busyAction()" (pressed)="promptDeleteArticle(article)">
+                      Delete
+                    </ui-button>
+                  </div>
+                </article>
+              } @empty {
+                <div class="admin-seo-engine__empty-state">
+                  <h3>{{ articles().length ? 'No articles match this view' : 'No articles yet' }}</h3>
+                  <p>
+                    {{
+                      articles().length
+                        ? 'Adjust the filter or search query to reveal more drafts and live articles.'
+                        : 'Generate the first article to start building the Insights editorial queue.'
+                    }}
+                  </p>
+                </div>
+              }
+            </div>
+          } @else if (boardTab() === 'schedules') {
+            <div class="admin-seo-engine__board-meta">
+              <p>{{ schedules().length }} schedules loaded</p>
+              <p>Use comma-separated hours in the publish cron to run multiple publish windows per day.</p>
+            </div>
+
+            @if (scheduleLoadError()) {
+              <ui-alert-banner
+                tone="warn"
+                title="Schedule settings unavailable"
+                [message]="scheduleLoadError()"
+              ></ui-alert-banner>
+            }
+
+            @if (schedules().length) {
+              <div class="admin-seo-engine__schedule-grid">
+                @for (schedule of schedules(); track schedule.jobType) {
+                  <article class="admin-seo-engine__schedule-card">
+                    <div class="admin-seo-engine__schedule-head">
+                      <div>
+                        <p class="admin-seo-engine__eyebrow">Live schedule</p>
+                        <h3>{{ schedule.label }}</h3>
+                        <p>{{ schedule.description }}</p>
+                      </div>
+
+                      <span
+                        class="admin-seo-engine__badge"
+                        [class.admin-seo-engine__badge--ready]="schedule.enabled"
+                        [class.admin-seo-engine__badge--attention]="!schedule.enabled"
+                      >
+                        {{ schedule.enabled ? 'Enabled' : 'Disabled' }}
+                      </span>
+                    </div>
+
+                    <div class="admin-seo-engine__schedule-fields">
+                      <label class="admin-seo-engine__field admin-seo-engine__field--toggle">
+                        <span>Enabled</span>
+                        <input
+                          type="checkbox"
+                          [checked]="getScheduleForm(schedule.jobType).enabled"
+                          (change)="updateScheduleField('enabled', schedule.jobType, $event)"
+                        />
+                      </label>
+
+                      <label class="admin-seo-engine__field">
+                        <span>Schedule expression</span>
+                        <input
+                          type="text"
+                          [value]="getScheduleForm(schedule.jobType).scheduleExpression"
+                          placeholder="cron(10 9 * * ? *)"
+                          (input)="updateScheduleField('scheduleExpression', schedule.jobType, $event)"
+                        />
+                      </label>
+
+                      <label class="admin-seo-engine__field">
+                        <span>Timezone</span>
+                        <input
+                          type="text"
+                          [value]="getScheduleForm(schedule.jobType).scheduleExpressionTimezone"
+                          placeholder="Australia/Sydney"
+                          (input)="updateScheduleField('scheduleExpressionTimezone', schedule.jobType, $event)"
+                        />
+                      </label>
+                    </div>
+
+                    <div class="admin-seo-engine__schedule-meta">
+                      <p><strong>Current</strong> {{ schedule.scheduleExpression }}</p>
+                      <p><strong>Examples</strong> {{ scheduleExamples(schedule.jobType) }}</p>
+                      <p><strong>Timezone</strong> {{ schedule.scheduleExpressionTimezone }}</p>
+                    </div>
+
+                    <div class="admin-seo-engine__card-actions">
+                      <ui-button
+                        variant="secondary"
+                        [disabled]="(!hasScheduleChanges(schedule.jobType)) || (!!busyAction() && !isSavingSchedule(schedule.jobType))"
+                        (pressed)="resetScheduleForm(schedule.jobType)"
+                      >
+                        Reset
+                      </ui-button>
+
+                      <ui-button
+                        [loading]="isSavingSchedule(schedule.jobType)"
+                        [disabled]="(!hasScheduleChanges(schedule.jobType)) || (!!busyAction() && !isSavingSchedule(schedule.jobType))"
+                        (pressed)="saveSchedule(schedule.jobType)"
+                      >
+                        Save schedule
+                      </ui-button>
+                    </div>
+                  </article>
+                }
+              </div>
+            } @else if (!scheduleLoadError()) {
+              <div class="admin-seo-engine__empty-state">
+                <h3>No schedules found</h3>
+                <p>The SEO engine schedules are not available for this environment yet.</p>
+              </div>
+            }
+          } @else {
+            <div class="admin-seo-engine__board-meta">
+              <p>Showing {{ sortedJobs().length }} queued jobs</p>
+              <p>New jobs are inserted immediately, then reconciled against the latest backend status.</p>
+            </div>
+
+            <div class="admin-seo-engine__job-list">
+              @for (job of sortedJobs(); track job.id) {
+                <article class="admin-seo-engine__job-card" [class.is-failed]="job.status === 'failed'">
+                  <div class="admin-seo-engine__job-head">
+                    <strong>{{ jobTypeLabel(job.jobType) }}</strong>
+                    <span
+                      class="admin-seo-engine__job-status"
+                      [class.admin-seo-engine__job-status--pending]="job.status === 'pending'"
+                      [class.admin-seo-engine__job-status--running]="job.status === 'running'"
+                      [class.admin-seo-engine__job-status--completed]="job.status === 'completed'"
+                      [class.admin-seo-engine__job-status--failed]="job.status === 'failed'"
+                    >
+                      {{ jobStatusLabel(job.status) }}
+                    </span>
+                  </div>
+
+                  <div class="admin-seo-engine__job-copy">
+                    <p>{{ job.createdAt | date: 'medium' }} · {{ job.requestedSource }}</p>
+
+                    @if (job.startedAt && !job.completedAt) {
+                      <p>Started {{ job.startedAt | date: 'short' }}</p>
+                    }
+
+                    @if (job.completedAt) {
+                      <p>Completed {{ job.completedAt | date: 'short' }}</p>
+                    }
+
+                    @if (job.articleId) {
+                      <p class="admin-seo-engine__job-reference">Article {{ job.articleId }}</p>
+                    }
+
+                    @if (job.errorMessage) {
+                      <em>{{ job.errorMessage }}</em>
+                    }
+                  </div>
+
+                  @if (job.articleId || canDeleteJob(job)) {
+                    <div class="admin-seo-engine__job-actions">
+                      @if (job.articleId) {
+                        <ui-button variant="secondary" [disabled]="!!busyAction()" (pressed)="openJobArticle(job)">
+                          Open article
+                        </ui-button>
+                      }
+
+                      @if (canDeleteJob(job)) {
+                        <ui-button variant="destructive" [disabled]="!!busyAction()" (pressed)="promptDeleteJob(job)">
+                          Delete
+                        </ui-button>
+                      }
+                    </div>
+                  }
+                </article>
+              } @empty {
+                <div class="admin-seo-engine__empty-state">
+                  <h3>No queued jobs yet</h3>
+                  <p>Trigger article generation or a sitemap refresh to populate the queue history.</p>
+                </div>
+              }
+            </div>
+          }
+        </article>
+      </section>
+
+      @if (editorOpen()) {
+        <div class="admin-seo-engine__editor-overlay" (click)="onEditorOverlayClick($event)" role="presentation">
+          <section
+            class="admin-seo-engine__editor-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="admin-seo-engine-editor-title"
+          >
+            <header class="admin-seo-engine__editor-header">
+              <div class="admin-seo-engine__editor-heading">
+                @if (selectedArticleSummary(); as summary) {
+                  <div class="admin-seo-engine__badge-row">
+                    <span
+                      class="admin-seo-engine__badge"
+                      [class.admin-seo-engine__badge--draft]="summary.status === 'draft'"
+                      [class.admin-seo-engine__badge--published]="summary.status === 'published'"
+                    >
+                      {{ articleStatusLabel(summary) }}
+                    </span>
+                    <span
+                      class="admin-seo-engine__badge"
+                      [class.admin-seo-engine__badge--attention]="summary.healthTone === 'attention'"
+                      [class.admin-seo-engine__badge--ready]="summary.healthTone === 'ready'"
+                      [class.admin-seo-engine__badge--live]="summary.healthTone === 'live'"
+                    >
+                      {{ summary.healthLabel }}
+                    </span>
+                    @if (hasUnsavedChanges()) {
+                      <span class="admin-seo-engine__badge admin-seo-engine__badge--attention">Unsaved changes</span>
+                    }
+                  </div>
+
+                  <h2 id="admin-seo-engine-editor-title">{{ summary.title }}</h2>
+                  <p>{{ summary.sourceCount }} sources · {{ articleMetaDateLabel(summary) }} {{ articleMetaDate(summary) | date: 'medium' }}</p>
+                } @else {
+                  <h2 id="admin-seo-engine-editor-title">Loading article</h2>
+                  <p>Fetching the latest article details.</p>
+                }
+              </div>
+
+              <div class="admin-seo-engine__editor-actions">
+                @if (selectedArticle(); as article) {
+                  @if (article.status === 'published' && publicArticleUrl(article); as liveUrl) {
+                    <a class="admin-seo-engine__live-link" [href]="liveUrl" target="_blank" rel="noopener noreferrer">Open live page</a>
+                  }
+                }
+
+                <div class="admin-seo-engine__editor-stepper" role="tablist" aria-label="Article editor steps">
+                  <button
+                    type="button"
+                    class="admin-seo-engine__editor-step"
+                    [class.is-active]="editorStep() === 'edit'"
+                    [disabled]="articleLoading()"
+                    (click)="showEditStep()"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    class="admin-seo-engine__editor-step"
+                    [class.is-active]="editorStep() === 'preview'"
+                    [disabled]="articleLoading() || !selectedArticle()"
+                    (click)="showPreviewStep()"
+                  >
+                    Preview
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  class="admin-seo-engine__editor-close"
+                  aria-label="Close article editor"
+                  [disabled]="!!busyAction()"
+                  (click)="closeEditor()"
+                >
+                  ✕
+                </button>
+              </div>
+            </header>
+
+            <div class="admin-seo-engine__editor-body">
+              @if (articleLoading()) {
+                <div class="admin-seo-engine__editor-loading">
+                  <ui-skeleton-block [height]="120"></ui-skeleton-block>
+                  <ui-skeleton-block [height]="560"></ui-skeleton-block>
+                </div>
+              } @else if (selectedArticle(); as article) {
+                @if (hasUnsavedChanges()) {
+                  <ui-alert-banner
+                    tone="warn"
+                    title="Unsaved changes"
+                    [message]="
+                      article.status === 'published'
+                        ? 'Saving will update the live article immediately.'
+                        : 'Save the draft before publishing so duplicate checks refresh against your latest edits.'
+                    "
+                  ></ui-alert-banner>
+                }
+
+                @if (hasBlockingWarnings()) {
+                  <ui-alert-banner
+                    tone="error"
+                    title="Publishing is blocked"
+                    message="Resolve blocking duplicate warnings before this draft can go live."
+                  ></ui-alert-banner>
+                } @else if (article.status === 'draft' && !hasUnsavedChanges()) {
+                  <ui-alert-banner
+                    tone="info"
+                    title="Ready to publish"
+                    message="This draft is clear of duplicate warnings and can be published when you're ready."
+                  ></ui-alert-banner>
+                }
+
+                @if (editorStep() === 'edit') {
+                  <div class="admin-seo-engine__editor-layout">
+                    <section class="admin-seo-engine__editor-main">
+                      <div class="admin-seo-engine__form-grid">
+                        <label class="admin-seo-engine__field admin-seo-engine__field--wide">
+                          <span>Title</span>
+                          <input type="text" [value]="form().title" (input)="updateField('title', $event)" />
+                        </label>
+
+                        <label class="admin-seo-engine__field">
+                          <span>Slug</span>
+                          <input type="text" [value]="form().slug" (input)="updateField('slug', $event)" />
+                        </label>
+
+                        <label class="admin-seo-engine__field">
+                          <span>Excerpt</span>
+                          <textarea rows="3" [value]="form().excerpt" (input)="updateField('excerpt', $event)"></textarea>
+                        </label>
+
+                        <label class="admin-seo-engine__field">
+                          <span>Meta title</span>
+                          <input type="text" [value]="form().metaTitle" (input)="updateField('metaTitle', $event)" />
+                        </label>
+
+                        <label class="admin-seo-engine__field">
+                          <span>Meta description</span>
+                          <textarea rows="3" [value]="form().metaDescription" (input)="updateField('metaDescription', $event)"></textarea>
+                        </label>
+
+                        <label class="admin-seo-engine__field">
+                          <span>Tags</span>
+                          <input type="text" [value]="form().tags" (input)="updateField('tags', $event)" />
+                        </label>
+
+                        <label class="admin-seo-engine__field">
+                          <span>Keywords</span>
+                          <input type="text" [value]="form().keywords" (input)="updateField('keywords', $event)" />
+                        </label>
+
+                        <label class="admin-seo-engine__field admin-seo-engine__field--wide">
+                          <span>Body markdown</span>
+                          <textarea rows="22" [value]="form().bodyMarkdown" (input)="updateField('bodyMarkdown', $event)"></textarea>
+                        </label>
+                      </div>
+                    </section>
+
+                    <aside class="admin-seo-engine__editor-side">
+                      @if (article.duplicateWarnings.length) {
+                        <article class="admin-seo-engine__panel admin-seo-engine__panel--warning">
+                          <h3>Duplicate warnings</h3>
+                          <div class="admin-seo-engine__warning-list">
+                            @for (warning of article.duplicateWarnings; track warning.message) {
+                              <div class="admin-seo-engine__warning-item">
+                                <span
+                                  class="admin-seo-engine__warning-pill"
+                                  [class.admin-seo-engine__warning-pill--block]="warning.severity === 'block'"
+                                >
+                                  {{ warning.severity }}
+                                </span>
+                                <div>
+                                  <strong>{{ warning.matchType }}</strong>
+                                  <p>{{ warning.message }}</p>
+                                </div>
+                              </div>
+                            }
+                          </div>
+                        </article>
+                      }
+
+                      <article class="admin-seo-engine__panel">
+                        <h3>Article status</h3>
+                        <dl class="admin-seo-engine__detail-list">
+                          <div>
+                            <dt>Status</dt>
+                            <dd>{{ article.status }}</dd>
+                          </div>
+                          <div>
+                            <dt>Sources</dt>
+                            <dd>{{ article.sourceCount }}</dd>
+                          </div>
+                          <div>
+                            <dt>Last generated</dt>
+                            <dd>{{ article.lastGeneratedAt ? (article.lastGeneratedAt | date: 'medium') : 'Not recorded' }}</dd>
+                          </div>
+                          <div>
+                            <dt>Published</dt>
+                            <dd>{{ article.publishedAt ? (article.publishedAt | date: 'medium') : 'Not published' }}</dd>
+                          </div>
+                        </dl>
+                      </article>
+
+                      <article class="admin-seo-engine__panel">
+                        <h3>Sources</h3>
+                        <div class="admin-seo-engine__source-list">
+                          @for (source of article.sources; track source.sourceUrl) {
+                            <article class="admin-seo-engine__source-item">
+                              <div>
+                                <strong>{{ source.publisher }}</strong>
+                                <p>{{ source.publishedAt ? (source.publishedAt | date: 'mediumDate') : 'Date unavailable' }}</p>
+                              </div>
+                              <a [href]="source.sourceUrl" target="_blank" rel="noopener noreferrer">{{ source.headline }}</a>
+                              <p>{{ source.summary }}</p>
+                            </article>
+                          } @empty {
+                            <p class="admin-seo-engine__empty-note">No source metadata captured for this article.</p>
+                          }
+                        </div>
+                      </article>
+                    </aside>
+                  </div>
+                } @else {
+                  <div class="admin-seo-engine__editor-layout admin-seo-engine__editor-layout--preview">
+                    <section class="admin-seo-engine__editor-main">
+                      <article class="admin-seo-engine__preview-stage">
+                        <p class="admin-seo-engine__eyebrow">Preview</p>
+                        <div class="admin-seo-engine__preview-header">
+                          <h3>{{ form().title || article.title }}</h3>
+                          <p>
+                            {{
+                              form().excerpt ||
+                                article.excerpt ||
+                                'No excerpt yet. Add a tighter summary so the preview reads like the published Insights page.'
+                            }}
+                          </p>
+                          <div class="admin-seo-engine__preview-meta">
+                            <span>{{ article.sourceCount }} sources</span>
+                            <span>/insights/{{ form().slug || article.slug }}</span>
+                            <span>{{ article.status === 'published' ? 'Live article' : 'Draft preview' }}</span>
+                          </div>
+                        </div>
+
+                        <div class="admin-seo-engine__preview" [innerHTML]="previewHtml()"></div>
+                      </article>
+                    </section>
+
+                    <aside class="admin-seo-engine__editor-side">
+                      @if (article.duplicateWarnings.length) {
+                        <article class="admin-seo-engine__panel admin-seo-engine__panel--warning">
+                          <h3>Duplicate warnings</h3>
+                          <div class="admin-seo-engine__warning-list">
+                            @for (warning of article.duplicateWarnings; track warning.message) {
+                              <div class="admin-seo-engine__warning-item">
+                                <span
+                                  class="admin-seo-engine__warning-pill"
+                                  [class.admin-seo-engine__warning-pill--block]="warning.severity === 'block'"
+                                >
+                                  {{ warning.severity }}
+                                </span>
+                                <div>
+                                  <strong>{{ warning.matchType }}</strong>
+                                  <p>{{ warning.message }}</p>
+                                </div>
+                              </div>
+                            }
+                          </div>
+                        </article>
+                      }
+
+                      <article class="admin-seo-engine__panel">
+                        <h3>Article status</h3>
+                        <dl class="admin-seo-engine__detail-list">
+                          <div>
+                            <dt>Status</dt>
+                            <dd>{{ article.status }}</dd>
+                          </div>
+                          <div>
+                            <dt>Sources</dt>
+                            <dd>{{ article.sourceCount }}</dd>
+                          </div>
+                          <div>
+                            <dt>Last generated</dt>
+                            <dd>{{ article.lastGeneratedAt ? (article.lastGeneratedAt | date: 'medium') : 'Not recorded' }}</dd>
+                          </div>
+                          <div>
+                            <dt>Published</dt>
+                            <dd>{{ article.publishedAt ? (article.publishedAt | date: 'medium') : 'Not published' }}</dd>
+                          </div>
+                        </dl>
+                      </article>
+
+                      <article class="admin-seo-engine__panel">
+                        <h3>Sources</h3>
+                        <div class="admin-seo-engine__source-list">
+                          @for (source of article.sources; track source.sourceUrl) {
+                            <article class="admin-seo-engine__source-item">
+                              <div>
+                                <strong>{{ source.publisher }}</strong>
+                                <p>{{ source.publishedAt ? (source.publishedAt | date: 'mediumDate') : 'Date unavailable' }}</p>
+                              </div>
+                              <a [href]="source.sourceUrl" target="_blank" rel="noopener noreferrer">{{ source.headline }}</a>
+                              <p>{{ source.summary }}</p>
+                            </article>
+                          } @empty {
+                            <p class="admin-seo-engine__empty-note">No source metadata captured for this article.</p>
+                          }
+                        </div>
+                      </article>
+                    </aside>
+                  </div>
+                }
+
+                <footer class="admin-seo-engine__editor-footer">
+                  <div class="admin-seo-engine__editor-footer-copy">
+                    <strong>{{ editorStep() === 'edit' ? 'Step 1 of 2: Edit draft' : 'Step 2 of 2: Review preview' }}</strong>
+                    <p>
+                      {{
+                        editorStep() === 'edit'
+                          ? 'Tighten the draft, metadata, and slug here, then move to preview before saving or publishing.'
+                          : 'Preview uses your current unsaved edits so you can review the article before it goes live.'
+                      }}
+                    </p>
+                  </div>
+
+                  <div class="admin-seo-engine__editor-footer-actions">
+                    @if (editorStep() === 'edit') {
+                      <ui-button variant="secondary" [disabled]="articleLoading() || !!busyAction()" (pressed)="showPreviewStep()">
+                        Next: Preview
+                      </ui-button>
+                    } @else {
+                      <ui-button variant="secondary" [disabled]="!!busyAction()" (pressed)="showEditStep()">
+                        Back to edit
+                      </ui-button>
+                    }
+
+                    <ui-button
+                      variant="secondary"
+                      [loading]="busyAction() === 'save'"
+                      [disabled]="!!busyAction() || !hasUnsavedChanges()"
+                      (pressed)="saveDraft()"
+                    >
+                      {{ saveLabel() }}
+                    </ui-button>
+
+                    @if (article.status === 'draft') {
+                      <ui-button
+                        [loading]="busyAction() === 'publish'"
+                        [disabled]="!!busyAction() || hasUnsavedChanges() || hasBlockingWarnings()"
+                        (pressed)="publishArticle()"
+                      >
+                        {{ publishLabel() }}
+                      </ui-button>
+                    }
+                  </div>
+                </footer>
+              } @else {
+                <div class="admin-seo-engine__editor-empty">
+                  <h3>Article unavailable</h3>
+                  <p>Select another article from the editorial queue.</p>
+                </div>
+              }
+            </div>
+          </section>
+        </div>
+      }
+
+      @if (deleteDialogOpen()) {
+        @if (deleteTarget(); as article) {
+          <app-confirm-action-dialog
+            title="Delete article"
+            description="Remove this article from the editorial workflow and public Insights index."
+            [detail]="article.title"
+            confirmLabel="Delete article"
+            cancelLabel="Keep article"
+            [busy]="busyAction() === 'delete'"
+            tone="danger"
+            (cancelled)="cancelDeleteArticle()"
+            (confirmed)="confirmDeleteArticle()"
+          ></app-confirm-action-dialog>
+        }
+      }
+
+      @if (jobDeleteDialogOpen()) {
+        @if (jobDeleteTarget(); as job) {
+          <app-confirm-action-dialog
+            title="Delete queue entry"
+            description="Remove this completed or failed queue record from history."
+            [detail]="jobDeleteDetail(job)"
+            confirmLabel="Delete entry"
+            cancelLabel="Keep entry"
+            [busy]="busyAction() === 'delete-job'"
+            tone="danger"
+            (cancelled)="cancelDeleteJob()"
+            (confirmed)="confirmDeleteJob()"
+          ></app-confirm-action-dialog>
+        }
+      }
+
+      @if (clearJobHistoryDialogOpen()) {
+        <app-confirm-action-dialog
+          title="Clear queue history"
+          description="Delete all completed and failed queue entries. Running and pending jobs will be kept."
+          [detail]="deletableJobCount() + ' finished entries ready to clear'"
+          confirmLabel="Clear history"
+          cancelLabel="Keep history"
+          [busy]="busyAction() === 'clear-job-history'"
+          tone="danger"
+          (cancelled)="cancelClearJobHistory()"
+          (confirmed)="confirmClearJobHistory()"
+        ></app-confirm-action-dialog>
+      }
+    }
+  </div>
+</section>

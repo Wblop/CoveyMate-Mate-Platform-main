@@ -1,0 +1,473 @@
+<section class="sm-page-section">
+  <div class="sm-container page-grid">
+    @if (loading()) {
+      <ui-skeleton-block [height]="48"></ui-skeleton-block>
+      <ui-skeleton-block [height]="520"></ui-skeleton-block>
+    } @else if (errorMessage()) {
+      <ui-alert-banner tone="error" title="Could not load quote request" [message]="errorMessage()"></ui-alert-banner>
+    } @else if (view(); as view) {
+      <ui-page-header
+        [title]="view.conveyancerDisplayName"
+        [description]="view.propertyAddress"
+        eyebrow="ConveyMate quote response"
+      >
+        <div actions class="header-actions">
+          <ui-button variant="secondary" (pressed)="openBuyerOverviewModal()">Buyer overview</ui-button>
+          @if (view.shareReportPdf) {
+            <ui-button variant="secondary" (pressed)="openDocumentModal()">
+              {{ view.documentAccess.isUnlocked ? 'Shared documents' : 'Unlock documents' }}
+            </ui-button>
+          }
+        </div>
+      </ui-page-header>
+
+      <section class="sm-surface response-hero">
+        <div class="response-hero__copy">
+          <p class="sm-eyebrow">Quote response</p>
+          <h2>Submit a structured conveyancing quote</h2>
+          <p>
+            Keep your professional fee separate from disbursements, explain scope clearly, and use the top-right actions when you need the buyer overview or shared documents.
+          </p>
+        </div>
+
+        <div class="response-hero__stats">
+          <article class="hero-stat">
+            <p class="hero-stat__label">Jurisdiction</p>
+            <p class="hero-stat__value hero-stat__value--compact">{{ view.stateOrTerritory }}</p>
+            <p class="hero-stat__meta">{{ serviceLabel(view.serviceNeed) }}</p>
+          </article>
+
+          <article class="hero-stat">
+            <p class="hero-stat__label">Response window</p>
+            <p class="hero-stat__value hero-stat__value--compact">{{ view.expiresAtUtc | date: 'd MMM yyyy' }}</p>
+            <p class="hero-stat__meta">Closes {{ view.expiresAtUtc | date: 'h:mm a' }}</p>
+          </article>
+
+          <article class="hero-stat">
+            <p class="hero-stat__label">Secure documents</p>
+            <p class="hero-stat__value hero-stat__value--compact">
+              {{
+                view.shareReportPdf
+                  ? (view.documentAccess.totalDocumentCount + ' file' + (view.documentAccess.totalDocumentCount === 1 ? '' : 's'))
+                  : 'Brief only'
+              }}
+            </p>
+            <p class="hero-stat__meta">
+              {{
+                view.shareReportPdf
+                  ? (view.documentAccess.isUnlocked ? 'Unlocked for review' : 'Use the top-right button to request access')
+                  : 'No contract pack shared on this request'
+              }}
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <div class="response-layout">
+        <div class="response-main">
+          @if (response(); as response) {
+            <section class="sm-surface confirmation-card">
+              <div class="confirmation-card__header">
+                <div class="confirmation-card__copy">
+                  <p class="sm-eyebrow">Submitted quote</p>
+                  <h2>Quote received</h2>
+                  <p class="sm-muted">Submitted {{ response.submittedAtUtc | date: 'd MMM yyyy, h:mm a' }}</p>
+                </div>
+
+                <div class="confirmation-card__price-block">
+                  <p class="sm-muted">Professional fee</p>
+                  <p class="confirmation-card__price">{{ response.professionalFeeAud | currency: 'AUD' : 'symbol' : '1.0-0' }}</p>
+                </div>
+              </div>
+
+              <div class="confirmation-card__facts">
+                <p class="confirmation-card__fact">{{ response.includesGst ? 'Includes GST' : 'GST not confirmed' }}</p>
+                @if (response.disbursementsEstimateAud !== null) {
+                  <p class="confirmation-card__fact">
+                    Disbursements {{ response.disbursementsEstimateAud | currency: 'AUD' : 'symbol' : '1.0-0' }}
+                  </p>
+                }
+                @if (response.turnaroundBusinessDays !== null) {
+                  <p class="confirmation-card__fact">{{ response.turnaroundBusinessDays }} business day turnaround</p>
+                }
+                @if (response.validUntilUtc) {
+                  <p class="confirmation-card__fact">Valid until {{ response.validUntilUtc | date: 'd MMM yyyy, h:mm a' }}</p>
+                }
+              </div>
+
+              <div class="confirmation-card__section">
+                <h3>Scope notes</h3>
+                <p class="confirmation-card__body">{{ response.scopeNotes }}</p>
+              </div>
+
+              @if (response.excludedItems.length > 0) {
+                <div class="confirmation-card__section">
+                  <h3>Excluded items</h3>
+                  <ul class="simple-list simple-list--tight">
+                    @for (item of response.excludedItems; track item) {
+                      <li>{{ item }}</li>
+                    }
+                  </ul>
+                </div>
+              }
+
+              <div class="confirmation-card__section">
+                <h3>Contact</h3>
+                <p class="confirmation-card__body">{{ response.responderName }}</p>
+                <p class="sm-muted">{{ response.responderEmail }}</p>
+                @if (response.responderPhone) {
+                  <p class="sm-muted">{{ response.responderPhone }}</p>
+                }
+              </div>
+            </section>
+          } @else if (view.canRespond) {
+            <section class="sm-surface form-card">
+              <div class="section-heading">
+                <p class="sm-eyebrow">Your response</p>
+                <h2>Submit your quote</h2>
+                <p class="sm-muted">
+                  Keep the fee structure clear, explain scope and exclusions, and use the top-right buyer overview when you want the matter summary or buyer questions.
+                </p>
+              </div>
+
+              @if (submitError()) {
+                <ui-alert-banner tone="error" title="Could not submit quote" [message]="submitError()"></ui-alert-banner>
+              }
+
+              <div class="form-section">
+                <div class="form-section__header">
+                  <h3>Contact details</h3>
+                  <p class="sm-muted">These details are shown to the buyer with your quote.</p>
+                </div>
+
+                <div class="form-grid">
+                  <ui-form-field label="Responder name" forId="responderName" [required]="true">
+                    <input id="responderName" type="text" [(ngModel)]="responderName" name="responderName" />
+                  </ui-form-field>
+
+                  <ui-form-field label="Responder email" forId="responderEmail" [required]="true">
+                    <input id="responderEmail" type="email" [(ngModel)]="responderEmail" name="responderEmail" />
+                  </ui-form-field>
+
+                  <ui-form-field label="Responder phone" forId="responderPhone">
+                    <input id="responderPhone" type="tel" [(ngModel)]="responderPhone" name="responderPhone" />
+                  </ui-form-field>
+                </div>
+              </div>
+
+              <div class="form-section">
+                <div class="form-section__header">
+                  <h3>Pricing</h3>
+                  <p class="sm-muted">Separate your professional fee from disbursements so the buyer can compare fairly.</p>
+                </div>
+
+                <div class="form-grid">
+                  <ui-form-field label="Professional fee (AUD)" forId="professionalFeeAud" [required]="true">
+                    <input id="professionalFeeAud" type="number" min="1" step="1" [(ngModel)]="professionalFeeAud" name="professionalFeeAud" />
+                  </ui-form-field>
+
+                  <ui-form-field label="Disbursements estimate (AUD)" forId="disbursementsEstimateAud">
+                    <input
+                      id="disbursementsEstimateAud"
+                      type="number"
+                      min="0"
+                      step="1"
+                      [(ngModel)]="disbursementsEstimateAud"
+                      name="disbursementsEstimateAud"
+                    />
+                  </ui-form-field>
+
+                  <ui-form-field label="Turnaround (business days)" forId="turnaroundBusinessDays">
+                    <input
+                      id="turnaroundBusinessDays"
+                      type="number"
+                      min="1"
+                      step="1"
+                      [(ngModel)]="turnaroundBusinessDays"
+                      name="turnaroundBusinessDays"
+                    />
+                  </ui-form-field>
+
+                  <ui-form-field label="Valid until" forId="validUntilUtc">
+                    <input id="validUntilUtc" type="datetime-local" [(ngModel)]="validUntilUtc" name="validUntilUtc" />
+                  </ui-form-field>
+                </div>
+
+                <label class="checkbox-card" for="includesGst">
+                  <input id="includesGst" type="checkbox" [(ngModel)]="includesGst" name="includesGst" />
+                  <div>
+                    <p class="checkbox-card__title">Fee includes GST</p>
+                    <p class="checkbox-card__body">Leave unticked if GST is excluded or still needs confirming.</p>
+                  </div>
+                </label>
+              </div>
+
+              <div class="form-section">
+                <div class="form-section__header">
+                  <h3>Scope and exclusions</h3>
+                  <p class="sm-muted">Be clear about what is covered, where assumptions apply, and what is outside scope.</p>
+                </div>
+
+                <ui-form-field label="Scope notes" forId="scopeNotes" [required]="true">
+                  <textarea id="scopeNotes" rows="6" [(ngModel)]="scopeNotes" name="scopeNotes"></textarea>
+                </ui-form-field>
+
+                <ui-form-field
+                  label="Excluded items"
+                  forId="excludedItems"
+                  hint="Optional. Separate exclusions with commas or new lines."
+                >
+                  <textarea id="excludedItems" rows="4" [(ngModel)]="excludedItemsText" name="excludedItems"></textarea>
+                </ui-form-field>
+              </div>
+
+              <ui-button [disabled]="!canSubmit()" [loading]="submitting()" (pressed)="submit()">
+                {{ submitting() ? 'Submitting...' : 'Submit quote' }}
+              </ui-button>
+            </section>
+          } @else {
+            <ui-alert-banner
+              tone="warn"
+              title="Quote request closed"
+              message="This request is no longer accepting new responses."
+            ></ui-alert-banner>
+          }
+        </div>
+      </div>
+
+      @if (buyerOverviewModalOpen()) {
+        <div class="dialog-modal" role="presentation" (click)="onBuyerOverviewModalBackdropClick($event)">
+          <section
+            class="dialog-modal__dialog dialog-modal__dialog--overview"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="buyer-overview-modal-title"
+          >
+            <div class="dialog-modal__header">
+              <div class="dialog-modal__header-copy">
+                <p class="sm-eyebrow">Buyer overview</p>
+                <h2 id="buyer-overview-modal-title">Context for your quote</h2>
+                <p class="sm-muted">
+                  Review the matter summary and key questions in one place, then jump back to your quote with the right context.
+                </p>
+              </div>
+
+              <button type="button" class="dialog-modal__close" aria-label="Close buyer overview dialog" (click)="closeBuyerOverviewModal()">
+                Close
+              </button>
+            </div>
+
+            <div class="dialog-modal__body dialog-modal__body--overview">
+              <div class="overview-tabs">
+                <nav class="overview-tabs__nav" role="tablist" aria-label="Buyer overview sections">
+                  @for (tab of buyerOverviewTabs; track tab.id) {
+                    <button
+                      type="button"
+                      class="overview-tabs__tab"
+                      role="tab"
+                      [id]="buyerOverviewTabButtonId(tab.id)"
+                      [class.is-active]="activeBuyerOverviewTab() === tab.id"
+                      [attr.aria-selected]="activeBuyerOverviewTab() === tab.id"
+                      [attr.aria-controls]="buyerOverviewTabPanelId(tab.id)"
+                      [attr.tabindex]="activeBuyerOverviewTab() === tab.id ? 0 : -1"
+                      (click)="selectBuyerOverviewTab(tab.id)"
+                      (keydown)="onBuyerOverviewTabKeydown($event, tab.id)"
+                    >
+                      {{ tab.label }}
+                    </button>
+                  }
+                </nav>
+              </div>
+
+              <section
+                class="overview-tab-panel"
+                role="tabpanel"
+                tabindex="0"
+                [id]="buyerOverviewTabPanelId(activeBuyerOverviewTab())"
+                [attr.aria-labelledby]="buyerOverviewTabButtonId(activeBuyerOverviewTab())"
+              >
+                @switch (activeBuyerOverviewTab()) {
+                  @case ('summary') {
+                    <article class="overview-panel">
+                      <div class="section-heading">
+                        <p class="sm-eyebrow">Matter summary</p>
+                        <h3>Overview of the matter</h3>
+                        <p class="sm-muted">Start here for the high-level brief before finalising price, scope, and assumptions.</p>
+                      </div>
+                      @if (view.summary.trim()) {
+                        <p class="overview-panel__summary">{{ view.summary }}</p>
+                      } @else {
+                        <div class="empty-state">
+                          <h3>No summary supplied</h3>
+                          <p class="sm-muted">The buyer did not provide a written matter summary for this quote request.</p>
+                        </div>
+                      }
+                    </article>
+                  }
+
+                  @case ('questions') {
+                    <article class="overview-panel">
+                      <div class="section-heading">
+                        <p class="sm-eyebrow">Questions</p>
+                        <h3>Questions for the conveyancer</h3>
+                        <p class="sm-muted">Use these questions to shape scope notes, assumptions, and follow-up advice.</p>
+                      </div>
+                      @if (view.conveyancerQuestions.length > 0) {
+                        <ol class="overview-list" aria-label="Questions for the conveyancer">
+                          @for (item of view.conveyancerQuestions; track item; let index = $index) {
+                            <li class="overview-list__item">
+                              <span class="overview-list__index" aria-hidden="true">{{ index + 1 }}</span>
+                              <p>{{ item }}</p>
+                            </li>
+                          }
+                        </ol>
+                      } @else {
+                        <div class="empty-state">
+                          <h3>No questions supplied</h3>
+                          <p class="sm-muted">The buyer did not include any conveyancer questions for this matter.</p>
+                        </div>
+                      }
+                    </article>
+                  }
+                }
+              </section>
+            </div>
+          </section>
+        </div>
+      }
+
+      @if (documentModalOpen() && view.shareReportPdf) {
+        <div class="dialog-modal" role="presentation" (click)="onDocumentModalBackdropClick($event)">
+          <section class="dialog-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="document-modal-title">
+            <div class="dialog-modal__header">
+              <div class="dialog-modal__header-copy">
+                <p class="sm-eyebrow">Secure document review</p>
+                <h2 id="document-modal-title">Unlock the approved file set</h2>
+                <p class="sm-muted">
+                  We'll send a one-time access code to the email address that received this quote request. Once verified, the report and contract pack will be listed here.
+                </p>
+              </div>
+
+              <button type="button" class="dialog-modal__close" aria-label="Close secure document dialog" (click)="closeDocumentModal()">
+                Close
+              </button>
+            </div>
+
+            <div class="dialog-modal__body">
+              @if (documentAccessNotice()) {
+                <ui-alert-banner tone="info" title="Access update" [message]="documentAccessNotice()"></ui-alert-banner>
+              }
+
+              @if (documentAccessError()) {
+                <ui-alert-banner tone="error" title="Could not unlock documents" [message]="documentAccessError()"></ui-alert-banner>
+              }
+
+              @if (downloadError()) {
+                <ui-alert-banner tone="error" title="Could not download file" [message]="downloadError()"></ui-alert-banner>
+              }
+
+              @if (!view.documentAccess.isUnlocked) {
+                <div class="dialog-modal__steps">
+                  <article class="document-step">
+                    <p class="sm-eyebrow">Step 1</p>
+                    <h3>Email the access code</h3>
+                    <p class="sm-muted">Use the email address that received this quote request. You can still submit your quote without unlocking the files.</p>
+                    <ui-button variant="secondary" [disabled]="requestingDocumentAccessOtp()" (pressed)="requestDocumentAccessOtp()">
+                      {{ requestingDocumentAccessOtp() ? 'Sending code...' : 'Email access code' }}
+                    </ui-button>
+                  </article>
+
+                  <article class="document-step">
+                    <p class="sm-eyebrow">Step 2</p>
+                    <h3>Enter the 6-digit code</h3>
+                    <p class="sm-muted">Once verified, the approved documents appear below in this same panel.</p>
+
+                    <div class="otp-grid">
+                      <ui-form-field
+                        label="One-time code"
+                        forId="documentAccessOtpCode"
+                        hint="Enter the 6-digit code from the access email."
+                      >
+                        <input
+                          id="documentAccessOtpCode"
+                          type="text"
+                          inputmode="numeric"
+                          maxlength="6"
+                          [(ngModel)]="documentAccessOtpCode"
+                          name="documentAccessOtpCode"
+                        />
+                      </ui-form-field>
+
+                      <ui-button [disabled]="verifyingDocumentAccessOtp() || !documentAccessOtpCode.trim()" (pressed)="verifyDocumentAccessOtp()">
+                        {{ verifyingDocumentAccessOtp() ? 'Verifying...' : 'Unlock documents' }}
+                      </ui-button>
+                    </div>
+
+                    @if (view.documentAccess.otpRequestedAtUtc) {
+                      <p class="document-access-note">
+                        Access code requested {{ view.documentAccess.otpRequestedAtUtc | date: 'd MMM yyyy, h:mm a' }}
+                        @if (view.documentAccess.otpExpiresAtUtc) {
+                          <span> · expires {{ view.documentAccess.otpExpiresAtUtc | date: 'd MMM yyyy, h:mm a' }}</span>
+                        }
+                      </p>
+                    }
+                  </article>
+                </div>
+              } @else {
+                <div class="dialog-modal__library">
+                  <div class="dialog-modal__library-header">
+                    <div>
+                      <p class="sm-eyebrow">Unlocked library</p>
+                      <h3>{{ view.documentAccess.totalDocumentCount }} approved file{{ view.documentAccess.totalDocumentCount === 1 ? '' : 's' }}</h3>
+                    </div>
+                    @if (view.documentAccess.sessionExpiresAtUtc) {
+                      <p class="sm-muted">Access expires {{ view.documentAccess.sessionExpiresAtUtc | date: 'd MMM yyyy, h:mm a' }}</p>
+                    }
+                  </div>
+
+                  @if (view.documentAccess.totalDocumentCount === 0) {
+                    <div class="empty-state">
+                      <h3>No files available</h3>
+                      <p class="sm-muted">The buyer has not shared any documents on this request.</p>
+                    </div>
+                  } @else {
+                    <div class="document-list">
+                      @if (hasSharedReport(view)) {
+                        <article class="document-row">
+                          <div class="document-row__copy">
+                            <p class="document-row__title">ConveyMate report PDF</p>
+                            <p class="sm-muted">Buyer-approved report ready for download.</p>
+                          </div>
+                          <ui-button variant="secondary" [disabled]="downloading()" [loading]="downloading()" (pressed)="downloadReport()">
+                            {{ downloading() ? 'Preparing...' : 'Download' }}
+                          </ui-button>
+                        </article>
+                      }
+
+                      @for (document of view.sharedDocuments; track document.id) {
+                        <article class="document-row">
+                          <div class="document-row__copy">
+                            <p class="document-row__title">{{ document.fileName }}</p>
+                            <p class="sm-muted">{{ document.docType }} · uploaded {{ document.uploadedAtUtc | date: 'd MMM yyyy, h:mm a' }}</p>
+                          </div>
+                          <ui-button
+                            variant="secondary"
+                            [disabled]="isDownloadingDocument(document.id)"
+                            [loading]="isDownloadingDocument(document.id)"
+                            (pressed)="downloadSharedDocument(document.id, document.fileName)"
+                          >
+                            {{ isDownloadingDocument(document.id) ? 'Preparing...' : 'Download' }}
+                          </ui-button>
+                        </article>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </section>
+        </div>
+      }
+    }
+  </div>
+</section>

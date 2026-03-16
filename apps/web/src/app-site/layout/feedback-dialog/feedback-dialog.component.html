@@ -1,0 +1,82 @@
+    <div class="feedback-overlay" (click)="onOverlayClick($event)" role="presentation">
+      <div
+        class="feedback-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="feedback-title"
+      >
+        <div class="feedback-dialog__header">
+          <h2 id="feedback-title" class="feedback-dialog__title">Share feedback</h2>
+          <button
+            type="button"
+            class="feedback-dialog__close"
+            aria-label="Close feedback"
+            (click)="close()"
+          >✕</button>
+        </div>
+
+        @if (submitted()) {
+          <div class="feedback-dialog__success">
+            <p class="feedback-dialog__success-msg">Thanks for your feedback! We really appreciate it.</p>
+            <button type="button" class="feedback-dialog__btn feedback-dialog__btn--primary" (click)="close()">
+              Close
+            </button>
+          </div>
+        } @else {
+          <div class="feedback-dialog__body">
+            <div class="feedback-dialog__field">
+              <label class="feedback-dialog__label" for="feedback-type">Type</label>
+              <select
+                id="feedback-type"
+                class="feedback-dialog__select"
+                [value]="feedbackType()"
+                (change)="feedbackType.set($any($event.target).value)"
+              >
+                <option value="bug">Bug report</option>
+                <option value="suggestion">Suggestion</option>
+                <option value="general">General feedback</option>
+              </select>
+            </div>
+
+            <div class="feedback-dialog__field">
+              <label class="feedback-dialog__label" for="feedback-message">
+                Message <span class="feedback-dialog__required" aria-hidden="true">*</span>
+              </label>
+              <textarea
+                id="feedback-message"
+                class="feedback-dialog__textarea"
+                rows="5"
+                maxlength="2000"
+                placeholder="Describe your feedback..."
+                [value]="message()"
+                (input)="message.set($any($event.target).value)"
+              ></textarea>
+              <span class="feedback-dialog__char-count">{{ message().length }}/2000</span>
+            </div>
+
+            @if (error()) {
+              <p class="feedback-dialog__error" role="alert">{{ error() }}</p>
+            }
+
+            <div class="feedback-dialog__actions">
+              <button
+                type="button"
+                class="feedback-dialog__btn feedback-dialog__btn--ghost"
+                [disabled]="submitting()"
+                (click)="close()"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                class="feedback-dialog__btn feedback-dialog__btn--primary"
+                [disabled]="submitting() || !message().trim()"
+                (click)="submit()"
+              >
+                {{ submitting() ? 'Sending...' : 'Send feedback' }}
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>

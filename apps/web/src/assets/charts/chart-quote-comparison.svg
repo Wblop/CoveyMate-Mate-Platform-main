@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 320" fill="none" aria-hidden="true">
+  <defs>
+    <filter id="qc-shadow" x="-6%" y="-6%" width="116%" height="124%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#0f2a3c" flood-opacity="0.09"/>
+    </filter>
+    <filter id="qc-shadow-highlight" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#0b3c5d" flood-opacity="0.18"/>
+    </filter>
+    <radialGradient id="qc-glow" cx="55%" cy="22%" r="55%">
+      <stop offset="0%" stop-color="#bed8ea" stop-opacity="0.48"/>
+      <stop offset="100%" stop-color="#bed8ea" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="qc-bar-a" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5a8fa8"/>
+      <stop offset="100%" stop-color="#7aafc9"/>
+    </linearGradient>
+    <linearGradient id="qc-bar-b" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5a8fa8"/>
+      <stop offset="100%" stop-color="#7aafc9"/>
+    </linearGradient>
+    <linearGradient id="qc-bar-best" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0b3c5d"/>
+      <stop offset="100%" stop-color="#1a7ba4"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Ambient glow -->
+  <ellipse cx="300" cy="52" rx="230" ry="130" fill="url(#qc-glow)"/>
+
+  <!-- Card -->
+  <rect x="20" y="10" width="520" height="300" rx="22" fill="#ffffff" stroke="#d0dce7" stroke-width="1.5" filter="url(#qc-shadow)"/>
+
+  <!-- Card header band -->
+  <rect x="20" y="10" width="520" height="58" rx="22" fill="#f0f6fb"/>
+  <rect x="20" y="48" width="520" height="20" fill="#f0f6fb"/>
+
+  <!-- Header: title -->
+  <text x="50" y="46" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="700" fill="#0b3c5d" letter-spacing="-0.01em">Conveyancer Quote Comparison</text>
+
+  <!-- Header: state badge -->
+  <rect x="418" y="27" width="42" height="22" rx="11" fill="#eaf2f8" stroke="#c8d9e6" stroke-width="1"/>
+  <text x="439" y="42" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="700" fill="#2b5f78" letter-spacing="0.05em">VIC</text>
+
+  <!-- Header: auto-sent badge -->
+  <rect x="466" y="27" width="58" height="22" rx="11" fill="#edf7f2" stroke="#b8d9c6" stroke-width="1"/>
+  <text x="495" y="42" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9.5" font-weight="700" fill="#1f7a3d" letter-spacing="0.03em">AUTO-SENT</text>
+
+  <!-- Y-axis gridlines -->
+  <!-- max ~$2200, min $0, chart h=180 (y=78 to y=258) -->
+  <!-- $2000 → 2000/2200 * 180 = 163.6 → y=94 -->
+  <!-- $1500 → 1500/2200 * 180 = 122.7 → y=135 -->
+  <!-- $1000 → 1000/2200 * 180 = 81.8  → y=176 -->
+  <!-- $500  → 500/2200 * 180 = 40.9   → y=217 -->
+  <line x1="88" y1="94"  x2="524" y2="94"  stroke="#ebf2f7" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="88" y1="135" x2="524" y2="135" stroke="#ebf2f7" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="88" y1="176" x2="524" y2="176" stroke="#ebf2f7" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="88" y1="217" x2="524" y2="217" stroke="#ebf2f7" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="88" y1="258" x2="524" y2="258" stroke="#d0dce7" stroke-width="1.5"/>
+
+  <!-- Y-axis labels -->
+  <text x="82" y="98"  text-anchor="end" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#8aa5b8">$2000</text>
+  <text x="82" y="139" text-anchor="end" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#8aa5b8">$1500</text>
+  <text x="82" y="180" text-anchor="end" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#8aa5b8">$1000</text>
+  <text x="82" y="221" text-anchor="end" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#8aa5b8">$500</text>
+
+  <!-- Y-axis line -->
+  <line x1="90" y1="78" x2="90" y2="258" stroke="#d0dce7" stroke-width="1.5"/>
+
+  <!--
+    Firm A: $1,650 → 1650/2200*180 = 135px tall → y=258-135=123
+    Firm B: $1,980 → 1980/2200*180 = 162px tall → y=258-162=96
+    Firm C: $1,450 → 1450/2200*180 = 118.6px ≈ 119 → y=258-119=139  (lowest = best)
+    Bar width = 72px, gap between groups ~40px
+    Groups centred at x=160, 280, 400
+  -->
+
+  <!-- Firm A ($1,650) - standard -->
+  <rect x="124" y="123" width="72" height="135" rx="10" fill="url(#qc-bar-a)"/>
+  <text x="160" y="117" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="700" fill="#425667">$1,650</text>
+  <text x="160" y="275" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#425667" font-weight="500">Firm A</text>
+  <!-- Response badge -->
+  <rect x="120" y="289" width="80" height="18" rx="9" fill="#f4f8fb" stroke="#d0dce7" stroke-width="1"/>
+  <circle cx="133" cy="298" r="4" fill="#1a7ba4" opacity="0.6"/>
+  <text x="160" y="302" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#425667">Replied</text>
+
+  <!-- Firm B ($1,980) - highest -->
+  <rect x="244" y="96" width="72" height="162" rx="10" fill="url(#qc-bar-b)"/>
+  <text x="280" y="90" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="700" fill="#425667">$1,980</text>
+  <text x="280" y="275" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#425667" font-weight="500">Firm B</text>
+  <!-- Response badge -->
+  <rect x="240" y="289" width="80" height="18" rx="9" fill="#f4f8fb" stroke="#d0dce7" stroke-width="1"/>
+  <circle cx="253" cy="298" r="4" fill="#1a7ba4" opacity="0.6"/>
+  <text x="280" y="302" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#425667">Replied</text>
+
+  <!-- Firm C ($1,450) - LOWEST / best highlighted -->
+  <rect x="364" y="139" width="72" height="119" rx="10" fill="url(#qc-bar-best)" filter="url(#qc-shadow-highlight)"/>
+  <text x="400" y="133" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="700" fill="#0b3c5d">$1,450</text>
+  <text x="400" y="275" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#0b3c5d" font-weight="600">Firm C</text>
+  <!-- Lowest badge -->
+  <rect x="356" y="289" width="88" height="18" rx="9" fill="#edf7f2" stroke="#b8d9c6" stroke-width="1"/>
+  <text x="400" y="302" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9" font-weight="700" fill="#1f7a3d" letter-spacing="0.02em">LOWEST QUOTE</text>
+
+  <!-- Savings callout: $530 less than Firm B -->
+  <rect x="96" y="78" width="272" height="0" rx="0" fill="none"/>
+  <!-- Bracket lines connecting Firm B top to Firm C top -->
+  <line x1="280" y1="90" x2="400" y2="90" stroke="#cadbe7" stroke-width="1" stroke-dasharray="3 2"/>
+  <rect x="302" y="78" width="76" height="18" rx="9" fill="#fdf6ec" stroke="#e8d3a8" stroke-width="1"/>
+  <text x="340" y="91" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9.5" font-weight="700" fill="#8a5a00" letter-spacing="0.02em">$530 SAVING</text>
+</svg>

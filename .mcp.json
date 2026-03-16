@@ -1,0 +1,42 @@
+{
+  "mcpServers": {
+    "serena": {
+      "type": "sse",
+      "url": "http://localhost:3000/sse"
+    },
+    "postgres": {
+      "type": "stdio",
+      "command": "bash",
+      "args": [
+        "-c",
+        "set -a && source ./local/.env && set +a && npx -y @modelcontextprotocol/server-postgres postgresql://${CONVEYMATE_POSTGRES_USER}:${CONVEYMATE_POSTGRES_PASSWORD}@localhost:${CONVEYMATE_POSTGRES_PORT:-54329}/${CONVEYMATE_POSTGRES_DB}"
+      ]
+    },
+    "git": {
+      "type": "stdio",
+      "command": "/opt/homebrew/bin/uvx",
+      "args": [
+        "mcp-server-git",
+        "--repository",
+        "/Users/daimen/Desktop/Projects/ConveyMate/ConveyMate"
+      ]
+    },
+    "aws": {
+      "type": "stdio",
+      "command": "/opt/homebrew/bin/uvx",
+      "args": ["awslabs.aws-api-mcp-server@latest"],
+      "env": {
+        "AWS_REGION": "ap-southeast-2"
+      }
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest",
+        "--browser", "chromium",
+        "--headless"
+      ]
+    }
+  }
+}

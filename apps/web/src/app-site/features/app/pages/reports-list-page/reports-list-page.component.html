@@ -1,0 +1,259 @@
+    <section class="sm-page-section">
+      <div class="sm-container page-grid">
+        <ui-page-header
+          title="Reports"
+          description="Filter report history, inspect evidence, and open detailed findings."
+          eyebrow="Reports explorer"
+        ></ui-page-header>
+
+        <section class="sm-surface section-card filter-panel">
+          <div class="filter-toolbar">
+            <div class="filter-grid">
+              <div class="filter-control filter-control--search">
+                <ui-form-field label="Search reports" forId="search">
+                  <input
+                    id="search"
+                    name="search"
+                    type="search"
+                    placeholder="Address, title, state, or pipeline step"
+                    [(ngModel)]="searchTerm"
+                    (input)="onFilterChanged()"
+                  />
+                </ui-form-field>
+              </div>
+
+              <div class="filter-control">
+                <ui-form-field label="Status" forId="statusFilter">
+                  <select id="statusFilter" name="statusFilter" [(ngModel)]="statusFilter" (change)="onFilterChanged()">
+                    <option value="all">All statuses</option>
+                    <option value="draft">Draft</option>
+                    <option value="processing">Processing</option>
+                    <option value="ready">Ready</option>
+                    <option value="failed">Failed</option>
+                  </select>
+                </ui-form-field>
+              </div>
+
+              <div class="filter-control">
+                <ui-form-field label="State" forId="stateFilter">
+                  <select id="stateFilter" name="stateFilter" [(ngModel)]="stateFilter" (change)="onFilterChanged()">
+                    <option value="all">All states</option>
+                    @for (state of stateOptions(); track state) {
+                      <option [value]="state">{{ state }}</option>
+                    }
+                  </select>
+                </ui-form-field>
+              </div>
+
+              <label class="filter-checkbox" for="showArchived">
+                <input
+                  id="showArchived"
+                  name="showArchived"
+                  type="checkbox"
+                  [ngModel]="showArchived()"
+                  (change)="onShowArchivedChanged($event)"
+                />
+                <span>Show archived jobs</span>
+              </label>
+            </div>
+
+            @if (hasActiveFilters()) {
+              <div class="filter-actions">
+                <button type="button" class="clear-filters" (click)="clearFilters()">Clear all</button>
+              </div>
+            }
+          </div>
+
+          <div class="filter-meta" aria-live="polite">
+            <p class="results-pill">{{ filteredReports().length }} of {{ allReports().length }} results</p>
+
+            @if (hasActiveFilters()) {
+              <div class="active-filter-chips">
+                @if (searchTerm.trim()) {
+                  <button type="button" class="filter-chip" (click)="clearSearchFilter()">
+                    Search: "{{ searchTerm.trim() }}"
+                    <span aria-hidden="true">×</span>
+                  </button>
+                }
+                @if (statusFilter !== 'all') {
+                  <button type="button" class="filter-chip" (click)="clearStatusFilter()">
+                    Status: {{ statusFilterLabel() }}
+                    <span aria-hidden="true">×</span>
+                  </button>
+                }
+                @if (stateFilter !== 'all') {
+                  <button type="button" class="filter-chip" (click)="clearStateFilter()">
+                    State: {{ stateFilter }}
+                    <span aria-hidden="true">×</span>
+                  </button>
+                }
+                @if (showArchived()) {
+                  <button type="button" class="filter-chip" (click)="clearArchivedFilter()">
+                    Showing archived
+                    <span aria-hidden="true">×</span>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        </section>
+
+        <section class="sm-surface section-card results-card">
+          <header class="results-header">
+            <div>
+              <h2>Report history</h2>
+              <p class="sm-muted">Use this table for full exploration and open any row for detail.</p>
+            </div>
+          </header>
+
+          @if (loading()) {
+            <div class="skeleton-list">
+              <ui-skeleton-block [height]="56"></ui-skeleton-block>
+              <ui-skeleton-block [height]="56"></ui-skeleton-block>
+              <ui-skeleton-block [height]="56"></ui-skeleton-block>
+            </div>
+          } @else if (errorMessage()) {
+            <ui-alert-banner tone="error" title="Could not load reports" [message]="errorMessage()"></ui-alert-banner>
+          } @else if (filteredReports().length === 0 && allReports().length === 0) {
+            <ui-alert-banner
+              tone="info"
+              title="No reports available"
+              message="Completed and historical reports will appear here when they are available."
+            ></ui-alert-banner>
+          } @else if (filteredReports().length === 0) {
+            <ui-alert-banner
+              tone="info"
+              title="No matching reports"
+              message="Adjust your filters or clear them to broaden this view."
+            ></ui-alert-banner>
+          } @else {
+            <div class="table-wrap">
+              <table>
+                <caption class="sm-sr-only">
+                  Report explorer table
+                </caption>
+                <colgroup>
+                  <col class="col-property" />
+                  <col class="col-state" />
+                  <col class="col-created" />
+                  <col class="col-status" />
+                  <col class="col-progress" />
+                  <col class="col-updated" />
+                  <col class="col-action" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th scope="col">Property</th>
+                    <th scope="col">State</th>
+                    <th scope="col">Created</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Progress</th>
+                    <th scope="col">Updated</th>
+                    <th scope="col">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (report of pagedReports(); track report.id) {
+                    <tr>
+                      <td>
+                        <p class="table-title">{{ report.propertyAddress }}</p>
+                        <p class="sm-muted">{{ report.title }}</p>
+                        @if (report.archivedAtUtc) {
+                          <p class="table-archive-badge">Archived</p>
+                        }
+                      </td>
+                      <td>{{ report.stateOrTerritory }}</td>
+                      <td>{{ report.createdAt | date: 'd MMM yyyy' }}</td>
+                      <td><ui-status-badge [status]="report.status"></ui-status-badge></td>
+                      <td>
+                        @if (report.status === 'processing') {
+                          <p class="sm-muted table-progress-detail">{{ report.percentComplete }}% · {{ reportStepLabel(report) }}</p>
+                          <div class="progress-track" aria-hidden="true">
+                            <div class="progress-fill" [style.width.%]="report.percentComplete"></div>
+                          </div>
+                        } @else {
+                          <span class="sm-muted">-</span>
+                        }
+                      </td>
+                      <td>{{ report.updatedAt | date: 'd MMM yyyy, h:mm a' }}</td>
+                      <td>
+                        <div class="report-actions">
+                          <button type="button" class="table-link-button" (click)="openPrimaryReportAction(report)">
+                            {{ primaryActionLabel(report) }}
+                          </button>
+                          <button
+                            type="button"
+                            class="report-actions-trigger"
+                            aria-haspopup="menu"
+                            [attr.aria-expanded]="isActionsMenuOpen(report.id)"
+                            (click)="toggleActionsMenu(report.id)"
+                            (keydown)="onActionsTriggerKeydown($event, report.id)"
+                          >
+                            <span class="report-actions-trigger__dots" aria-hidden="true">
+                              <span></span>
+                              <span></span>
+                              <span></span>
+                            </span>
+                            <span class="sm-sr-only">Open actions for {{ report.propertyAddress }}</span>
+                          </button>
+
+                          @if (isActionsMenuOpen(report.id)) {
+                            <div class="report-actions-menu" role="menu" [attr.aria-label]="'Actions for ' + report.propertyAddress">
+                              <button type="button" class="report-actions-menu__item" role="menuitem" (click)="openPrimaryReportAction(report)">
+                                {{ primaryActionLabel(report) }}
+                              </button>
+                              <button type="button" class="report-actions-menu__item" role="menuitem" (click)="openArchiveDialog(report)">
+                                {{ archiveActionLabel(report) }}
+                              </button>
+                              <button
+                                type="button"
+                                class="report-actions-menu__item report-actions-menu__item--danger"
+                                role="menuitem"
+                                (click)="openDeleteDialog(report)"
+                              >
+                                Delete job
+                              </button>
+                            </div>
+                          }
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <footer class="pagination" aria-label="Pagination controls">
+              <p class="sm-muted">{{ resultsRangeLabel() }}</p>
+              <div class="pagination-controls">
+                <ui-button variant="secondary" [disabled]="currentPage() === 1" (pressed)="goToPreviousPage()">Previous</ui-button>
+                @for (page of visiblePages(); track page) {
+                  <button
+                    type="button"
+                    class="page-chip"
+                    [class.page-chip--active]="page === currentPage()"
+                    (click)="goToPage(page)"
+                  >
+                    {{ page }}
+                  </button>
+                }
+                <ui-button variant="secondary" [disabled]="currentPage() >= totalPages()" (pressed)="goToNextPage()">Next</ui-button>
+              </div>
+            </footer>
+          }
+        </section>
+
+        @if (dialogState(); as dialog) {
+          <app-confirm-action-dialog
+            [title]="dialogTitle()"
+            [description]="dialogDescription()"
+            [detail]="dialog.report.title"
+            [confirmLabel]="dialogConfirmLabel()"
+            [tone]="isDeleteDialog() ? 'danger' : 'neutral'"
+            [busy]="actionBusy()"
+            (confirmed)="confirmDialogAction()"
+            (cancelled)="closeDialog()"
+          ></app-confirm-action-dialog>
+        }
+      </div>
+    </section>

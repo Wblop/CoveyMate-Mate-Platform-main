@@ -1,0 +1,203 @@
+:host {
+  display: block;
+  position: sticky;
+  top: 0;
+  z-index: 90;
+}
+
+.public-header {
+  border-bottom: 1px solid var(--sm-color-border);
+  background: var(--sm-color-surface);
+}
+
+.public-header__inner {
+  min-height: var(--sm-header-height);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--sm-space-4);
+}
+
+.public-header__brand {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sm-space-2);
+  color: inherit;
+}
+
+.public-header__mark {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  display: block;
+}
+
+.public-header__brand-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.public-header__name {
+  color: var(--sm-color-primary);
+  font-size: 22px;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  font-family: var(--sm-font-heading);
+}
+
+.public-header__tagline {
+  font-size: 12px;
+  line-height: 1.3;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--sm-color-text-muted);
+}
+
+.public-header__nav,
+.public-header__auth {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.public-header__mobile-toggle {
+  display: none;
+  min-height: 44px;
+  border: 1px solid var(--sm-color-border-strong);
+  border-radius: var(--sm-radius-sm);
+  background: var(--sm-color-surface);
+  color: var(--sm-color-primary);
+  padding: 8px 12px;
+  font-size: 14px;
+  line-height: 1.2;
+  font-weight: 700;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.public-header__mobile-toggle:hover,
+.public-header__mobile-toggle:focus-visible {
+  background: var(--sm-color-surface-emphasis);
+  border-color: #9ab4c7;
+}
+
+.public-header__mobile-toggle-icon {
+  width: 18px;
+  display: grid;
+  gap: 3px;
+}
+
+.public-header__mobile-toggle-icon span {
+  display: block;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.public-header__nav-link {
+  color: var(--sm-color-primary);
+  text-decoration: none;
+  padding: 8px 10px;
+  border-radius: var(--sm-radius-sm);
+  border: 1px solid transparent;
+  font-size: 15px;
+  line-height: 1.4;
+  font-weight: 600;
+  transition: background-color var(--sm-motion-fast), border-color var(--sm-motion-fast);
+}
+
+.public-header__nav-link:hover,
+.public-header__nav-link.is-active,
+.public-header__nav-link:focus-visible {
+  background: var(--sm-color-surface-emphasis);
+  border-color: #9eb8ca;
+}
+
+.public-header__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  border-radius: var(--sm-radius-sm);
+  border: 1px solid var(--sm-color-primary);
+  background: var(--sm-color-primary);
+  color: #fff;
+  font-size: 15px;
+  line-height: 1.4;
+  font-weight: 700;
+  padding: 8px 12px;
+  transition: background-color var(--sm-motion-fast), border-color var(--sm-motion-fast);
+}
+
+.public-header__cta:hover,
+.public-header__cta:focus-visible {
+  background: var(--sm-color-primary-hover);
+  border-color: var(--sm-color-primary-hover);
+}
+
+@media (max-width: 700px) {
+  .public-header__inner {
+    min-height: auto;
+    padding-block: 12px;
+    flex-wrap: wrap;
+    row-gap: 10px;
+  }
+
+  .public-header__name {
+    font-size: 20px;
+  }
+
+  .public-header__tagline {
+    display: none;
+  }
+
+  .public-header__auth {
+    margin-left: auto;
+    gap: 6px;
+  }
+
+  .public-header__mobile-toggle {
+    display: inline-flex;
+    margin-left: auto;
+  }
+
+  .public-header__nav {
+    display: none;
+    width: 100%;
+    padding-top: 10px;
+    border-top: 1px solid var(--sm-color-border);
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .public-header__nav.is-open {
+    display: flex;
+  }
+
+  .public-header__nav-link {
+    padding: 10px 12px;
+    font-size: 14px;
+    text-align: center;
+  }
+
+  .public-header__cta {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-header__nav-link,
+  .public-header__cta,
+  .public-header__mobile-toggle {
+    transition: none;
+  }
+}

@@ -1,0 +1,22 @@
+    <div
+      class="ui-dropzone"
+      role="button"
+      tabindex="0"
+      aria-label="Upload files"
+      (dragover)="onDragOver($event)"
+      (drop)="onDrop($event)"
+      (keydown.enter)="fileInput.click()"
+      (keydown.space)="fileInput.click(); $event.preventDefault()"
+      (click)="fileInput.click()"
+    >
+      <p class="ui-dropzone__title">Drop files here or choose files</p>
+      <p class="ui-dropzone__hint">Accepted: PDF only</p>
+      <input
+        #fileInput
+        type="file"
+        multiple
+        class="sm-sr-only"
+        (change)="onFileInputChange($event)"
+        accept=".pdf,application/pdf"
+      />
+    </div>

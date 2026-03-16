@@ -1,0 +1,22 @@
+IMPORTANT:
+
+1. If we are deploying we NEED to setup an event webhook for payment_intent.succeeded with the URL. This ensures we can mark failures as succeded if payment goes through.
+
+
+WIL:
+
+1. Email every single conveyencer in the db for a rough quote. conveyancers:refresh:all should get you all the data scraped and in your db. Takes about 10mins. If you have issues the scripts are in data/conveyencers. The job just gives you up to date data
+
+Thoughts are we create a couple fake outlook/gmail accounts and store in the repo. And we can use these accounts to email for quotes. We can automate this process in the future but lets leave for now.
+
+I can help you scrap the data once you get all the emails back
+
+2. Send out requests for contracts and paper work from 5 different houses, aparatments, town houses and land sales from all different states. We need this for state/territory testing. and to do post training.
+
+When you get them create a folder in testfiles/nsw/house1 or testfiles/nsw/apartment1 for example. Save as a pdf.
+
+3. review home page content. i think its to AI schlop. Add to legal disclaimer or refund policy. I have started it but needs a review.
+
+
+support@exchangemate.com.au
+

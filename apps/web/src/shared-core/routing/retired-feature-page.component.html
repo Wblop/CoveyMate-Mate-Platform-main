@@ -1,0 +1,14 @@
+<section class="sm-page-section">
+  <div class="sm-container retired-feature-page">
+    <ui-page-header [eyebrow]="eyebrow()" [title]="title()" [description]="description()"></ui-page-header>
+
+    <div class="sm-surface retired-feature-page__card">
+      <ui-alert-banner tone="info" title="Feature retired" [message]="detail()"></ui-alert-banner>
+
+      <div class="retired-feature-page__actions">
+        <ui-button [routerLink]="primaryLink()">{{ primaryLabel() }}</ui-button>
+        <ui-button variant="secondary" [routerLink]="secondaryLink()">{{ secondaryLabel() }}</ui-button>
+      </div>
+    </div>
+  </div>
+</section>

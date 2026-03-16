@@ -1,0 +1,124 @@
+<section class="insight-article-page">
+  <section class="insight-hero">
+    <div class="sm-container insight-hero__inner">
+      <div class="insight-hero__copy">
+        <p class="insight-hero__eyebrow">Insights Desk</p>
+        <h1>{{ currentArticle().title }}</h1>
+        <p class="insight-hero__excerpt">{{ currentArticle().excerpt }}</p>
+
+        <div class="insight-hero__meta">
+          <span><strong>ConveyMate Editorial</strong></span>
+          <span>Published {{ currentArticle().publishedLabel }}</span>
+          <span>Updated {{ currentArticle().updatedLabel }}</span>
+          <span>{{ currentArticle().readingMinutes }} min read</span>
+        </div>
+
+        @if (currentArticle().tags.length) {
+          <div class="insight-hero__tags" aria-label="Article topics">
+            @for (tag of currentArticle().tags; track tag) {
+              <span>{{ tag }}</span>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="insight-page">
+    <div class="sm-container insight-page__frame">
+      <article class="article-card">
+        @for (section of renderedSections(); track section.sectionId) {
+          <section [id]="section.sectionId" class="article-section article-anchor">
+            <h2>{{ section.heading }}</h2>
+
+            @for (paragraph of section.paragraphsHtml; track paragraph) {
+              <p [innerHTML]="paragraph"></p>
+            }
+
+            @if (section.bulletsHtml.length) {
+              <ul>
+                @for (item of section.bulletsHtml; track item) {
+                  <li [innerHTML]="item"></li>
+                }
+              </ul>
+            }
+          </section>
+        }
+
+        <section class="article-sources">
+          <h2>Sources</h2>
+          <p class="article-sources__lede">This article is built from the reporting and official material below.</p>
+
+          @if (currentArticle().sources.length) {
+            <div class="article-sources__list">
+              @for (source of currentArticle().sources; track source.sourceUrl) {
+                <article class="source-card">
+                  <p class="source-card__meta">
+                    {{ source.publisher }}
+                    @if (source.publishedLabel) {
+                      <span> · {{ source.publishedLabel }}</span>
+                    }
+                  </p>
+                  <h3><a [href]="source.sourceUrl" target="_blank" rel="noopener noreferrer">{{ source.headline }}</a></h3>
+                  <p>{{ source.summary }}</p>
+                </article>
+              }
+            </div>
+          }
+
+          <p class="article-note">
+            ConveyMate provides buyer-focused information and workflow support. It is not a substitute for legal or financial advice tailored to your transaction.
+          </p>
+        </section>
+      </article>
+
+      <aside class="article-rail" aria-label="Insight navigation">
+        <section class="sm-surface rail-card">
+          <p class="rail-card__eyebrow">On this page</p>
+          <h3>Jump to a section</h3>
+          <nav aria-label="Section navigation">
+            @for (section of currentArticle().sections; track section.sectionId) {
+              <a
+                [attr.href]="'#' + section.sectionId"
+                [class.is-active]="activeSectionId() === section.sectionId"
+                (click)="scrollToSection($event, section.sectionId)"
+                >{{ section.heading }}</a
+              >
+            }
+          </nav>
+        </section>
+
+        <section class="sm-surface rail-card">
+          <p class="rail-card__eyebrow">More insights</p>
+          <h3>Keep reading</h3>
+          <nav aria-label="Recent insights">
+            @for (article of recentInsights(); track article.slug) {
+              <a [attr.href]="article.canonicalPath">
+                <span class="rail-link__meta">{{ article.publishedLabel }}</span>
+                <span>{{ article.title }}</span>
+              </a>
+            }
+          </nav>
+        </section>
+
+        <section class="sm-surface rail-card">
+          <p class="rail-card__eyebrow">Trending</p>
+          <h3>Popular keywords</h3>
+          <nav aria-label="Trending insight keywords">
+            @for (keyword of trendingKeywords(); track keyword.slug) {
+              <a [routerLink]="['/insights']" [queryParams]="{ keyword: keyword.keyword.toLowerCase() }">{{ keyword.keyword }}</a>
+            }
+          </nav>
+        </section>
+
+        <section class="rail-card rail-card--cta">
+          <p class="rail-card__eyebrow">ConveyMate</p>
+          <h3>Need help with a contract?</h3>
+          <p>Turn a contract pack into a buyer-ready review before you speak with your conveyancer or solicitor.</p>
+          <a class="rail-cta__primary" href="/create-report">Start a report</a>
+          <a class="rail-cta__secondary" routerLink="/guides">See buyer guides</a>
+        </section>
+      </aside>
+    </div>
+  </section>
+</section>

@@ -1,0 +1,57 @@
+<section
+  id="faq"
+  class="sm-page-section landing-section landing-reveal landing-reveal--delay-6 landing-faq-section"
+  aria-labelledby="faq-title"
+>
+  <div class="sm-container landing-faq__layout">
+    <div class="landing-section__head landing-faq__head">
+      <p class="sm-eyebrow">FAQ</p>
+      <h2 id="faq-title">Questions buyers ask before they start</h2>
+      <p class="landing-section__intro">
+        Straight answers about what ConveyMate does, what it costs, and where your solicitor or conveyancer takes over.
+      </p>
+    </div>
+
+    <div class="landing-faq">
+      @for (group of faqGroups; track group.id) {
+        <section class="landing-faq__group" [attr.aria-labelledby]="'faq-group-' + group.id">
+          <h3 class="landing-faq__group-title" [id]="'faq-group-' + group.id">{{ group.title }}</h3>
+
+          <div class="landing-faq__items">
+            @for (item of group.items; track item.id) {
+              <article class="landing-faq__item" [class.is-open]="openItemId() === item.id">
+                <h4 class="landing-faq__question">
+                  <button
+                    type="button"
+                    class="landing-faq__trigger"
+                    [attr.aria-expanded]="openItemId() === item.id"
+                    [attr.aria-controls]="'faq-panel-' + item.id"
+                    [id]="'faq-trigger-' + item.id"
+                    (click)="toggleItem(item.id)"
+                  >
+                    <span class="landing-faq__label">{{ item.question }}</span>
+                    <span class="landing-faq__icon" aria-hidden="true"></span>
+                  </button>
+                </h4>
+
+                <div
+                  class="landing-faq__panel"
+                  [id]="'faq-panel-' + item.id"
+                  role="region"
+                  [attr.aria-labelledby]="'faq-trigger-' + item.id"
+                  [hidden]="openItemId() !== item.id"
+                >
+                  <p>{{ item.answer }}</p>
+                </div>
+              </article>
+            }
+          </div>
+        </section>
+      }
+
+      <p class="landing-faq__footnote">
+        ConveyMate helps you understand what you're signing before you're committed to it. It does not replace legal advice from a qualified solicitor or conveyancer.
+      </p>
+    </div>
+  </div>
+</section>

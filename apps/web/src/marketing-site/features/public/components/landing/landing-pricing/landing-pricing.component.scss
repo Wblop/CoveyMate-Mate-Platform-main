@@ -1,0 +1,322 @@
+:host {
+  display: block;
+}
+
+.landing-pricing__head {
+  margin-bottom: var(--sm-space-4);
+}
+
+.landing-pricing {
+  display: grid;
+  grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+  gap: var(--sm-space-4);
+  align-items: start;
+}
+
+.landing-pricing__primary,
+.landing-pricing__secondary {
+  height: 100%;
+  padding: var(--sm-space-5);
+  box-shadow: none;
+  border-color: #c8d8e4;
+  display: grid;
+  gap: var(--sm-space-3);
+  align-content: start;
+}
+
+.landing-pricing__primary {
+  background:
+    radial-gradient(120% 120% at 0% 0%, rgba(117, 166, 197, 0.15) 0%, transparent 58%),
+    linear-gradient(180deg, rgba(234, 242, 248, 0.96) 0%, #ffffff 52%);
+  border-color: #bdd1de;
+}
+
+.landing-pricing__secondary {
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.98) 0%, #ffffff 44%);
+}
+
+.landing-pricing__summary-head {
+  display: grid;
+  gap: 10px;
+}
+
+.landing-pricing__kicker {
+  margin: 0;
+  color: #48667b;
+  font-size: 0.74rem;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.landing-pricing__detail-head {
+  display: grid;
+  gap: 10px;
+}
+
+.landing-pricing__primary h3,
+.landing-pricing__secondary h3 {
+  margin: 0;
+  color: #13354b;
+  letter-spacing: -0.02em;
+}
+
+.landing-pricing__primary h3 {
+  font-size: clamp(1.3rem, 1.9vw, 1.58rem);
+  line-height: 1.22;
+  max-width: 18ch;
+}
+
+.landing-pricing__secondary h3 {
+  font-size: clamp(1.28rem, 1.8vw, 1.56rem);
+  line-height: 1.24;
+  max-width: 22ch;
+}
+
+.landing-pricing__price-block {
+  display: grid;
+  gap: 6px;
+}
+
+.landing-pricing__price {
+  margin: 0;
+  font-size: clamp(2.8rem, 4vw, 3.5rem);
+  line-height: 0.96;
+  letter-spacing: -0.04em;
+  color: #0b3c5d;
+  font-weight: 800;
+}
+
+.landing-pricing__price-note {
+  margin: 0;
+  color: #4a667a;
+  font-size: 0.78rem;
+  line-height: 1.2;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.landing-pricing__lead,
+.landing-pricing__detail-copy,
+.landing-pricing__footnote,
+.landing-pricing__secondary-note p,
+.landing-pricing__point-copy p,
+.landing-pricing__stack-copy p {
+  margin: 0;
+  color: #4d6477;
+  font-size: 0.96rem;
+  line-height: 1.58;
+}
+
+.landing-pricing__points,
+.landing-pricing__stack {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0;
+}
+
+.landing-pricing__point,
+.landing-pricing__stack-item {
+  display: grid;
+  align-items: start;
+  padding: 15px 0;
+  border-top: 1px solid #d9e4ec;
+}
+
+.landing-pricing__point:first-child,
+.landing-pricing__stack-item:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.landing-pricing__point {
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 12px;
+}
+
+.landing-pricing__point-icon,
+.landing-pricing__stack-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #bfd1dd;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(229, 238, 245, 0.98) 100%);
+  color: #1f5977;
+}
+
+.landing-pricing__point-icon svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.landing-pricing__point-copy,
+.landing-pricing__stack-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.landing-pricing__point-copy strong,
+.landing-pricing__stack-copy h4,
+.landing-pricing__secondary-note strong {
+  margin: 0;
+  color: #173c54;
+  font-size: 0.98rem;
+  line-height: 1.34;
+  font-weight: 700;
+}
+
+.landing-pricing__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sm-space-3);
+}
+
+.landing-pricing__actions a {
+  text-decoration: none;
+}
+
+.landing-pricing__footnote,
+.landing-pricing__secondary-note {
+  padding-top: var(--sm-space-3);
+  border-top: 1px solid #d7e3eb;
+}
+
+.landing-pricing__stack-item {
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 14px;
+}
+
+.landing-pricing__stack-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border-color: #b7cad8;
+  color: #1c4a66;
+}
+
+.landing-pricing__stack-icon svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (max-width: 1080px) {
+  .landing-pricing {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-pricing__primary h3,
+  .landing-pricing__secondary h3 {
+    max-width: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .landing-pricing__primary,
+  .landing-pricing__secondary {
+    padding: 18px;
+    gap: 14px;
+  }
+
+  .landing-pricing__lead,
+  .landing-pricing__detail-copy,
+  .landing-pricing__footnote,
+  .landing-pricing__secondary-note p,
+  .landing-pricing__point-copy p,
+  .landing-pricing__stack-copy p {
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+
+  .landing-pricing__primary h3 {
+    font-size: 1.18rem;
+  }
+
+  .landing-pricing__secondary h3 {
+    font-size: 1.12rem;
+  }
+
+  .landing-pricing__price {
+    font-size: 2.4rem;
+  }
+
+  .landing-pricing__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .landing-pricing__actions a {
+    display: block;
+  }
+
+  :host ::ng-deep .landing-pricing__actions .ui-button {
+    width: 100%;
+  }
+
+  .landing-pricing__point {
+    grid-template-columns: 32px minmax(0, 1fr);
+    gap: 10px;
+    padding: 14px 0;
+  }
+
+  .landing-pricing__point-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+  }
+
+  .landing-pricing__stack-item {
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 12px;
+    padding: 14px 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .landing-pricing__primary,
+  .landing-pricing__secondary {
+    padding: 16px;
+  }
+
+  .landing-pricing__price {
+    font-size: 2.18rem;
+  }
+}
+
+@media (max-width: 430px) {
+  .landing-pricing__primary h3,
+  .landing-pricing__secondary h3 {
+    font-size: 1.04rem;
+  }
+
+  .landing-pricing__price {
+    font-size: 2rem;
+  }
+
+  .landing-pricing__point-copy strong,
+  .landing-pricing__stack-copy h4 {
+    font-size: 0.94rem;
+  }
+
+  .landing-pricing__stack-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+}

@@ -1,0 +1,4 @@
+[
+  { "ParameterKey": "AccountUsersGroupName", "ParameterValue": "Users" },
+  { "ParameterKey": "AccessPolicyName", "ParameterValue": "users-account-wide-web-access" }
+]

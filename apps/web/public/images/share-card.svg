@@ -1,0 +1,44 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="84" y1="72" x2="1112" y2="602" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F4F7FA"/>
+      <stop offset="1" stop-color="#EAF1F6"/>
+    </linearGradient>
+    <linearGradient id="accentGlow" x1="878" y1="108" x2="1106" y2="370" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2B5F78" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#2B5F78" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" rx="36" fill="url(#bg)"/>
+  <circle cx="1036" cy="124" r="210" fill="url(#accentGlow)"/>
+  <circle cx="1038" cy="538" r="178" fill="#D9E5EE"/>
+  <circle cx="131" cy="552" r="132" fill="#DDE8F0"/>
+
+  <g opacity="0.55">
+    <path d="M895 151H1065C1074.94 151 1083 159.059 1083 169V286C1083 357.367 1030.69 404.951 970 423.726C909.311 404.951 857 357.367 857 286V169C857 159.059 865.059 151 875 151H895Z" fill="#E6EEF4"/>
+    <rect x="919" y="232" width="102" height="11" rx="5.5" fill="#C2D2DE"/>
+    <rect x="919" y="261" width="64" height="11" rx="5.5" fill="#C2D2DE"/>
+    <path d="M917 305L952 340L1027 260" stroke="#B4C7D4" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <g>
+    <path d="M96 132H146C148.209 132 150 133.791 150 136V161C150 176.054 138.948 186.094 126.333 190C113.718 186.094 102.667 176.054 102.667 161V136C102.667 133.791 104.457 132 106.667 132H96Z" fill="#0B3C5D"/>
+    <rect x="113" y="147" width="25" height="3" rx="1.5" fill="white" fill-opacity="0.82"/>
+    <rect x="113" y="155.5" width="16" height="3" rx="1.5" fill="white" fill-opacity="0.82"/>
+    <path d="M112.5 168L121 176.5L139.5 158" stroke="white" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <text x="174" y="165" fill="#0B3C5D" font-size="34" font-weight="700" letter-spacing="-0.68" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">ConveyMate</text>
+    <text x="174" y="193" fill="#425667" font-size="14" font-weight="700" letter-spacing="1.4" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">PREPARE WITH CONFIDENCE</text>
+  </g>
+
+  <text x="90" y="272" fill="#0B3C5D" font-size="58" font-weight="700" letter-spacing="-1.24" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">Prepare for your purchase</text>
+  <text x="90" y="338" fill="#0B3C5D" font-size="58" font-weight="700" letter-spacing="-1.24" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">with clarity and confidence</text>
+
+  <text x="90" y="402" fill="#425667" font-size="24" font-weight="500" letter-spacing="-0.24" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">Upload your contract pack, follow each review stage, and bring a</text>
+  <text x="90" y="437" fill="#425667" font-size="24" font-weight="500" letter-spacing="-0.24" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">structured brief to your solicitor or conveyancer before exchange.</text>
+
+  <rect x="90" y="493" width="88" height="2" fill="#B6C4D1"/>
+  <text x="90" y="539" fill="#172532" font-size="18" font-weight="700" letter-spacing="0.96" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">FOR AUSTRALIAN PROPERTY BUYERS</text>
+  <text x="90" y="575" fill="#425667" font-size="21" font-weight="500" letter-spacing="-0.21" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">Not legal advice. Prepare first, then confirm with your solicitor or conveyancer.</text>
+</svg>

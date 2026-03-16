@@ -1,0 +1,908 @@
+    <section class="sm-page-section">
+      <div class="sm-container page-grid">
+        <ui-page-header
+          title="New report"
+          description="Create a review, upload contract files, and track processing."
+          eyebrow="Report wizard"
+        ></ui-page-header>
+
+        <ui-stepper data-testid="new-report-stepper" [steps]="steps" [currentStepIndex]="currentStep()"></ui-stepper>
+
+        <section
+          class="sm-surface wizard-panel"
+          [class.wizard-panel--live-pipeline]="currentStep() === 3 && !awaitingPaymentConfirmation()"
+        >
+          @if (wizardError()) {
+            <ui-alert-banner tone="error" title="Action required" [message]="wizardError()"></ui-alert-banner>
+          }
+
+          @if (currentStep() === 0) {
+            <section class="wizard-step" [attr.data-step]="currentStep()" [attr.aria-busy]="stateConfigLoading()">
+              <h2 id="wizard-step-1-heading" tabindex="-1">Property basics</h2>
+              <p class="sm-muted">Provide the property details used to prepare this review.</p>
+
+              <div class="form-grid">
+                <ui-form-field
+                  class="form-grid__full-width"
+                  label="Property address"
+                  forId="propertyAddress"
+                  [required]="true"
+                  [error]="stepErrors().propertyAddress"
+                >
+                  <div class="address-autocomplete">
+                    <input
+                      id="propertyAddress"
+                      name="propertyAddress"
+                      type="text"
+                      inputmode="search"
+                      autocomplete="off"
+                      placeholder="e.g. 12 Smith Street, Sydney"
+                      [ngModel]="propertyAddress"
+                      (ngModelChange)="onPropertyAddressChanged($event)"
+                    />
+
+                    @if (addressLookupLoading() && !addressManualEntry()) {
+                      <p class="address-suggestion-status">Looking up address matches...</p>
+                    }
+
+                    @if (!addressManualEntry() && addressSuggestions().length > 0) {
+                      <ul class="address-suggestion-list" aria-label="Suggested addresses">
+                        @for (suggestion of addressSuggestions(); track suggestion.id) {
+                          <li>
+                            <button type="button" class="address-suggestion-button" (click)="applyAddressSuggestion(suggestion)">
+                              {{ suggestion.label }}
+                            </button>
+                          </li>
+                        }
+                      </ul>
+                    }
+
+                    <div class="address-manual-controls">
+                      <button type="button" class="address-manual-button" (click)="toggleManualAddressEntry()">
+                        {{ addressManualEntry() ? 'Use suggested lookup instead' : "Can't find it? Enter address manually" }}
+                      </button>
+
+                      @if (addressManualEntry()) {
+                        <p class="address-manual-hint">Manual entry is enabled. Type the full property address and continue.</p>
+                      }
+                    </div>
+                  </div>
+                </ui-form-field>
+
+                <ui-form-field label="Buyer type" forId="buyerType" [required]="true">
+                  <select id="buyerType" name="buyerType" [(ngModel)]="buyerType">
+                    <option value="owner-occupier">Owner-occupier</option>
+                    <option value="investor">Investor</option>
+                  </select>
+                </ui-form-field>
+
+                <ui-form-field label="State or territory" forId="stateOrTerritory" [required]="true" [error]="stepErrors().stateOrTerritory" hint="Only selected states are currently supported. Others are coming soon.">
+                  <select
+                    id="stateOrTerritory"
+                    name="stateOrTerritory"
+                    [ngModel]="stateOrTerritory"
+                    (ngModelChange)="onStateOrTerritoryChanged($event)"
+                  >
+                    @for (state of supportedStates(); track state) {
+                      <option [value]="state" [disabled]="!isStateEnabled(state)">
+                        {{ toStateLabel(state) }}
+                      </option>
+                    }
+                  </select>
+                </ui-form-field>
+                <ui-form-field label="Are you a first home buyer?" forId="isFirstHomeBuyer" [required]="true" [error]="stepErrors().isFirstHomeBuyer" hint="Helps check first home buyer grant and stamp duty concession eligibility.">
+                  <select
+                    id="isFirstHomeBuyer"
+                    name="isFirstHomeBuyer"
+                    [ngModel]="isFirstHomeBuyer"
+                    (ngModelChange)="onFirstHomeBuyerChanged($event)"
+                  >
+                    <option [ngValue]="null">Select an option</option>
+                    <option [ngValue]="true">Yes</option>
+                    <option [ngValue]="false">No</option>
+                  </select>
+                </ui-form-field>
+
+                <ui-form-field label="Do you want concession checks included?" forId="concessionIntent" hint="ConveyMate checks whether you may qualify for stamp duty concessions in your state.">
+                  <select id="concessionIntent" name="concessionIntent" [(ngModel)]="concessionIntent">
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                    <option value="unsure">Unsure</option>
+                  </select>
+                </ui-form-field>
+
+                <ui-form-field label="Has this contract exchanged?" forId="contractExchanged" [required]="true" [error]="stepErrors().contractExchanged" hint="Exchanged means both parties have signed and swapped contracts. If unsure, select No.">
+                  <select
+                    id="contractExchanged"
+                    name="contractExchanged"
+                    [ngModel]="contractExchanged"
+                    (ngModelChange)="onContractExchangedChanged($event)"
+                  >
+                    <option [ngValue]="null">Select an option</option>
+                    <option [ngValue]="true">Yes</option>
+                    <option [ngValue]="false">No</option>
+                  </select>
+                </ui-form-field>
+
+                @if (contractExchanged === true) {
+                  <ui-form-field label="Agreed purchase price (AUD)" forId="agreedPriceAud" [required]="true" [error]="stepErrors().agreedPriceAud">
+                    <input
+                      id="agreedPriceAud"
+                      name="agreedPriceAud"
+                      type="text"
+                      inputmode="decimal"
+                      [ngModel]="agreedPriceAud"
+                      (ngModelChange)="onAgreedPriceChanged($event)"
+                      placeholder="e.g. 850,000"
+                    />
+                  </ui-form-field>
+                } @else if (contractExchanged === false) {
+                  <ui-form-field
+                    label="Estimated purchase price (AUD)"
+                    forId="estimatedPriceAud"
+                    [error]="stepErrors().estimatedPriceAud"
+                  >
+                    <input
+                      id="estimatedPriceAud"
+                      name="estimatedPriceAud"
+                      type="text"
+                      inputmode="decimal"
+                      [ngModel]="estimatedPriceAud"
+                      (ngModelChange)="onEstimatedPriceChanged($event)"
+                      placeholder="Optional estimate"
+                    />
+                  </ui-form-field>
+                }
+
+                @if (stateConfigLoading()) {
+                  <div class="inline-skeleton form-grid__full-width" role="status" aria-live="polite">
+                    <span class="inline-skeleton-line"></span>
+                    <span class="inline-skeleton-line short"></span>
+                  </div>
+                }
+
+                @if (stateConfigError()) {
+                  <ui-alert-banner
+                    class="form-grid__full-width"
+                    tone="warn"
+                    title="Jurisdiction configuration"
+                    [message]="stateConfigError()"
+                  ></ui-alert-banner>
+                }
+              </div>
+            </section>
+          }
+
+          @if (currentStep() === 1) {
+            <section class="wizard-step" [attr.data-step]="currentStep()">
+              <div class="wizard-step-title-row">
+                <h2 id="wizard-step-2-heading" tabindex="-1">Upload documents</h2>
+                <button type="button" class="upload-help-trigger" (click)="openUploadHelpModal()">Need help?</button>
+              </div>
+
+              <p class="sm-muted">Add PDF files. {{ uploadLimitSummary }} Files are uploaded and locked before payment starts.</p>
+
+              @if (!uploadsPrepared()) {
+                <ui-file-dropzone (filesDropped)="onFilesSelected($event)"></ui-file-dropzone>
+              } @else {
+                <ui-alert-banner
+                  tone="success"
+                  title="Uploads complete"
+                  message="Files have been uploaded and locked for this review. Continue to payment."
+                ></ui-alert-banner>
+              }
+
+              @if (uploadError()) {
+                <ui-alert-banner tone="warn" title="Upload note" [message]="uploadError()"></ui-alert-banner>
+              }
+
+              <div class="upload-list">
+                @if ((uploads$ | async)?.length === 0) {
+                  <p class="sm-muted">No files added yet.</p>
+                } @else {
+                  <table>
+                    <caption class="sm-sr-only">
+                      Uploaded files
+                    </caption>
+                    <thead>
+                      <tr>
+                        <th scope="col">File</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Progress</th>
+                        <th scope="col">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (item of (uploads$ | async) ?? []; track item.id) {
+                        <tr>
+                          <td>
+                            <p class="file-name">{{ item.fileName }}</p>
+                            <p class="file-meta">{{ formatBytes(item.fileSizeBytes) }}</p>
+                            @if (item.errorMessage) {
+                              <p class="file-error">{{ item.errorMessage }}</p>
+                            }
+                          </td>
+                          <td>{{ uploadStatusLabel(item.status) }}</td>
+                          <td>{{ item.progressPercent }}%</td>
+                          <td>
+                            <ui-button variant="tertiary" [disabled]="processingActive() || uploadsPrepared()" (pressed)="removeUpload(item)">
+                              Remove
+                            </ui-button>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                }
+              </div>
+            </section>
+          }
+
+          @if (currentStep() === 2) {
+            <section class="wizard-step review-step" [attr.data-step]="currentStep()">
+              <h2 id="wizard-step-3-heading" tabindex="-1">Review and confirm</h2>
+              <p class="sm-muted">Check the details below before opening secure checkout.</p>
+
+              <section class="review-summary-strip" aria-label="Review summary">
+                <div class="review-summary-strip-primary">
+                  <p class="review-summary-strip-label">Property</p>
+                  <p class="review-summary-strip-value">{{ propertyAddress || 'Not provided' }}</p>
+                </div>
+                <div class="review-summary-strip-secondary">
+                  <p class="review-summary-strip-label">Review fee</p>
+                  <p class="review-summary-strip-price">{{ priceLabel() }}</p>
+                </div>
+              </section>
+
+              <dl class="review-list">
+                <div>
+                  <dt>Buyer type</dt>
+                  <dd>{{ buyerTypeLabel() }}</dd>
+                </div>
+                <div>
+                  <dt>State</dt>
+                  <dd>{{ stateOrTerritory ? toStateLabel(stateOrTerritory) : 'Not provided' }}</dd>
+                </div>
+                <div>
+                  <dt>First home buyer</dt>
+                  <dd>{{ isFirstHomeBuyer === null ? 'Not provided' : isFirstHomeBuyer ? 'Yes' : 'No' }}</dd>
+                </div>
+                <div>
+                  <dt>Concession checks</dt>
+                  <dd>{{ toConcessionIntentLabel(concessionIntent) }}</dd>
+                </div>
+                <div>
+                  <dt>Contract exchanged</dt>
+                  <dd>{{ contractExchanged === null ? 'Not provided' : contractExchanged ? 'Yes' : 'No' }}</dd>
+                </div>
+                <div>
+                  <dt>Price context</dt>
+                  <dd>{{ reviewPriceSummary() }}</dd>
+                </div>
+              </dl>
+
+              <section class="disclaimer-card" aria-labelledby="disclaimer-title">
+                <div class="disclaimer-card-head">
+                  <div>
+                    <h3 id="disclaimer-title">Disclaimer acknowledgement</h3>
+                    <p class="sm-muted">Reports support preparation and do not replace legal advice.</p>
+                  </div>
+                  <span class="review-acknowledgement-chip" [class.is-complete]="acceptedDisclaimer">
+                    {{ acceptedDisclaimer ? 'Accepted' : 'Required' }}
+                  </span>
+                </div>
+                <a class="disclaimer-link" [attr.href]="siteUrls.marketingHref('/legal/disclaimer')" target="_blank" rel="noopener noreferrer">
+                  Open website disclaimer
+                </a>
+                <label class="checkbox-row checkbox-row--prominent">
+                  <input id="acceptedDisclaimer" type="checkbox" [(ngModel)]="acceptedDisclaimer" name="acceptedDisclaimer" />
+                  <span>I acknowledge this disclaimer and want to continue to payment.</span>
+                </label>
+                @if (disclaimerAcceptedAtUtc()) {
+                  <p class="disclaimer-audit">
+                    Last accepted {{ formatUtcTimestamp(disclaimerAcceptedAtUtc()) }} · Version {{ disclaimerVersion() }}
+                  </p>
+                }
+              </section>
+            </section>
+          }
+
+          @if (currentStep() === 3) {
+            <section class="wizard-step running-step" [attr.data-step]="currentStep()">
+              <div class="running-step-header">
+                <div>
+                  <h2 id="wizard-step-4-heading" tabindex="-1">Report pipeline</h2>
+                  <p class="sm-muted">{{ stepFourIntroText() }}</p>
+                </div>
+
+                @if (awaitingPaymentConfirmation()) {
+                  <p class="running-step-badge">Checkout required</p>
+                } @else if (processingComplete()) {
+                  <p class="running-step-badge is-complete">Report ready</p>
+                } @else if (pipelineStatusIsFailed()) {
+                  <p class="running-step-badge is-failed">Needs attention</p>
+                }
+              </div>
+
+              @if (pipelineModelError()) {
+                <ui-alert-banner tone="warn" title="Pipeline model" [message]="pipelineModelError()"></ui-alert-banner>
+              }
+
+              @if (processingComplete() && createdReportId()) {
+                <section class="running-step-complete-actions" aria-labelledby="running-step-complete-title">
+                  <div class="running-step-complete-summary">
+                    <div class="running-step-complete-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" focusable="false">
+                        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"></circle>
+                        <path d="M8.5 12.2 10.8 14.5 15.7 9.6" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path>
+                      </svg>
+                    </div>
+
+                    <div class="running-step-complete-copy">
+                      <p class="phase-kicker running-step-complete-kicker">Processing complete</p>
+                      <h3 id="running-step-complete-title">Open your finished report</h3>
+                      <p class="running-step-complete-description">
+                        Your review is ready. Jump straight into the buyer summary, risk tabs, and PDF download without scrolling through the wizard again.
+                      </p>
+
+                      <ul class="running-step-complete-highlights" aria-label="Report ready highlights">
+                        <li>Buyer-ready summary</li>
+                        <li>Tabbed report review</li>
+                        <li>PDF download available</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div class="running-step-complete-cta">
+                    <a [routerLink]="['/reports', createdReportId()]">
+                      <ui-button>Open report</ui-button>
+                    </a>
+                    <p class="running-step-complete-note">This takes you straight to the final report page.</p>
+                  </div>
+                </section>
+              }
+
+              @if (awaitingPaymentConfirmation()) {
+                <section class="payment-launcher" aria-live="polite">
+                  <div class="payment-launcher-summary">
+                    <p class="phase-kicker">Secure checkout</p>
+                    <h3>Start this report</h3>
+                    <p class="payment-price-line">{{ priceLabel() }}</p>
+                    <p class="payment-copy">
+                      Payment confirmation moves this job into the worker queue. You stay on this page and see the pipeline update live.
+                    </p>
+                  </div>
+
+                  @if (paymentSessionPreparing()) {
+                    <div class="payment-boot-skeleton" role="status" aria-live="polite">
+                      <div class="payment-skeleton-row"></div>
+                      <div class="payment-skeleton-row short"></div>
+                      <p class="sm-muted">Preparing secure checkout...</p>
+                    </div>
+                  } @else if (!paymentFormReady()) {
+                    <ui-alert-banner
+                      tone="warn"
+                      title="Payment setup required"
+                      message="Secure checkout is not ready yet. Retry setup to continue."
+                    ></ui-alert-banner>
+                  } @else {
+                    <p class="sm-muted">Secure checkout is ready. Apple Pay, Google Pay, Link, and card options appear where supported.</p>
+                  }
+
+                  <div id="sm-stripe-payment-element-stage" class="payment-element-stage" aria-hidden="true"></div>
+
+                  <div class="payment-launcher-actions">
+                    @if (canOpenPaymentModal()) {
+                      <ui-button
+                        [disabled]="paymentActionInFlight()"
+                        (pressed)="openPaymentModal()"
+                      >
+                        {{ paymentModalOpen() ? 'Checkout open' : 'Open secure checkout' }}
+                      </ui-button>
+                    } @else if (!paymentSessionPreparing()) {
+                      <ui-button [disabled]="paymentActionInFlight()" (pressed)="retryPaymentSetup()">
+                        Restore secure checkout
+                      </ui-button>
+                    }
+                  </div>
+                </section>
+                <section class="pipeline-preview-shell" aria-labelledby="pipeline-preview-title">
+                  <div class="pipeline-preview-copy">
+                    <p class="phase-kicker">After payment</p>
+                    <h3 id="pipeline-preview-title">The pipeline starts automatically</h3>
+                    <p class="sm-muted">Stages unlock one by one, and the latest backend update stays visible here.</p>
+                  </div>
+
+                  <ol class="pipeline-preview-list" [style.--preview-stage-count]="pipelinePreviewStages().length">
+                    @for (stage of pipelinePreviewStages(); track stage.id; let index = $index; let isLast = $last) {
+                      <li class="pipeline-preview-item" [class.is-last]="isLast">
+                        <span class="pipeline-preview-glyph" aria-hidden="true">{{ index + 1 }}</span>
+                        <div class="pipeline-preview-item-copy">
+                          <p class="pipeline-preview-phase">{{ stage.phase }} phase</p>
+                          <p class="pipeline-preview-title">{{ stage.label }}</p>
+                          <p class="pipeline-preview-description">{{ stage.description }}</p>
+                        </div>
+                      </li>
+                    }
+                  </ol>
+                </section>
+              } @else {
+                <section
+                  class="pipeline-live-shell"
+                  aria-label="Report pipeline"
+                  [class.is-complete]="processingComplete()"
+                  [class.is-failed]="pipelineStatusIsFailed()"
+                >
+                  <header class="pipeline-live-header">
+                    <div>
+                      <p class="phase-kicker">Report reference {{ reportReferenceLabel() }}</p>
+                      <h3>{{ propertyAddress || 'Residential contract review' }}</h3>
+                    </div>
+                    <p class="pipeline-status-chip" [class]="pipelineStatusChipClass()">{{ pipelineStatusLabel() }}</p>
+                  </header>
+
+                  <div class="pipeline-live-grid">
+                    <article
+                      class="pipeline-stage-hero"
+                      [class.is-complete]="processingComplete()"
+                      [class.is-failed]="pipelineStatusIsFailed()"
+                      [class.is-queued]="pipelineStatusLabel() === 'Queued'"
+                    >
+                      <div class="pipeline-stage-hero-head">
+                        <span class="pipeline-live-orb" aria-hidden="true"></span>
+                        <div>
+                          <h4>{{ pipelineHeroTitle() }}</h4>
+                        </div>
+                      </div>
+
+                      <p class="pipeline-hero-copy">{{ pipelineHeroCopy() }}</p>
+
+                      @if (pipelineHeroDetail()) {
+                        <p class="pipeline-hero-detail">{{ pipelineHeroDetail() }}</p>
+                      }
+
+                      <div class="progress-wrap" role="status" aria-live="polite">
+                        <div class="progress-track">
+                          <div class="progress-fill" [style.width.%]="processingPercent()"></div>
+                        </div>
+                        <div class="progress-summary">
+                          <p class="progress-label">{{ processingPercent() }}% complete</p>
+                          <p class="progress-meta">Last update {{ relativeTime(pipelineLastUpdatedUtc()) }} · {{ etaLabel() }}</p>
+                        </div>
+                      </div>
+
+                      <dl class="pipeline-summary-strip">
+                        <div class="pipeline-signal-item">
+                          <dt>Stages</dt>
+                          <dd>{{ completedStageSummary() }}</dd>
+                        </div>
+                        <div class="pipeline-signal-item">
+                          <dt>Elapsed</dt>
+                          <dd>{{ pipelineElapsedLabel() }}</dd>
+                        </div>
+                        <div class="pipeline-signal-item">
+                          <dt>Next</dt>
+                          <dd>{{ nextStageLabel() }}</dd>
+                        </div>
+                      </dl>
+                    </article>
+
+                    <aside class="pipeline-monitor-panel" aria-labelledby="pipeline-monitor-title">
+                      <div class="pipeline-monitor-header">
+                        <div>
+                          <p class="phase-kicker">Latest updates</p>
+                          <h4 id="pipeline-monitor-title">Recent activity</h4>
+                        </div>
+                      </div>
+
+                      @if (recentActivityEvents().length === 0) {
+                        <p class="pipeline-monitor-empty">New worker updates appear here automatically as the report moves through each stage.</p>
+                      } @else {
+                        <ol class="pipeline-monitor-list">
+                          @for (item of recentActivityEvents(); track item.id; let isLatest = $first) {
+                            <li
+                              class="pipeline-monitor-item"
+                              [class.is-latest]="isLatest"
+                              [class.is-warning]="item.severity === 'warning'"
+                              [class.is-error]="item.severity === 'error'"
+                            >
+                              <p class="pipeline-monitor-time">{{ activityTimestamp(item.timestampUtc) }}</p>
+                              <p class="pipeline-monitor-message">{{ item.message }}</p>
+                            </li>
+                          }
+                        </ol>
+                      }
+
+                      <button type="button" class="activity-toggle activity-toggle--monitor" (click)="toggleActivityPanel()">
+                        {{ activityExpanded() ? 'Hide full log' : 'Show full log' }}
+                      </button>
+                    </aside>
+                  </div>
+
+                  <section class="pipeline-roadmap-shell" aria-labelledby="pipeline-stage-title">
+                    <div class="pipeline-section-heading">
+                      <h4 id="pipeline-stage-title">Stages</h4>
+                      <p class="pipeline-flow-summary">{{ completedStageSummary() }}</p>
+                    </div>
+
+                    <div class="pipeline-stage-scroll" role="presentation">
+                      <ol class="pipeline-stage-flow" [style.--stage-count]="processingStages().length">
+                        @for (stage of processingStages(); track stage.id; let index = $index; let isLast = $last) {
+                        <li
+                          class="pipeline-stage-node"
+                          [class.is-focused]="isFocusedProcessingStage(stage)"
+                          [class.is-running]="stage.state === 'running' || stage.state === 'retrying'"
+                          [class.is-complete]="stage.state === 'complete'"
+                          [class.is-warning]="stage.state === 'warning'"
+                          [class.is-failed]="stage.state === 'failed'"
+                          [class.is-last]="isLast"
+                        >
+                          <div class="pipeline-stage-marker">
+                            <span class="pipeline-stage-badge" aria-hidden="true">
+                              @if (stage.state === 'complete' || stage.state === 'failed' || stage.state === 'warning' || stage.state === 'retrying') {
+                                {{ stageGlyph(stage.state) }}
+                              } @else {
+                                {{ index + 1 }}
+                              }
+                            </span>
+                          </div>
+
+                          <div class="pipeline-stage-card">
+                            <div class="pipeline-stage-head">
+                              <p class="pipeline-stage-title">{{ stage.label }}</p>
+                              @if (
+                                isFocusedProcessingStage(stage) ||
+                                stage.state === 'running' ||
+                                stage.state === 'retrying' ||
+                                stage.state === 'warning' ||
+                                stage.state === 'failed'
+                              ) {
+                                <p class="pipeline-stage-meta">{{ stage.phase }} phase</p>
+                              }
+                            </div>
+                            <p class="pipeline-stage-state">{{ stageStateLabel(stage.state) }}</p>
+                          </div>
+                        </li>
+                        }
+                      </ol>
+                    </div>
+                  </section>
+
+                  @if (activityExpanded()) {
+                    <section class="activity-panel" aria-labelledby="activity-title">
+                      <div class="activity-header">
+                        <div class="activity-header-copy">
+                          <h4 id="activity-title">Full activity log</h4>
+                          <p class="sm-muted">{{ latestActivityMessage() }}</p>
+                        </div>
+                      </div>
+                      <div #activityScrollRegion class="activity-scroll-region" role="log" aria-live="polite">
+                        @if (activityEvents().length === 0) {
+                          <p class="sm-muted">No activity yet. Updates will appear here automatically.</p>
+                        } @else {
+                          <ol class="activity-list">
+                            @for (item of activityEvents(); track item.id) {
+                              <li class="activity-item" [class.is-warning]="item.severity === 'warning'" [class.is-error]="item.severity === 'error'">
+                                <p class="activity-item-time">{{ activityTimestamp(item.timestampUtc) }}</p>
+                                <div class="activity-item-content">
+                                  <p class="activity-item-message">{{ item.message }}</p>
+                                  @if (item.technicalDetails) {
+                                    <details class="activity-item-technical">
+                                      <summary>Technical details</summary>
+                                      <pre>{{ item.technicalDetails }}</pre>
+                                    </details>
+                                  }
+                                </div>
+                              </li>
+                            }
+                          </ol>
+                        }
+                      </div>
+                    </section>
+                  }
+                </section>
+              }
+
+              @if (pipelineStatusIsFailed()) {
+                <article class="pipeline-failure-card" role="alert" aria-live="assertive">
+                  <div class="pipeline-failure-header">
+                    <p class="pipeline-failure-kicker">Processing issue</p>
+                    <h4>Processing could not be completed</h4>
+                  </div>
+                  <p class="pipeline-failure-message">{{ failureSummaryMessage() }}</p>
+                  <p class="pipeline-failure-guidance">{{ failureGuidanceMessage() }}</p>
+                  <div class="pipeline-failure-actions">
+                    <a class="support-link" [attr.href]="failureSupportMailto()">Contact support</a>
+                  </div>
+                  <details class="pipeline-failure-technical">
+                    <summary>Technical details</summary>
+                    <pre>{{ failureTechnicalDetails() }}</pre>
+                  </details>
+                </article>
+              }
+
+            </section>
+          }
+
+          @if (uploadHelpModalOpen()) {
+            <div class="upload-help-popover" role="presentation" (click)="onUploadHelpBackdropPressed($event)">
+              <section
+                #uploadHelpModal
+                class="upload-help-modal"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="upload-help-modal-title"
+                (keydown)="onUploadHelpModalKeydown($event)"
+              >
+                <div class="upload-help-header">
+                  <h3 id="upload-help-modal-title">What to upload for the best results</h3>
+                  <button #uploadHelpCloseButton type="button" class="upload-help-close" (click)="closeUploadHelpModal()">Close</button>
+                </div>
+
+                <p class="sm-muted">
+                  Upload complete PDF copies of your property pack. {{ uploadLimitSummary }} The more complete and readable the documents are, the more
+                  accurate the report will be.
+                </p>
+
+                <div class="upload-help-content">
+                  <h4>Priority documents (PDF)</h4>
+                  <ul>
+                    <li>Contract of sale (full version, including particulars pages)</li>
+                    <li>Special conditions, annexures, schedules, and signed variations</li>
+                    <li>Title search and plan documents (easements, caveats, encumbrances)</li>
+                    <li>Rates, water, and outgoings notices</li>
+                    <li>Building and pest reports (if available)</li>
+                    <li>For units/apartments: strata report, levy schedule, minutes, and by-laws</li>
+                  </ul>
+
+                  <h4>Quality rules that improve accuracy</h4>
+                  <ul>
+                    <li>Use digital text PDFs where possible (not photos of pages).</li>
+                    <li>If scans are unavoidable, use high contrast, straight pages, and at least 300 DPI.</li>
+                    <li>Upload full documents with all pages; do not crop margins, schedules, or signatures.</li>
+                    <li>Keep one logical document per file and use clear file names.</li>
+                    <li>Avoid password-protected or locked PDFs.</li>
+                  </ul>
+
+                  <p class="upload-help-note">
+                    ConveyMate extracts text, builds embeddings, and retrieves evidence by semantic similarity. Cleaner, complete PDFs improve retrieval
+                    quality, reduce missing fields, and lower confusing output.
+                  </p>
+                </div>
+              </section>
+            </div>
+          }
+
+          @if (failedJobDialogOpen()) {
+            <div class="upload-help-popover failure-dialog-popover" role="presentation" (click)="onFailedJobBackdropPressed($event)">
+              <section
+                class="upload-help-modal failure-modal failure-dialog-modal"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="failure-modal-title"
+                aria-describedby="failure-modal-description"
+                (keydown)="onFailedJobDialogKeydown($event)"
+              >
+                <div class="upload-help-header failure-dialog-header">
+                  <div>
+                    <p class="failure-dialog-eyebrow">Pipeline failure</p>
+                    <h3 id="failure-modal-title">Please don’t panic</h3>
+                  </div>
+                  <button #failedJobCloseButton type="button" class="upload-help-close" (click)="closeFailedJobDialog()">
+                    Close
+                  </button>
+                </div>
+
+                <div class="failure-dialog-body">
+                  <p id="failure-modal-description" class="failure-dialog-lead">
+                    We’re sorry. A ConveyMate engineer has already been notified and will investigate this failed run.
+                  </p>
+                  <p class="failure-dialog-copy">
+                    If we confirm a pipeline failure, we’ll issue a refund as appropriate.
+                  </p>
+                  <p class="failure-dialog-copy">{{ failureGuidanceMessage() }}</p>
+                  <p class="failure-dialog-reference">Reference {{ reportReferenceLabel() }}</p>
+
+                  <div class="failure-dialog-actions">
+                    <ui-button variant="secondary" (pressed)="closeFailedJobDialog()">Close</ui-button>
+                  </div>
+                </div>
+              </section>
+            </div>
+          }
+
+          <div class="wizard-actions">
+            <ui-button variant="secondary" [disabled]="currentStep() === 0 || processingActive()" (pressed)="goBack()">Back</ui-button>
+
+            @if (currentStep() < 2) {
+              <ui-button [disabled]="!canProceedCurrentStep() || processingActive()" (pressed)="goNext()">
+                {{ currentStep() === 1 && processingActive() ? 'Uploading...' : 'Next' }}
+              </ui-button>
+            }
+
+            @if (currentStep() === 2) {
+              <ui-button data-testid="new-report-submit-cta" [disabled]="!canProceedCurrentStep() || processingActive()" (pressed)="submitAndProcess()">
+                {{ processingActive() ? 'Submitting...' : 'Submit and continue to payment' }}
+              </ui-button>
+            }
+
+            @if (currentStep() === 3) {
+              <a routerLink="/dashboard">
+                <ui-button variant="secondary">Return to dashboard</ui-button>
+              </a>
+            }
+          </div>
+        </section>
+
+        @if (awaitingPaymentConfirmation() && paymentModalOpen()) {
+          <div class="payment-modal-backdrop" role="presentation" (click)="onPaymentBackdropPressed($event)">
+            <section
+              #paymentModal
+              class="payment-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="payment-modal-title"
+              aria-describedby="payment-modal-description"
+              (keydown)="onPaymentModalKeydown($event)"
+            >
+              <div class="payment-modal-header">
+                <div class="payment-modal-header-copy">
+                  <p class="payment-modal-eyebrow">Secure checkout</p>
+                  <h3 id="payment-modal-title">Complete payment</h3>
+                  <p id="payment-modal-description" class="payment-modal-copy">
+                    Stripe securely handles payment details. Once payment is confirmed, ConveyMate starts this review immediately.
+                  </p>
+                </div>
+                <button
+                  #paymentCloseButton
+                  type="button"
+                  class="payment-modal-close"
+                  [disabled]="paymentActionInFlight() || paymentModalRendering()"
+                  (click)="closePaymentModal()"
+                >
+                  Close
+                </button>
+              </div>
+
+              <div class="payment-modal-body">
+                <section class="payment-summary-panel" aria-label="Order summary">
+                  <div class="payment-summary-background" aria-hidden="true">
+                    <svg class="payment-summary-illustration" viewBox="0 0 360 250" focusable="false">
+                      <defs>
+                        <radialGradient id="paymentSummaryGlowA" cx="50%" cy="50%" r="50%">
+                          <stop offset="0%" stop-color="#bdd4e4" stop-opacity="0.74" />
+                          <stop offset="68%" stop-color="#dfeaf2" stop-opacity="0.18" />
+                          <stop offset="100%" stop-color="#dfeaf2" stop-opacity="0" />
+                        </radialGradient>
+                        <radialGradient id="paymentSummaryGlowB" cx="50%" cy="50%" r="50%">
+                          <stop offset="0%" stop-color="#d4e5ef" stop-opacity="0.62" />
+                          <stop offset="68%" stop-color="#ebf2f7" stop-opacity="0.14" />
+                          <stop offset="100%" stop-color="#ebf2f7" stop-opacity="0" />
+                        </radialGradient>
+                      </defs>
+
+                      <circle cx="246" cy="78" r="94" fill="url(#paymentSummaryGlowA)" />
+                      <circle cx="278" cy="156" r="74" fill="url(#paymentSummaryGlowB)" />
+
+                      <g class="payment-illustration__mesh">
+                        <path d="M24 160c42-24 92-28 146-10 54 18 112 24 174-8" />
+                        <path d="M48 198c48-18 94-18 142 2 48 20 96 24 148-6" />
+                        <path d="M112 54c40-14 80-10 116 8 38 18 78 26 126 14" />
+                      </g>
+
+                      <g class="payment-illustration__ring payment-illustration__ring--outer">
+                        <circle cx="244" cy="96" r="62" />
+                        <circle cx="244" cy="96" r="94" />
+                        <circle cx="244" cy="96" r="126" />
+                      </g>
+
+                      <g class="payment-illustration__ring payment-illustration__ring--inner">
+                        <circle cx="180" cy="160" r="42" />
+                        <circle cx="180" cy="160" r="68" />
+                      </g>
+
+                      <g transform="translate(126 40)">
+                        <rect x="10" y="16" width="116" height="146" rx="20" class="payment-illustration__sheet-shadow" />
+                        <rect x="0" y="0" width="116" height="146" rx="20" class="payment-illustration__sheet" />
+                        <rect x="18" y="20" width="54" height="8" rx="4" class="payment-illustration__line payment-illustration__line--strong" />
+                        <rect x="18" y="40" width="80" height="6" rx="3" class="payment-illustration__line" />
+                        <rect x="18" y="54" width="72" height="6" rx="3" class="payment-illustration__line" />
+                        <rect x="18" y="82" width="82" height="28" rx="10" class="payment-illustration__panel" />
+                        <rect x="18" y="122" width="46" height="6" rx="3" class="payment-illustration__line" />
+                        <rect x="18" y="134" width="64" height="6" rx="3" class="payment-illustration__line" />
+                        <circle cx="92" cy="118" r="16" class="payment-illustration__badge" />
+                        <path d="m85 118 5 5 10-12" class="payment-illustration__badge-mark" />
+                      </g>
+
+                      <g transform="translate(234 118) rotate(8)">
+                        <rect x="8" y="12" width="84" height="104" rx="16" class="payment-illustration__sheet-shadow" />
+                        <rect x="0" y="0" width="84" height="104" rx="16" class="payment-illustration__sheet payment-illustration__sheet--soft" />
+                        <rect x="14" y="18" width="34" height="6" rx="3" class="payment-illustration__line payment-illustration__line--strong" />
+                        <rect x="14" y="34" width="52" height="5" rx="2.5" class="payment-illustration__line" />
+                        <rect x="14" y="46" width="44" height="5" rx="2.5" class="payment-illustration__line" />
+                        <rect x="14" y="66" width="52" height="18" rx="8" class="payment-illustration__panel payment-illustration__panel--soft" />
+                      </g>
+                    </svg>
+                  </div>
+
+                  <div class="payment-summary-shell">
+                    <p class="payment-provider-chip">Secure payment processing by Stripe</p>
+
+                    <div class="payment-summary-copy-block">
+                      <p class="payment-summary-kicker">Review queued</p>
+                      <h4>One secure step before the pipeline starts</h4>
+                      <p class="payment-summary-supporting">
+                        Complete payment once, then ConveyMate allocates the review, extracts the contract, and assembles the final report.
+                      </p>
+                    </div>
+
+                    <section class="payment-summary-details" aria-label="Review summary">
+                      <div class="payment-summary-primary">
+                        <p class="payment-summary-label">Amount due</p>
+                        <p class="payment-summary-amount">{{ priceLabel() }}</p>
+                        <p class="payment-summary-supporting">One-time payment for this contract review.</p>
+                      </div>
+
+                      <dl class="payment-summary-meta">
+                        <div>
+                          <dt>Reference</dt>
+                          <dd>{{ reportReferenceLabel() }}</dd>
+                        </div>
+                        <div>
+                          <dt>Property</dt>
+                          <dd>{{ propertyAddress || 'Residential contract review' }}</dd>
+                        </div>
+                      </dl>
+                    </section>
+
+                    <ol class="payment-summary-rail" aria-label="What happens after payment">
+                      <li>Payment clears</li>
+                      <li>Worker capacity is assigned</li>
+                      <li>The AI review and report begin</li>
+                    </ol>
+                  </div>
+                </section>
+
+                <section class="payment-checkout-panel" aria-label="Payment details">
+                  <div class="payment-checkout-header">
+                    <div class="payment-checkout-copy">
+                      <p class="payment-checkout-title">Payment details</p>
+                      <p class="payment-checkout-subtitle">Card and wallet options load in the secure Stripe form below.</p>
+                    </div>
+                  </div>
+
+                  <div class="payment-element-shell" [class.is-loading]="paymentModalRendering()">
+                    @if (paymentModalRendering()) {
+                      <div class="payment-element-loading" role="status" aria-live="polite">
+                        <span class="payment-loading-dot" aria-hidden="true"></span>
+                        <span>Preparing secure checkout...</span>
+                      </div>
+                    }
+                    <div id="sm-stripe-payment-element-modal" class="payment-element" [class.is-hidden]="paymentModalRendering()"></div>
+                  </div>
+
+                  @if (paymentError()) {
+                    <ui-alert-banner tone="error" title="Payment failed" [message]="paymentError()"></ui-alert-banner>
+                  }
+
+                  <ul class="payment-assurance-list" aria-label="Checkout assurances">
+                    <li>Encrypted checkout</li>
+                    <li>Stay on ConveyMate</li>
+                    <li>Processing starts after confirmation</li>
+                  </ul>
+
+                  <div class="payment-actions">
+                    <ui-button
+                      [disabled]="paymentActionInFlight() || paymentModalRendering() || !paymentFormReady()"
+                      (pressed)="confirmPaymentAndStartPipeline()"
+                    >
+                      {{ paymentActionInFlight() ? 'Confirming payment...' : 'Pay ' + priceLabel() + ' and start analysis' }}
+                    </ui-button>
+                  </div>
+                </section>
+              </div>
+            </section>
+          </div>
+        }
+      </div>
+    </section>

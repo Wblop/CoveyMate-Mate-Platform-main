@@ -1,0 +1,23 @@
+[
+  { "ParameterKey": "EnvironmentName", "ParameterValue": "www" },
+  { "ParameterKey": "AppName", "ParameterValue": "conveymate" },
+  { "ParameterKey": "DomainName", "ParameterValue": "conveymate.com.au" },
+  { "ParameterKey": "AppDomainName", "ParameterValue": "app.conveymate.com.au" },
+  { "ParameterKey": "HostedZoneId", "ParameterValue": "REPLACE_WITH_ROUTE53_HOSTED_ZONE_ID" },
+  { "ParameterKey": "CloudFrontCertificateArn", "ParameterValue": "replace-with-cloudfront-certificate-arn" },
+  { "ParameterKey": "ApiImageUri", "ParameterValue": "replace-with-api-image-uri" },
+  { "ParameterKey": "DesiredCount", "ParameterValue": "1" },
+  { "ParameterKey": "TaskCpu", "ParameterValue": "512" },
+  { "ParameterKey": "TaskMemory", "ParameterValue": "1024" },
+  { "ParameterKey": "ApiContainerPort", "ParameterValue": "8081" },
+  { "ParameterKey": "LogRetentionInDays", "ParameterValue": "14" },
+  { "ParameterKey": "PublicMetadataCacheTtlSeconds", "ParameterValue": "300" },
+  { "ParameterKey": "AddressAutocompleteProvider", "ParameterValue": "nominatim-au" },
+  { "ParameterKey": "GoogleAnalyticsMeasurementId", "ParameterValue": "G-HRYCZEWV23" },
+  { "ParameterKey": "HealthCheckPath", "ParameterValue": "/health" },
+  { "ParameterKey": "QuoteRequestSenderLocalPart", "ParameterValue": "quotes" },
+  { "ParameterKey": "QuoteRequestSenderName", "ParameterValue": "ConveyMate Quotes" },
+  { "ParameterKey": "QuoteRequestExpiryHours", "ParameterValue": "72" },
+  { "ParameterKey": "EmailSmtpEnableSes", "ParameterValue": "true" },
+  { "ParameterKey": "EmailSmtpTestAddress", "ParameterValue": "daimenrees@hotmail.com" }
+]

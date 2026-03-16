@@ -1,0 +1,49 @@
+<header class="public-header">
+  <div class="sm-container public-header__inner">
+    <a class="public-header__brand" routerLink="/" aria-label="ConveyMate home">
+      <svg class="public-header__mark" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+        <path class="mark-shield" d="M7 4h22c1.1 0 2 .9 2 2v14c0 7.5-5.5 12.5-13 15-7.5-2.5-13-7.5-13-15V6c0-1.1.9-2 2-2z" fill="#0b3c5d"/>
+        <rect class="mark-doc" x="11" y="12" width="14" height="1.6" rx=".8" fill="white" fill-opacity=".82"/>
+        <rect class="mark-doc" x="11" y="16.5" width="9" height="1.6" rx=".8" fill="white" fill-opacity=".82"/>
+        <path class="mark-check" d="M10.5 23l5 5 10-11" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="public-header__brand-copy">
+        <span class="public-header__name">ConveyMate</span>
+        <span class="public-header__tagline">Prepare with confidence</span>
+      </span>
+    </a>
+
+    <button
+      type="button"
+      class="public-header__mobile-toggle"
+      aria-controls="public-site-nav"
+      [attr.aria-expanded]="mobileNavOpen()"
+      (click)="toggleMobileNav()"
+    >
+      <span class="public-header__mobile-toggle-label">Menu</span>
+      <span class="public-header__mobile-toggle-icon" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
+    </button>
+
+    <nav
+      id="public-site-nav"
+      class="public-header__nav"
+      [class.is-open]="mobileNavOpen()"
+      aria-label="Public navigation"
+    >
+      <a class="public-header__nav-link" routerLink="/insights" routerLinkActive="is-active" (click)="closeMobileNav()">Insights</a>
+      <a class="public-header__nav-link" routerLink="/guides" routerLinkActive="is-active" (click)="closeMobileNav()">Guides</a>
+
+      @if (authPresence.isSignedIn()) {
+        <a class="public-header__nav-link" [attr.href]="siteUrls.appHref('/dashboard')" (click)="closeMobileNav()">Dashboard</a>
+        <a class="public-header__cta" [attr.href]="siteUrls.appHref('/new-report')" (click)="closeMobileNav()">New Report</a>
+      } @else {
+        <a class="public-header__nav-link" [attr.href]="siteUrls.appHref('/signin')" (click)="closeMobileNav()">Sign in</a>
+        <a class="public-header__cta" [attr.href]="siteUrls.appHref('/signup')" (click)="closeMobileNav()">Create Account</a>
+      }
+    </nav>
+  </div>
+</header>

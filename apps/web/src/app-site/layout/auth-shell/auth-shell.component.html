@@ -1,0 +1,9 @@
+<div class="sm-shell sm-shell--auth">
+  <a class="sm-skip-link" href="#main-content">Skip to main content</a>
+  <ui-site-notification-stack [notifications]="notifications()"></ui-site-notification-stack>
+  <app-auth-topbar></app-auth-topbar>
+  <main id="main-content" class="sm-main">
+    <router-outlet></router-outlet>
+  </main>
+  <app-footer [compact]="true"></app-footer>
+</div>

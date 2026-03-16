@@ -1,0 +1,8 @@
+[
+  { "ParameterKey": "EnvironmentName", "ParameterValue": "dev" },
+  { "ParameterKey": "AppName", "ParameterValue": "conveymate" },
+  { "ParameterKey": "CallbackUrls", "ParameterValue": "http://localhost:4200/google/callback" },
+  { "ParameterKey": "LogoutUrls", "ParameterValue": "http://localhost:4200/signin" },
+  { "ParameterKey": "HostedUiDomainPrefix", "ParameterValue": "conveymate-dev-780419334634" },
+  { "ParameterKey": "EnableGoogleIdentityProvider", "ParameterValue": "true" }
+]

@@ -1,0 +1,159 @@
+<section class="sm-page-section">
+  <div class="sm-container page-grid">
+    <ui-page-header
+      title="Quote requests"
+      description="Track who was invited, who has replied, and which workflows are still waiting on responses."
+      eyebrow="Quotes"
+    ></ui-page-header>
+
+    <section class="sm-surface filter-panel">
+      <label class="filter-checkbox" for="showArchivedQuotes">
+        <input
+          id="showArchivedQuotes"
+          name="showArchivedQuotes"
+          type="checkbox"
+          [ngModel]="showArchived()"
+          (ngModelChange)="onShowArchivedChanged($event)"
+        />
+        <span>Show archived workflows</span>
+      </label>
+
+      @if (hasActiveFilters()) {
+        <button type="button" class="clear-filters" (click)="clearFilters()">Clear filters</button>
+      }
+    </section>
+
+    @if (loading()) {
+      <ui-skeleton-block [height]="120"></ui-skeleton-block>
+      <ui-skeleton-block [height]="120"></ui-skeleton-block>
+    } @else if (errorMessage()) {
+      <ui-alert-banner tone="error" title="Could not load quote requests" [message]="errorMessage()"></ui-alert-banner>
+    } @else if (sortedRequests().length === 0) {
+      <section class="sm-surface empty-state">
+        <p class="sm-eyebrow">No workflows yet</p>
+        <h2>No quote requests yet</h2>
+        <p class="sm-muted">Open a completed report and send a structured request to up to three conveyancers.</p>
+        <a routerLink="/reports">
+          <ui-button>Browse reports</ui-button>
+        </a>
+      </section>
+    } @else {
+      <section class="sm-surface overview-card">
+        <article class="overview-stat">
+          <p class="overview-stat__label">Active workflows</p>
+          <p class="overview-stat__value">{{ activeRequestCount() }}</p>
+          <p class="overview-stat__meta">Requests still collecting quotes</p>
+        </article>
+        <article class="overview-stat">
+          <p class="overview-stat__label">Quotes received</p>
+          <p class="overview-stat__value">{{ totalResponses() }}</p>
+          <p class="overview-stat__meta">Across all quote workflows</p>
+        </article>
+        <article class="overview-stat">
+          <p class="overview-stat__label">Invites sent</p>
+          <p class="overview-stat__value">{{ totalTargets() }}</p>
+          <p class="overview-stat__meta">Total conveyancers contacted</p>
+        </article>
+      </section>
+
+      <div class="request-grid">
+        @for (request of sortedRequests(); track request.id) {
+          <article class="sm-surface request-card">
+            <div class="request-card__top">
+              <div class="request-card__title-block">
+                <div class="request-card__meta">
+                  <span class="request-card__status">{{ statusLabel(request.status) }}</span>
+                  <span class="request-card__responses">{{ request.responseCount }} / {{ request.targetCount }} responses</span>
+                  @if (request.archivedAtUtc) {
+                    <span class="request-card__archived">Archived</span>
+                  }
+                </div>
+                <h2>{{ request.propertyAddress }}</h2>
+                <p class="sm-muted">{{ request.stateOrTerritory }} · {{ serviceLabel(request.serviceNeed) }}</p>
+              </div>
+
+              <div class="request-card__side">
+                <div class="request-card__timeline">
+                  <p class="request-card__timeline-label">Created {{ request.createdAtUtc | date: 'd MMM yyyy, h:mm a' }}</p>
+                  @if (request.sentAtUtc) {
+                    <p class="request-card__timeline-label">Sent {{ request.sentAtUtc | date: 'd MMM yyyy, h:mm a' }}</p>
+                  }
+                  <p class="request-card__timeline-label">Expires {{ request.expiresAtUtc | date: 'd MMM yyyy, h:mm a' }}</p>
+                </div>
+
+                <div class="request-card__action-pane">
+                  <button
+                    type="button"
+                    class="request-card__actions-trigger"
+                    aria-haspopup="menu"
+                    [attr.aria-expanded]="isActionsMenuOpen(request.id)"
+                    (click)="toggleActionsMenu(request.id)"
+                    (keydown)="onActionsTriggerKeydown($event, request.id)"
+                  >
+                    <span class="request-card__actions-trigger-dots" aria-hidden="true">
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </span>
+                    <span class="sm-sr-only">Open actions for {{ request.propertyAddress }}</span>
+                  </button>
+
+                  @if (isActionsMenuOpen(request.id)) {
+                    <div class="request-actions-menu" role="menu" [attr.aria-label]="'Actions for ' + request.propertyAddress">
+                      <a class="request-actions-menu__item" role="menuitem" [routerLink]="['/quotes', request.id]">Open workflow</a>
+                      <a class="request-actions-menu__item" role="menuitem" [routerLink]="['/reports', request.reviewJobId]">Open report</a>
+                      <button type="button" class="request-actions-menu__item" role="menuitem" (click)="openArchiveDialog(request)">
+                        {{ archiveActionLabel(request) }}
+                      </button>
+                      <button
+                        type="button"
+                        class="request-actions-menu__item request-actions-menu__item--danger"
+                        role="menuitem"
+                        (click)="openDeleteDialog(request)"
+                      >
+                        Delete workflow
+                      </button>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <div class="request-card__progress" aria-hidden="true">
+              <span [style.width.%]="progressPercent(request)"></span>
+            </div>
+
+            <div class="request-card__footer">
+              <div class="request-card__summary">
+                <p class="request-card__summary-value">{{ progressPercent(request) }}%</p>
+                <p class="request-card__summary-label">response coverage</p>
+              </div>
+
+              <div class="request-card__actions">
+                <a [routerLink]="['/quotes', request.id]">
+                  <ui-button>Open workflow</ui-button>
+                </a>
+                <a [routerLink]="['/reports', request.reviewJobId]">
+                  <ui-button variant="secondary">Open report</ui-button>
+                </a>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    }
+
+    @if (dialogState(); as dialog) {
+      <app-confirm-action-dialog
+        [title]="dialogTitle()"
+        [description]="dialogDescription()"
+        [detail]="dialog.request.propertyAddress"
+        [confirmLabel]="dialogConfirmLabel()"
+        [tone]="isDeleteDialog() ? 'danger' : 'neutral'"
+        [busy]="actionBusy()"
+        (confirmed)="confirmDialogAction()"
+        (cancelled)="closeDialog()"
+      ></app-confirm-action-dialog>
+    }
+  </div>
+</section>

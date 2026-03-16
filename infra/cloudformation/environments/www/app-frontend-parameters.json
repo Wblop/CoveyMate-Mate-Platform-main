@@ -1,0 +1,8 @@
+[
+  { "ParameterKey": "EnvironmentName", "ParameterValue": "www" },
+  { "ParameterKey": "AppName", "ParameterValue": "conveymate" },
+  { "ParameterKey": "AppDomainName", "ParameterValue": "app.conveymate.com.au" },
+  { "ParameterKey": "HostedZoneId", "ParameterValue": "REPLACE_WITH_ROUTE53_HOSTED_ZONE_ID" },
+  { "ParameterKey": "CloudFrontCertificateArn", "ParameterValue": "replace-with-app-cloudfront-certificate-arn" },
+  { "ParameterKey": "ApiOriginDomainName", "ParameterValue": "replace-with-api-alb-dns-name" }
+]

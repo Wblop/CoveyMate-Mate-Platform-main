@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 292" fill="none" aria-hidden="true">
+  <defs>
+    <filter id="rs-shadow" x="-6%" y="-6%" width="116%" height="124%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#0f2a3c" flood-opacity="0.09"/>
+    </filter>
+    <radialGradient id="rs-glow" cx="72%" cy="18%" r="55%">
+      <stop offset="0%" stop-color="#bed8ea" stop-opacity="0.52"/>
+      <stop offset="100%" stop-color="#bed8ea" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="rs-bar-critical" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#b83a30"/>
+      <stop offset="100%" stop-color="#d4534a"/>
+    </linearGradient>
+    <linearGradient id="rs-bar-high" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#b36610"/>
+      <stop offset="100%" stop-color="#d98a2a"/>
+    </linearGradient>
+    <linearGradient id="rs-bar-medium" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0f5f8a"/>
+      <stop offset="100%" stop-color="#1a7ba4"/>
+    </linearGradient>
+    <linearGradient id="rs-bar-low" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1a6634"/>
+      <stop offset="100%" stop-color="#2a9c52"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Ambient glow -->
+  <ellipse cx="408" cy="52" rx="210" ry="138" fill="url(#rs-glow)"/>
+
+  <!-- Card -->
+  <rect x="20" y="10" width="520" height="272" rx="22" fill="#ffffff" stroke="#d0dce7" stroke-width="1.5" filter="url(#rs-shadow)"/>
+
+  <!-- Card header band -->
+  <rect x="20" y="10" width="520" height="58" rx="22" fill="#f0f6fb"/>
+  <rect x="20" y="48" width="520" height="20" fill="#f0f6fb"/>
+
+  <!-- Header: title -->
+  <text x="50" y="46" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="700" fill="#0b3c5d" letter-spacing="-0.01em">Risk Analysis Summary</text>
+
+  <!-- Header: badge -->
+  <rect x="354" y="26" width="104" height="22" rx="11" fill="#eaf2f8" stroke="#c8d9e6" stroke-width="1"/>
+  <text x="406" y="41" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="700" fill="#2b5f78" letter-spacing="0.05em">15 FINDINGS</text>
+
+  <!-- Header: report label -->
+  <rect x="472" y="26" width="52" height="22" rx="11" fill="#edf7f2" stroke="#b8d9c6" stroke-width="1"/>
+  <text x="498" y="41" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9.5" font-weight="700" fill="#1f7a3d" letter-spacing="0.04em">DRAFT</text>
+
+  <!-- Grid lines (25 / 50 / 75 / 100 %) in bar area x=226-502 -->
+  <line x1="295" y1="76" x2="295" y2="260" stroke="#e8f1f7" stroke-width="1" stroke-dasharray="3 3"/>
+  <line x1="364" y1="76" x2="364" y2="260" stroke="#e8f1f7" stroke-width="1" stroke-dasharray="3 3"/>
+  <line x1="433" y1="76" x2="433" y2="260" stroke="#e8f1f7" stroke-width="1" stroke-dasharray="3 3"/>
+  <line x1="502" y1="76" x2="502" y2="260" stroke="#dde8f0" stroke-width="1"/>
+
+  <!-- Grid labels -->
+  <text x="295" y="271" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#8aa5b8">25%</text>
+  <text x="364" y="271" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#8aa5b8">50%</text>
+  <text x="433" y="271" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#8aa5b8">75%</text>
+
+  <!-- ── ROW 1 · Critical · 2 of 6 max → bar width = 92px ─────── -->
+  <circle cx="50" cy="106" r="6" fill="#b83a30"/>
+  <text x="64" y="110" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="600" fill="#172532">Critical</text>
+  <!-- bar track -->
+  <rect x="226" y="99" width="276" height="14" rx="7" fill="#f4f7fa"/>
+  <!-- bar fill -->
+  <rect x="226" y="99" width="92" height="14" rx="7" fill="url(#rs-bar-critical)"/>
+  <!-- count badge -->
+  <rect x="514" y="96" width="26" height="20" rx="10" fill="rgba(184,58,48,0.10)"/>
+  <text x="527" y="110" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="700" fill="#b83a30">2</text>
+
+  <!-- ── ROW 2 · High · 4 of 6 max → bar width = 184px ──────── -->
+  <circle cx="50" cy="150" r="6" fill="#c47d16"/>
+  <text x="64" y="154" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="600" fill="#172532">High</text>
+  <rect x="226" y="143" width="276" height="14" rx="7" fill="#f4f7fa"/>
+  <rect x="226" y="143" width="184" height="14" rx="7" fill="url(#rs-bar-high)"/>
+  <rect x="514" y="140" width="26" height="20" rx="10" fill="rgba(196,125,22,0.10)"/>
+  <text x="527" y="154" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="700" fill="#c47d16">4</text>
+
+  <!-- ── ROW 3 · Medium · 6 of 6 max → bar width = 276px ─────── -->
+  <circle cx="50" cy="194" r="6" fill="#1a7ba4"/>
+  <text x="64" y="198" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="600" fill="#172532">Medium</text>
+  <rect x="226" y="187" width="276" height="14" rx="7" fill="#f4f7fa"/>
+  <rect x="226" y="187" width="276" height="14" rx="7" fill="url(#rs-bar-medium)"/>
+  <rect x="514" y="184" width="26" height="20" rx="10" fill="rgba(26,123,164,0.10)"/>
+  <text x="527" y="198" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="700" fill="#1a7ba4">6</text>
+
+  <!-- ── ROW 4 · Low · 3 of 6 max → bar width = 138px ─────────── -->
+  <circle cx="50" cy="238" r="6" fill="#2a9c52"/>
+  <text x="64" y="242" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="600" fill="#172532">Low</text>
+  <rect x="226" y="231" width="276" height="14" rx="7" fill="#f4f7fa"/>
+  <rect x="226" y="231" width="138" height="14" rx="7" fill="url(#rs-bar-low)"/>
+  <rect x="514" y="228" width="26" height="20" rx="10" fill="rgba(42,156,82,0.10)"/>
+  <text x="527" y="242" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="700" fill="#2a9c52">3</text>
+
+  <!-- Divider between label column and bar area -->
+  <line x1="214" y1="78" x2="214" y2="258" stroke="#e8f1f7" stroke-width="1"/>
+</svg>

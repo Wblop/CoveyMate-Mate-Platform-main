@@ -1,0 +1,54 @@
+    <div class="sm-shell sm-shell--workspace dashboard-shell">
+      <a class="sm-skip-link" href="#main-content-area">Skip to main content</a>
+
+      <app-app-sidebar
+        data-testid="dashboard-shell-sidebar"
+        [isMobileDrawerOpen]="sidebarOpen()"
+        [isAdmin]="isAdmin()"
+        [isSidebarInert]="sidebarInert()"
+        (navigate)="closeSidebar()"
+      ></app-app-sidebar>
+
+      <div class="dashboard-shell__content">
+        <ui-site-notification-stack [notifications]="notifications()"></ui-site-notification-stack>
+        <app-app-header
+          data-testid="dashboard-shell-header"
+          [sidebarOpen]="sidebarOpen()"
+          (sidebarToggle)="toggleSidebar()"
+          (signOut)="handleSignOut()"
+          (feedbackRequest)="feedbackOpen.set(true)"
+        ></app-app-header>
+
+        <main id="main-content" class="dashboard-shell__main" data-testid="dashboard-shell-main">
+          <router-outlet></router-outlet>
+        </main>
+
+        <app-footer data-testid="dashboard-shell-footer" [showHelpLinks]="true"></app-footer>
+      </div>
+
+      @if (sidebarOpen()) {
+        <button
+          type="button"
+          class="dashboard-shell__scrim"
+          aria-label="Close navigation menu"
+          (click)="closeSidebar()"
+        ></button>
+      }
+
+      @if (feedbackOpen()) {
+        <app-feedback-dialog (closed)="feedbackOpen.set(false)" />
+      }
+
+      @if (showScrollTop()) {
+        <button
+          type="button"
+          class="dashboard-shell__scroll-top"
+          aria-label="Scroll to top"
+          (click)="scrollToTop()"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="18 15 12 9 6 15"/>
+          </svg>
+        </button>
+      }
+    </div>

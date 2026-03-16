@@ -1,0 +1,107 @@
+<section
+  id="pricing"
+  class="sm-page-section landing-section landing-reveal landing-reveal--delay-4"
+  aria-labelledby="pricing-title"
+>
+  <div class="sm-container">
+    <div class="landing-section__head landing-pricing__head">
+      <p class="sm-eyebrow">Pricing</p>
+      <h2 id="pricing-title">One price. Full contract insights. No subscription.</h2>
+      <p class="landing-section__intro">
+        Pay once when you're ready to run a report. You get the full insights workflow — extraction, analysis, and a structured PDF brief — for less than a conveyancer's first billable hour.
+      </p>
+    </div>
+
+    <div class="landing-pricing">
+      <article class="sm-surface landing-pricing__primary" aria-labelledby="pricing-summary-title">
+        <div class="landing-pricing__summary-head">
+          <p class="landing-pricing__kicker">Simple per-report pricing</p>
+
+          <div class="landing-pricing__price-block" aria-label="Price">
+            <p class="landing-pricing__price">AUD $19.99</p>
+            <p class="landing-pricing__price-note">Per property report</p>
+          </div>
+
+          <h3 id="pricing-summary-title">Pay once. Walk away better prepared.</h3>
+          <p class="landing-pricing__lead">
+            One flat fee per property. No subscription, no prompt engineering. Leave with a structured insights brief ready for your solicitor or conveyancer conversation.
+          </p>
+        </div>
+
+        <ul class="landing-pricing__points" aria-label="Included in the price">
+          @for (point of summaryPoints; track point.title) {
+            <li class="landing-pricing__point">
+              <span class="landing-pricing__point-icon" aria-hidden="true">
+                <svg viewBox="0 0 16 16" focusable="false">
+                  <path d="M3.5 8.2 6.6 11.3 12.5 5.4"></path>
+                </svg>
+              </span>
+              <div class="landing-pricing__point-copy">
+                <strong>{{ point.title }}</strong>
+                <p>{{ point.description }}</p>
+              </div>
+            </li>
+          }
+        </ul>
+
+        <div class="landing-pricing__actions">
+          <ui-button routerLink="/create-report">Create Report</ui-button>
+          <ui-button variant="secondary" routerLink="/guides">Read the quickstart</ui-button>
+        </div>
+
+        <p class="landing-pricing__footnote">
+          Designed to help buyers prepare for professional advice before exchange, settlement, waiver, rescission, or
+          any binding decision.
+        </p>
+      </article>
+
+      <article class="sm-surface landing-pricing__secondary" aria-labelledby="pricing-detail-title">
+        <div class="landing-pricing__detail-head">
+          <p class="landing-pricing__kicker">Included in every run</p>
+          <h3 id="pricing-detail-title">What's included from upload to handover</h3>
+          <p class="landing-pricing__detail-copy">
+            The value is in the workflow: extracting the full pack, building a structured review, and ending with a brief that's easier to hand to a professional.
+          </p>
+        </div>
+
+        <div class="landing-pricing__stack">
+          @for (item of includedItems; track item.title) {
+            <article class="landing-pricing__stack-item">
+              <span class="landing-pricing__stack-icon" aria-hidden="true">
+                @switch (item.icon) {
+                  @case ('document') {
+                    <svg viewBox="0 0 24 24" focusable="false">
+                      <path d="M7 4h7l3 3v13H7z"></path>
+                      <path d="M14 4v4h4"></path>
+                    </svg>
+                  }
+                  @case ('analysis') {
+                    <svg viewBox="0 0 24 24" focusable="false">
+                      <path d="M5 18h14"></path>
+                      <path d="m7 18 2.2-5.4 2.1 3 2.5-7 2.2 9.4"></path>
+                    </svg>
+                  }
+                  @case ('brief') {
+                    <svg viewBox="0 0 24 24" focusable="false">
+                      <path d="M6 5h12v14H6z"></path>
+                      <path d="m9 12 2.2 2.2 4-4.2"></path>
+                    </svg>
+                  }
+                }
+              </span>
+              <div class="landing-pricing__stack-copy">
+                <h4>{{ item.title }}</h4>
+                <p>{{ item.description }}</p>
+              </div>
+            </article>
+          }
+        </div>
+
+        <div class="landing-pricing__secondary-note">
+          <strong>No subscription. No prompt engineering.</strong>
+          <p>Just a clear contract briefing and a sharper starting point for the conversation that actually matters.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>

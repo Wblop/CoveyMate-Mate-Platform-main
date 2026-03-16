@@ -1,0 +1,110 @@
+<section class="sm-page-section auth-page">
+  <div class="sm-container auth-layout">
+    <section class="auth-shell auth-shell--compact auth-shell--callback">
+      <aside class="auth-spotlight auth-spotlight--callback">
+        <div class="auth-spotlight__art">
+          <img src="images/auth-illustration-v3.svg" alt="" loading="eager" />
+        </div>
+        <div class="auth-spotlight__content">
+          <h2>Back to your workspace.</h2>
+          <ul class="auth-spotlight__trust">
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+              <div>
+                <strong>Secure Google return</strong>
+                <span>Your sign-in is completed through the protected Google and Cognito flow.</span>
+              </div>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+              </svg>
+              <div>
+                <strong>New accounts are handled automatically</strong>
+                <span>If this is your first Google sign-in, we finish the setup before opening your account.</span>
+              </div>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              <div>
+                <strong>You will be redirected automatically</strong>
+                <span>As soon as your session is ready, we take you straight back into ConveyMate.</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </aside>
+
+      <article class="auth-panel auth-panel--callback">
+        <div class="auth-panel__logo">
+          <svg class="auth-panel__mark" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+            <path d="M7 4h22c1.1 0 2 .9 2 2v14c0 7.5-5.5 12.5-13 15-7.5-2.5-13-7.5-13-15V6c0-1.1.9-2 2-2z" fill="#0b3c5d"/>
+            <rect x="11" y="12" width="14" height="1.6" rx=".8" fill="white" fill-opacity=".82"/>
+            <rect x="11" y="16.5" width="9" height="1.6" rx=".8" fill="white" fill-opacity=".82"/>
+            <path d="M10.5 23l5 5 10-11" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="auth-panel__brand-name">ConveyMate</span>
+        </div>
+
+        <h1>{{ heading() }}</h1>
+        <p class="sm-muted">{{ description() }}</p>
+
+        @if (loading()) {
+          <div class="auth-callback__status-card" aria-live="polite" aria-busy="true">
+            <div class="auth-callback__provider">
+              <svg class="auth-callback__provider-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="#4285F4" d="M21.64 12.2c0-.64-.06-1.26-.17-1.85H12v3.5h5.41a4.63 4.63 0 0 1-2 3.04v2.53h3.24c1.89-1.74 2.99-4.31 2.99-7.22z"/>
+                <path fill="#34A853" d="M12 22c2.7 0 4.96-.9 6.61-2.44l-3.24-2.53c-.9.6-2.04.95-3.37.95-2.59 0-4.79-1.75-5.57-4.11H3.08v2.59A9.99 9.99 0 0 0 12 22z"/>
+                <path fill="#FBBC05" d="M6.43 13.87A6 6 0 0 1 6.12 12c0-.65.11-1.27.31-1.87V7.54H3.08A9.99 9.99 0 0 0 2 12c0 1.61.39 3.13 1.08 4.46l3.35-2.59z"/>
+                <path fill="#EA4335" d="M12 6.02c1.47 0 2.78.5 3.81 1.5l2.86-2.86C16.96 3.08 14.7 2 12 2A9.99 9.99 0 0 0 3.08 7.54l3.35 2.59C7.21 7.77 9.41 6.02 12 6.02z"/>
+              </svg>
+              <span>Google secure sign-in</span>
+            </div>
+
+            <div class="auth-callback__loading">
+              <span class="auth-callback__spinner" aria-hidden="true"></span>
+              <div>
+                <strong>Connecting your account</strong>
+                <span>{{ loadingNote() }}</span>
+              </div>
+            </div>
+
+            <ol class="auth-callback__steps" aria-label="Google sign-in progress">
+              @for (step of steps; track step.id) {
+                <li
+                  class="auth-callback__step"
+                  [class.auth-callback__step--current]="isStepCurrent(step.id)"
+                  [class.auth-callback__step--complete]="isStepComplete(step.id)"
+                >
+                  <span class="auth-callback__step-indicator" aria-hidden="true"></span>
+                  <div>
+                    <strong>{{ step.title }}</strong>
+                    <span>{{ step.detail }}</span>
+                  </div>
+                </li>
+              }
+            </ol>
+
+            <p class="auth-callback__hint">Keep this tab open while we complete the return from Google.</p>
+          </div>
+        }
+
+        <div role="alert" aria-live="assertive" aria-atomic="true">
+          @if (errorMessage()) {
+            <ui-alert-banner tone="error" title="Google sign-in failed" [message]="errorMessage()"></ui-alert-banner>
+          }
+        </div>
+
+        @if (!loading()) {
+          <p class="auth-meta">
+            <a routerLink="/signin">Return to sign in</a>
+          </p>
+        }
+      </article>
+    </section>
+  </div>
+</section>

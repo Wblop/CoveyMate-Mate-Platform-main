@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" fill="none">
+  <defs>
+    <linearGradient id="qs-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f4f8fb"/>
+      <stop offset="100%" stop-color="#e4eef6"/>
+    </linearGradient>
+    <radialGradient id="qs-glow" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#c8dfee" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#c8dfee" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="qs-shadow" x="-8%" y="-8%" width="125%" height="135%">
+      <feDropShadow dx="0" dy="16" stdDeviation="22" flood-color="#0b3c5d" flood-opacity="0.10"/>
+    </filter>
+    <filter id="qs-shadow-best" x="-10%" y="-10%" width="135%" height="140%">
+      <feDropShadow dx="0" dy="20" stdDeviation="28" flood-color="#0b3c5d" flood-opacity="0.18"/>
+    </filter>
+    <linearGradient id="qs-bar-std" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8ab8cc"/>
+      <stop offset="100%" stop-color="#a8cdd9"/>
+    </linearGradient>
+    <linearGradient id="qs-bar-best" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0b3c5d"/>
+      <stop offset="100%" stop-color="#1a7ba4"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1080" height="1080" fill="url(#qs-bg)"/>
+  <ellipse cx="540" cy="400" rx="600" ry="420" fill="url(#qs-glow)"/>
+
+  <!-- Subtle grid -->
+  <g opacity="0.14">
+    <line x1="0" y1="270" x2="1080" y2="270" stroke="#9ab8cc" stroke-width="1" stroke-dasharray="8 16"/>
+    <line x1="0" y1="540" x2="1080" y2="540" stroke="#9ab8cc" stroke-width="1" stroke-dasharray="8 16"/>
+    <line x1="0" y1="810" x2="1080" y2="810" stroke="#9ab8cc" stroke-width="1" stroke-dasharray="8 16"/>
+  </g>
+
+  <!-- Header eyebrow -->
+  <rect x="340" y="90" width="400" height="50" rx="25" fill="#eaf2f8" stroke="#c4d8e6" stroke-width="2"/>
+  <text x="540" y="123" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="20" font-weight="700" fill="#2b5f78" letter-spacing="0.10em">QUOTE COMPARISON · VIC</text>
+
+  <!-- Title -->
+  <text x="540" y="210" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="58" font-weight="800" fill="#0b3c5d" letter-spacing="-0.02em">Compare 3 quotes.</text>
+  <text x="540" y="274" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="58" font-weight="800" fill="#0b3c5d" letter-spacing="-0.02em">Pick the best one.</text>
+
+  <!-- Bar chart baseline y=740 -->
+  <!-- Firm A: $1,650 - standard -->
+  <!-- Firm B: $1,980 - highest -->
+  <!-- Firm C: $1,450 - lowest (best, highlighted) -->
+  <!--
+    Max $1980. Baseline y=740. Height area = 290px
+    A: 1650/1980 * 290 = 241.7 → y=740-242=498
+    B: 1980/1980 * 290 = 290   → y=740-290=450
+    C: 1450/1980 * 290 = 212.4 → y=740-212=528  ← lowest (best)
+    Bar width 150px
+    Centres at x=230, 540, 850
+  -->
+
+  <!-- Firm A ($1,650) -->
+  <rect x="155" y="498" width="150" height="242" rx="18" fill="url(#qs-bar-std)" filter="url(#qs-shadow)"/>
+  <rect x="154" y="738" width="152" height="4" rx="2" fill="#b0c8d8"/>
+  <!-- Price label above bar -->
+  <text x="230" y="480" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="32" font-weight="700" fill="#425667">$1,650</text>
+  <!-- Firm name below -->
+  <text x="230" y="778" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="24" font-weight="600" fill="#425667">Firm A</text>
+  <!-- Reply badge -->
+  <rect x="170" y="796" width="120" height="32" rx="16" fill="#eaf2f8" stroke="#cadbe7" stroke-width="1.5"/>
+  <circle cx="194" cy="812" r="6" fill="#1a7ba4" opacity="0.7"/>
+  <text x="230" y="817" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="16" fill="#2b5f78">Replied</text>
+
+  <!-- Firm B ($1,980) - most expensive -->
+  <rect x="465" y="450" width="150" height="290" rx="18" fill="url(#qs-bar-std)" filter="url(#qs-shadow)"/>
+  <rect x="464" y="738" width="152" height="4" rx="2" fill="#b0c8d8"/>
+  <text x="540" y="432" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="32" font-weight="700" fill="#425667">$1,980</text>
+  <text x="540" y="778" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="24" font-weight="600" fill="#425667">Firm B</text>
+  <rect x="480" y="796" width="120" height="32" rx="16" fill="#eaf2f8" stroke="#cadbe7" stroke-width="1.5"/>
+  <circle cx="504" cy="812" r="6" fill="#1a7ba4" opacity="0.7"/>
+  <text x="540" y="817" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="16" fill="#2b5f78">Replied</text>
+
+  <!-- Firm C ($1,450) - BEST highlighted in brand navy -->
+  <rect x="775" y="528" width="150" height="212" rx="18" fill="url(#qs-bar-best)" filter="url(#qs-shadow-best)"/>
+  <rect x="774" y="738" width="152" height="4" rx="2" fill="#0b3c5d"/>
+  <!-- Glow above best bar -->
+  <ellipse cx="850" cy="528" rx="75" ry="30" fill="rgba(26,123,164,0.20)" filter="url(#qs-shadow)"/>
+  <!-- Best badge above price -->
+  <rect x="770" y="468" width="160" height="36" rx="18" fill="#1f7a3d"/>
+  <text x="850" y="491" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="18" font-weight="700" fill="#ffffff" letter-spacing="0.06em">LOWEST QUOTE</text>
+  <text x="850" y="456" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="32" font-weight="800" fill="#0b3c5d">$1,450</text>
+  <text x="850" y="778" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="24" font-weight="700" fill="#0b3c5d">Firm C</text>
+  <rect x="790" y="796" width="120" height="32" rx="16" fill="#edf7f2" stroke="#b8d9c6" stroke-width="1.5"/>
+  <circle cx="810" cy="812" r="6" fill="#2a9c52"/>
+  <text x="850" y="817" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="16" font-weight="700" fill="#1f7a3d">Replied</text>
+
+  <!-- Saving annotation: dashed bracket between B and C -->
+  <line x1="540" y1="432" x2="850" y2="432" stroke="#cadbe7" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <line x1="540" y1="427" x2="540" y2="437" stroke="#cadbe7" stroke-width="1.5"/>
+  <line x1="850" y1="427" x2="850" y2="437" stroke="#cadbe7" stroke-width="1.5"/>
+  <rect x="640" y="414" width="120" height="36" rx="18" fill="#fef6e4" stroke="#e8d3a8" stroke-width="1.5"/>
+  <text x="700" y="437" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="19" font-weight="800" fill="#8a5a00">$530 saved</text>
+
+  <!-- Branding bar -->
+  <rect x="60" y="870" width="960" height="130" rx="24" fill="#0b3c5d"/>
+  <ellipse cx="980" cy="940" rx="200" ry="120" fill="rgba(26,123,164,0.22)"/>
+  <!-- Shield -->
+  <g transform="translate(106, 896)">
+    <path d="M40 4 L12 14 V30 C12 48 24 59 40 65 C56 59 68 48 68 30 V14 Z" fill="rgba(255,255,255,0.09)" stroke="rgba(255,255,255,0.20)" stroke-width="1.2"/>
+    <path d="M24 38 L34 48 L56 26" stroke="rgba(255,255,255,0.80)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="198" y="944" font-family="Inter, -apple-system, sans-serif" font-size="40" font-weight="700" fill="rgba(255,255,255,0.92)" letter-spacing="-0.01em">ConveyMate</text>
+  <text x="198" y="978" font-family="Inter, -apple-system, sans-serif" font-size="20" font-weight="700" fill="rgba(160,210,240,0.60)" letter-spacing="0.10em">PREPARE WITH CONFIDENCE</text>
+  <text x="980" y="944" text-anchor="end" font-family="Inter, -apple-system, sans-serif" font-size="24" fill="rgba(255,255,255,0.50)">conveymate.com.au</text>
+  <text x="980" y="978" text-anchor="end" font-family="Inter, -apple-system, sans-serif" font-size="16" fill="rgba(255,255,255,0.28)">Not legal advice</text>
+
+  <text x="540" y="1044" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="18" fill="rgba(60,90,110,0.55)">Quotes sent automatically · All replies in one place · No emails needed</text>
+</svg>

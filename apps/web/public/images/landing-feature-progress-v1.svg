@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 380" fill="none" aria-hidden="true">
+  <defs>
+    <filter id="progress-shadow" x="-20%" y="-20%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#123248" flood-opacity="0.14" />
+    </filter>
+    <radialGradient id="progress-glow-a" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#d6ebf8" stop-opacity="0.82" />
+      <stop offset="68%" stop-color="#d6ebf8" stop-opacity="0.14" />
+      <stop offset="100%" stop-color="#d6ebf8" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="progress-glow-b" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#bcd8ea" stop-opacity="0.56" />
+      <stop offset="72%" stop-color="#bcd8ea" stop-opacity="0.1" />
+      <stop offset="100%" stop-color="#bcd8ea" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <circle cx="104" cy="60" r="124" fill="url(#progress-glow-a)" />
+  <circle cx="560" cy="306" r="120" fill="url(#progress-glow-b)" />
+
+  <g opacity="0.22">
+    <path d="M34 150c112-14 214 12 308 76 94 64 188 84 306 52" stroke="#c1d6e5" stroke-width="1.5" stroke-linecap="round" />
+    <path d="M48 300c124-24 234-14 330 30s176 56 262 38" stroke="#c1d6e5" stroke-width="1.6" stroke-linecap="round" />
+    <circle cx="302" cy="90" r="120" stroke="#e1eef7" stroke-width="1.2" />
+    <circle cx="302" cy="90" r="182" stroke="#e1eef7" stroke-width="1.05" />
+  </g>
+
+  <g transform="translate(60 78)" filter="url(#progress-shadow)">
+    <rect x="18" y="20" width="504" height="232" rx="30" fill="#123248" fill-opacity="0.1" />
+    <rect x="0" y="0" width="504" height="232" rx="30" fill="#fbfdff" stroke="#d0dee9" stroke-width="1.8" />
+    <rect x="28" y="28" width="132" height="24" rx="12" fill="#edf5fa" stroke="#d7e4ed" />
+    <text x="94" y="44" fill="#264c64" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle">Visible pipeline</text>
+
+    <line x1="96" y1="104" x2="410" y2="104" stroke="#c3d6e4" stroke-width="8" stroke-linecap="round" />
+    <line x1="96" y1="104" x2="304" y2="104" stroke="#2f7a57" stroke-width="8" stroke-linecap="round" />
+
+    <g>
+      <circle cx="96" cy="104" r="24" fill="#0b3c5d" />
+      <path d="m86 104 7 7 14-16" stroke="#fff" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round" />
+      <text x="96" y="146" fill="#30526a" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="700" text-anchor="middle">Upload</text>
+    </g>
+    <g>
+      <circle cx="252" cy="104" r="24" fill="#0b3c5d" />
+      <path d="m242 104 7 7 14-16" stroke="#fff" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round" />
+      <text x="252" y="146" fill="#30526a" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="700" text-anchor="middle">Extract</text>
+    </g>
+    <g>
+      <circle cx="410" cy="104" r="24" fill="#ffffff" stroke="#90b0c4" stroke-width="2.2" />
+      <circle cx="410" cy="104" r="10" fill="#2f7a57" />
+      <text x="410" y="146" fill="#30526a" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="700" text-anchor="middle">Draft</text>
+    </g>
+
+    <g transform="translate(42 166)">
+      <rect x="10" y="12" width="188" height="72" rx="20" fill="#123248" fill-opacity="0.08" />
+      <rect x="0" y="0" width="188" height="72" rx="20" fill="#ffffff" stroke="#d3e1eb" stroke-width="1.6" />
+      <rect x="20" y="18" width="104" height="10" rx="5" fill="#a6bed0" />
+      <rect x="20" y="38" width="132" height="10" rx="5" fill="#d9e5ee" />
+      <rect x="20" y="54" width="96" height="8" rx="4" fill="#e4edf3" />
+      <rect x="138" y="22" width="30" height="30" rx="15" fill="#eaf5ee" />
+      <circle cx="153" cy="37" r="8" fill="#2f7a57" />
+    </g>
+
+    <g transform="translate(292 160)">
+      <rect x="12" y="16" width="164" height="92" rx="22" fill="#123248" fill-opacity="0.1" />
+      <rect x="0" y="0" width="164" height="92" rx="22" fill="#fdfefe" stroke="#d4e2ec" stroke-width="1.6" />
+      <rect x="20" y="18" width="76" height="22" rx="11" fill="#edf5fa" stroke="#d5e3ec" />
+      <text x="58" y="33" fill="#30526a" font-family="Inter, Arial, sans-serif" font-size="10.5" font-weight="700" text-anchor="middle">Clause scan</text>
+      <rect x="20" y="52" width="124" height="10" rx="5" fill="#d6e3ec" />
+      <rect x="20" y="68" width="90" height="8" rx="4" fill="#e2ebf2" />
+      <rect x="116" y="60" width="28" height="8" rx="4" fill="#2f7a57" />
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,14 @@
+[
+  { "ParameterKey": "EnvironmentName", "ParameterValue": "www" },
+  { "ParameterKey": "AppName", "ParameterValue": "conveymate" },
+  { "ParameterKey": "ReportsBucketCorsAllowedOrigin", "ParameterValue": "https://conveymate.com.au" },
+  { "ParameterKey": "WorkerCodeS3Bucket", "ParameterValue": "replace-with-core-artifacts-bucket" },
+  { "ParameterKey": "WorkerCodeS3Key", "ParameterValue": "releases/www/reports-worker/worker.zip" },
+  { "ParameterKey": "WorkerCodeS3ObjectVersion", "ParameterValue": "" },
+  { "ParameterKey": "StripePriceAudCents", "ParameterValue": "1999" },
+  { "ParameterKey": "TextractEnabled", "ParameterValue": "true" },
+  { "ParameterKey": "LambdaMemorySize", "ParameterValue": "3008" },
+  { "ParameterKey": "LambdaTimeoutSeconds", "ParameterValue": "900" },
+  { "ParameterKey": "ReservedConcurrentExecutions", "ParameterValue": "2" },
+  { "ParameterKey": "LogRetentionInDays", "ParameterValue": "14" }
+]

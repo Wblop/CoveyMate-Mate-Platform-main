@@ -1,0 +1,100 @@
+    .ui-form-field {
+      display: grid;
+      gap: 6px;
+      align-content: start;
+    }
+
+    .ui-form-field__label-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ui-form-field__label {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--sm-color-text-muted);
+      font-weight: 700;
+    }
+
+    .ui-form-field__required {
+      color: var(--sm-color-danger);
+    }
+
+    /* ── Hint tooltip ─────────────────────────────────── */
+
+    .ui-form-field__hint-trigger {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .ui-form-field__hint-button {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1.5px solid currentColor;
+      background: transparent;
+      color: var(--sm-color-text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      transition: color var(--sm-motion-fast), border-color var(--sm-motion-fast), background var(--sm-motion-fast);
+    }
+
+    .ui-form-field__hint-button:hover,
+    .ui-form-field__hint-button:focus-visible {
+      color: var(--sm-color-primary);
+      border-color: var(--sm-color-primary);
+      background: #edf4fb;
+      outline: none;
+    }
+
+    .ui-form-field__hint-tooltip {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      width: 220px;
+      background: var(--sm-color-primary);
+      color: #fff;
+      font-size: 13px;
+      line-height: 1.5;
+      font-weight: 400;
+      padding: 8px 12px;
+      border-radius: var(--sm-radius-sm);
+      z-index: 200;
+      pointer-events: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .ui-form-field__hint-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: var(--sm-color-primary);
+    }
+
+    .ui-form-field__hint-trigger:hover .ui-form-field__hint-tooltip,
+    .ui-form-field__hint-trigger--open .ui-form-field__hint-tooltip {
+      display: block;
+    }
+
+    /* ── Error ────────────────────────────────────────── */
+
+    .ui-form-field__error {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--sm-color-danger);
+    }

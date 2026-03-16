@@ -1,0 +1,27 @@
+.unsubscribe-layout {
+  display: grid;
+  gap: var(--sm-space-4);
+}
+
+.unsubscribe-card {
+  display: grid;
+  gap: var(--sm-space-3);
+  padding: clamp(24px, 3vw, 32px);
+}
+
+.unsubscribe-card h2,
+.unsubscribe-card p {
+  margin: 0;
+}
+
+.unsubscribe-card__timestamp {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--sm-color-text-muted);
+}
+
+.unsubscribe-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sm-space-2);
+}

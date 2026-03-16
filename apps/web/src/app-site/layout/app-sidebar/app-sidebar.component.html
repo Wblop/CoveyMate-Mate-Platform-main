@@ -1,0 +1,102 @@
+    <aside class="app-sidebar" [class.is-mobile-open]="isMobileDrawerOpen" [attr.inert]="isSidebarInert ? '' : null">
+      <div class="app-sidebar__brand">
+        <a class="app-sidebar__brand-link" routerLink="/dashboard" (click)="navigate.emit()">
+          <svg class="app-sidebar__brand-mark" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+            <path d="M7 4h22c1.1 0 2 .9 2 2v14c0 7.5-5.5 12.5-13 15-7.5-2.5-13-7.5-13-15V6c0-1.1.9-2 2-2z" fill="rgba(255,255,255,0.22)"/>
+            <rect x="11" y="12" width="14" height="1.6" rx=".8" fill="white" fill-opacity=".88"/>
+            <rect x="11" y="16.5" width="9" height="1.6" rx=".8" fill="white" fill-opacity=".88"/>
+            <path d="M10.5 23l5 5 10-11" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          ConveyMate
+        </a>
+        <p class="app-sidebar__brand-context">Prepare with confidence</p>
+      </div>
+
+      <nav class="app-sidebar__nav" aria-label="Workspace navigation">
+        <a
+          routerLink="/dashboard"
+          routerLinkActive="is-active"
+          #dashboardRla="routerLinkActive"
+          [attr.aria-current]="dashboardRla.isActive ? 'page' : null"
+          (click)="navigate.emit()"
+        >
+          <app-icon name="sliders"></app-icon>
+          <span>Dashboard</span>
+        </a>
+
+        <a
+          routerLink="/reports"
+          routerLinkActive="is-active"
+          #reportsRla="routerLinkActive"
+          [routerLinkActiveOptions]="{ exact: false }"
+          [attr.aria-current]="reportsRla.isActive ? 'page' : null"
+          (click)="navigate.emit()"
+        >
+          <app-icon name="briefcase"></app-icon>
+          <span>Reports</span>
+        </a>
+
+        <a
+          routerLink="/conveyancers"
+          routerLinkActive="is-active"
+          #conveyancersRla="routerLinkActive"
+          [attr.aria-current]="conveyancersRla.isActive ? 'page' : null"
+          (click)="navigate.emit()"
+        >
+          <app-icon name="building"></app-icon>
+          <span>Conveyancers</span>
+        </a>
+
+        <a
+          [attr.href]="siteUrls.marketingHref('/calculators')"
+          (click)="navigate.emit()"
+        >
+          <app-icon name="calculator"></app-icon>
+          <span>Calculators</span>
+        </a>
+
+        <a
+          routerLink="/docs"
+          routerLinkActive="is-active"
+          #docsRla="routerLinkActive"
+          [routerLinkActiveOptions]="{ exact: false }"
+          [attr.aria-current]="docsRla.isActive ? 'page' : null"
+          (click)="navigate.emit()"
+        >
+          <app-icon name="book"></app-icon>
+          <span>Guides</span>
+        </a>
+
+        @if (isAdmin) {
+          <div class="app-sidebar__admin-nav">
+            <a
+              routerLink="/admin"
+              routerLinkActive="is-active"
+              #adminRla="routerLinkActive"
+              [routerLinkActiveOptions]="{ exact: true }"
+              [attr.aria-current]="adminRla.isActive ? 'page' : null"
+              (click)="navigate.emit()"
+            >
+              <app-icon name="wrench"></app-icon>
+              <span>Admin</span>
+            </a>
+            <a
+              routerLink="/admin/seo-engine"
+              routerLinkActive="is-active"
+              #seoEngineRla="routerLinkActive"
+              [attr.aria-current]="seoEngineRla.isActive ? 'page' : null"
+              (click)="navigate.emit()"
+            >
+              <app-icon name="sparkles"></app-icon>
+              <span>SEO Engine</span>
+            </a>
+          </div>
+        }
+      </nav>
+
+      <section class="app-sidebar__assist" aria-label="Support links">
+        <p class="app-sidebar__assist-title">Need help?</p>
+        <a routerLink="/docs" (click)="navigate.emit()">Open quickstart guide</a>
+        <a [attr.href]="siteUrls.marketingHref('/legal/disclaimer')" (click)="navigate.emit()">Legal disclaimer</a>
+      </section>
+    </aside>

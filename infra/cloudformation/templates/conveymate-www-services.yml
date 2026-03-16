@@ -1,0 +1,832 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ConveyMate www application services (CloudFront, S3, ALB, ECS, DNS, and runtime configuration)
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: www
+    AllowedValues: [www]
+  AppName:
+    Type: String
+    Default: conveymate
+  DomainName:
+    Type: String
+    Default: conveymate.com.au
+  AppDomainName:
+    Type: String
+    Default: app.conveymate.com.au
+  HostedZoneId:
+    Type: String
+    Description: Route53 hosted zone ID for the public domain.
+  CloudFrontCertificateArn:
+    Type: String
+    Description: ACM certificate ARN in us-east-1 for the public web domain.
+  ApiImageUri:
+    Type: String
+    Description: Fully qualified ECR image URI for the API container.
+  DesiredCount:
+    Type: Number
+    Default: 1
+    MinValue: 1
+  TaskCpu:
+    Type: String
+    Default: '512'
+    AllowedValues: ['256', '512', '1024', '2048']
+  TaskMemory:
+    Type: String
+    Default: '1024'
+    AllowedValues: ['512', '1024', '2048', '3072', '4096']
+  ApiContainerPort:
+    Type: Number
+    Default: 8081
+  LogRetentionInDays:
+    Type: Number
+    Default: 14
+  PublicMetadataCacheTtlSeconds:
+    Type: Number
+    Default: 300
+  AddressAutocompleteProvider:
+    Type: String
+    Default: nominatim-au
+  GoogleAnalyticsMeasurementId:
+    Type: String
+    Default: ''
+  HealthCheckPath:
+    Type: String
+    Default: /health
+  QuoteRequestSenderLocalPart:
+    Type: String
+    Default: quotes
+  QuoteRequestSenderName:
+    Type: String
+    Default: ConveyMate Quotes
+  QuoteRequestExpiryHours:
+    Type: Number
+    Default: 72
+    MinValue: 1
+    MaxValue: 168
+  EmailSmtpEnableSes:
+    Type: String
+    Default: 'true'
+    AllowedValues: ['true', 'false']
+  EmailSmtpTestAddress:
+    Type: String
+    Default: daimenrees@hotmail.com
+
+Conditions:
+  HasGoogleAnalyticsMeasurementId: !Not [!Equals [!Ref GoogleAnalyticsMeasurementId, '']]
+
+Resources:
+  AlbSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Public ingress for the ConveyMate API ALB.
+      VpcId: !ImportValue
+        Fn::Sub: '${AppName}-${EnvironmentName}-VpcId'
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub '${AppName}-${EnvironmentName}-alb-sg'
+
+  AppRuntimeIngressFromAlb:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !ImportValue
+        Fn::Sub: '${AppName}-${EnvironmentName}-AppRuntimeSecurityGroupId'
+      IpProtocol: tcp
+      FromPort: !Ref ApiContainerPort
+      ToPort: !Ref ApiContainerPort
+      SourceSecurityGroupId: !Ref AlbSecurityGroup
+
+  ApplicationLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub '${AppName}-${EnvironmentName}-api-alb'
+      Scheme: internet-facing
+      Subnets:
+        - !ImportValue
+            Fn::Sub: '${AppName}-${EnvironmentName}-PublicSubnetAId'
+        - !ImportValue
+            Fn::Sub: '${AppName}-${EnvironmentName}-PublicSubnetBId'
+      SecurityGroups:
+        - !Ref AlbSecurityGroup
+      Type: application
+      IpAddressType: ipv4
+      LoadBalancerAttributes:
+        - Key: idle_timeout.timeout_seconds
+          Value: '60'
+
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub '${AppName}-${EnvironmentName}-api-tg'
+      Port: !Ref ApiContainerPort
+      Protocol: HTTP
+      HealthCheckEnabled: true
+      HealthCheckPath: !Ref HealthCheckPath
+      HealthCheckProtocol: HTTP
+      HealthCheckIntervalSeconds: 30
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 5
+      Matcher:
+        HttpCode: 200-399
+      TargetType: ip
+      VpcId: !ImportValue
+        Fn::Sub: '${AppName}-${EnvironmentName}-VpcId'
+
+  ApiLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/ecs/${AppName}/${EnvironmentName}/api'
+      RetentionInDays: !Ref LogRetentionInDays
+
+  TaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${AppName}-${EnvironmentName}-ecs-task-execution-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+
+  HttpListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup
+      LoadBalancerArn: !Ref ApplicationLoadBalancer
+      Port: 80
+      Protocol: HTTP
+
+  AppTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${AppName}-${EnvironmentName}-ecs-task-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub '${AppName}-${EnvironmentName}-app-runtime'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                  - ssm:GetParameters
+                  - ssm:GetParametersByPath
+                Resource:
+                  - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${AppName}/${EnvironmentName}'
+                  - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${AppName}/${EnvironmentName}/*'
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                Resource: !Sub 'arn:aws:s3:::${AppName}-${EnvironmentName}-${AWS::AccountId}-${AWS::Region}-reports/*'
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource: !Sub 'arn:aws:s3:::${AppName}-${EnvironmentName}-${AWS::AccountId}-${AWS::Region}-reports'
+              - Effect: Allow
+                Action:
+                  - sqs:SendMessage
+                  - sqs:GetQueueAttributes
+                Resource:
+                  - !Sub 'arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${AppName}-${EnvironmentName}-seo-commands'
+              - Effect: Allow
+                Action:
+                  - scheduler:GetSchedule
+                  - scheduler:UpdateSchedule
+                Resource:
+                  - !Sub 'arn:aws:scheduler:${AWS::Region}:${AWS::AccountId}:schedule/default/${AppName}-${EnvironmentName}-seo-generate-article'
+                  - !Sub 'arn:aws:scheduler:${AWS::Region}:${AWS::AccountId}:schedule/default/${AppName}-${EnvironmentName}-seo-publish-next-article'
+                  - !Sub 'arn:aws:scheduler:${AWS::Region}:${AWS::AccountId}:schedule/default/${AppName}-${EnvironmentName}-seo-refresh-sitemap'
+              - Effect: Allow
+                Action:
+                  - ses:SendEmail
+                Resource:
+                  - !Sub 'arn:aws:ses:${AWS::Region}:${AWS::AccountId}:identity/${DomainName}'
+                  - !Sub 'arn:aws:ses:${AWS::Region}:${AWS::AccountId}:identity/${EmailSmtpTestAddress}'
+              - Effect: Allow
+                Action:
+                  - textract:AnalyzeDocument
+                  - textract:DetectDocumentText
+                  - textract:GetDocumentAnalysis
+                  - textract:GetDocumentTextDetection
+                  - textract:StartDocumentAnalysis
+                  - textract:StartDocumentTextDetection
+                Resource: '*'
+
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub '${AppName}-${EnvironmentName}-app'
+      Cpu: !Ref TaskCpu
+      Memory: !Ref TaskMemory
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
+      TaskRoleArn: !GetAtt AppTaskRole.Arn
+      RuntimePlatform:
+        CpuArchitecture: ARM64
+        OperatingSystemFamily: LINUX
+      ContainerDefinitions:
+        - Name: api
+          Image: !Ref ApiImageUri
+          Essential: true
+          PortMappings:
+            - ContainerPort: !Ref ApiContainerPort
+              Protocol: tcp
+          Environment:
+            - Name: ASPNETCORE_URLS
+              Value: !Sub 'http://+:${ApiContainerPort}'
+            - Name: DOTNET_ENVIRONMENT
+              Value: Production
+            - Name: ConveyMate__ConfigEnvironment
+              Value: !Ref EnvironmentName
+            - Name: AWS_REGION
+              Value: !Ref AWS::Region
+            - Name: AWS_DEFAULT_REGION
+              Value: !Ref AWS::Region
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref ApiLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ecs
+
+  Service:
+    Type: AWS::ECS::Service
+    DependsOn:
+      - HttpListener
+    Properties:
+      Cluster: !ImportValue
+        Fn::Sub: '${AppName}-${EnvironmentName}-EcsClusterArn'
+      DesiredCount: !Ref DesiredCount
+      LaunchType: FARGATE
+      PlatformVersion: LATEST
+      EnableExecuteCommand: true
+      HealthCheckGracePeriodSeconds: 120
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 0
+        DeploymentCircuitBreaker:
+          Enable: false
+          Rollback: false
+        DeploymentCircuitBreaker:
+          Enable: true
+          Rollback: true
+      TaskDefinition: !Ref TaskDefinition
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          SecurityGroups:
+            - !ImportValue
+                Fn::Sub: '${AppName}-${EnvironmentName}-AppRuntimeSecurityGroupId'
+          Subnets:
+            - !ImportValue
+                Fn::Sub: '${AppName}-${EnvironmentName}-AppSubnetAId'
+            - !ImportValue
+                Fn::Sub: '${AppName}-${EnvironmentName}-AppSubnetBId'
+      LoadBalancers:
+        - ContainerName: api
+          ContainerPort: !Ref ApiContainerPort
+          TargetGroupArn: !Ref TargetGroup
+
+  WebsiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${AppName}-${EnvironmentName}-${AWS::AccountId}-${AWS::Region}-website'
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpireNonCurrentWebsiteObjects
+            Status: Enabled
+            NoncurrentVersionExpiration:
+              NoncurrentDays: 30
+
+  WebsiteOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Description: Access control for the ConveyMate static website bucket.
+        Name: !Sub '${AppName}-${EnvironmentName}-website-oac'
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  WebsiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WebsiteBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowCloudFrontRead
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action:
+              - s3:GetObject
+            Resource: !Sub '${WebsiteBucket.Arn}/*'
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${WebsiteDistribution}'
+
+  SpaRewriteFunction:
+    Type: AWS::CloudFront::Function
+    Properties:
+      Name: !Sub '${AppName}-${EnvironmentName}-spa-rewrite'
+      AutoPublish: true
+      FunctionConfig:
+        Comment: Rewrites known public content routes to prerendered HTML and redirects app-host routes to the authenticated frontend.
+        Runtime: cloudfront-js-2.0
+      FunctionCode: |
+        function isAppOnlyRoute(uri) {
+          return uri === '/signin' ||
+            uri === '/signup' ||
+            uri === '/forgot-password' ||
+            uri === '/google/callback' ||
+            uri === '/dashboard' ||
+            uri.startsWith('/dashboard/') ||
+            uri === '/reports' ||
+            uri.startsWith('/reports/') ||
+            uri === '/new-report' ||
+            uri.startsWith('/new-report/') ||
+            uri === '/quotes' ||
+            uri.startsWith('/quotes/') ||
+            uri === '/conveyancers' ||
+            uri.startsWith('/conveyancers/') ||
+            uri === '/docs' ||
+            uri.startsWith('/docs/') ||
+            uri === '/admin' ||
+            uri.startsWith('/admin/') ||
+            uri === '/account' ||
+            uri.startsWith('/account/');
+        }
+
+        function isPrerenderedMarketingRoute(uri) {
+          return uri === '/create-report' ||
+            uri === '/guides' ||
+            uri.startsWith('/guides/') ||
+            uri === '/insights' ||
+            uri.startsWith('/insights/') ||
+            uri === '/calculators' ||
+            uri === '/legal/privacy' ||
+            uri === '/legal/terms' ||
+            uri === '/legal/disclaimer' ||
+            uri === '/legal/accessibility';
+        }
+
+        function toQueryString(querystring) {
+          var pairs = [];
+
+          for (var key in querystring) {
+            if (!Object.prototype.hasOwnProperty.call(querystring, key)) {
+              continue;
+            }
+
+            var entry = querystring[key];
+            if (entry.multiValue && entry.multiValue.length > 0) {
+              for (var i = 0; i < entry.multiValue.length; i++) {
+                var item = entry.multiValue[i];
+                pairs.push(item.value === '' ? key : key + '=' + item.value);
+              }
+              continue;
+            }
+
+            pairs.push(entry.value === '' ? key : key + '=' + entry.value);
+          }
+
+          return pairs.length > 0 ? '?' + pairs.join('&') : '';
+        }
+
+        function redirectToAppHost(request) {
+          return {
+            statusCode: 307,
+            statusDescription: 'Temporary Redirect',
+            headers: {
+              location: { value: 'https://app.conveymate.com.au' + request.uri + toQueryString(request.querystring) },
+              'cache-control': { value: 'public, max-age=300' }
+            }
+          };
+        }
+
+        function handler(event) {
+          var request = event.request;
+          var uri = request.uri;
+
+          if (isAppOnlyRoute(uri)) {
+            return redirectToAppHost(request);
+          }
+
+          if (uri.endsWith('/')) {
+            request.uri += 'index.html';
+            return request;
+          }
+
+          if (isPrerenderedMarketingRoute(uri)) {
+            request.uri += '/index.html';
+            return request;
+          }
+
+          if (uri.indexOf('.') === -1) {
+            request.uri = '/index.html';
+          }
+
+          return request;
+        }
+
+  WebsiteCachePolicy:
+    Type: AWS::CloudFront::CachePolicy
+    Properties:
+      CachePolicyConfig:
+        Name: !Sub '${AppName}-${EnvironmentName}-website-cache'
+        Comment: Cache policy for static website assets.
+        DefaultTTL: 86400
+        MaxTTL: 31536000
+        MinTTL: 0
+        ParametersInCacheKeyAndForwardedToOrigin:
+          CookiesConfig:
+            CookieBehavior: none
+          EnableAcceptEncodingBrotli: true
+          EnableAcceptEncodingGzip: true
+          HeadersConfig:
+            HeaderBehavior: none
+          QueryStringsConfig:
+            QueryStringBehavior: none
+
+  ApiCachePolicy:
+    Type: AWS::CloudFront::CachePolicy
+    Properties:
+      CachePolicyConfig:
+        Name: !Sub '${AppName}-${EnvironmentName}-api-cache'
+        Comment: Cache policy for dynamic API requests.
+        DefaultTTL: 0
+        MaxTTL: 0
+        MinTTL: 0
+        ParametersInCacheKeyAndForwardedToOrigin:
+          CookiesConfig:
+            CookieBehavior: none
+          EnableAcceptEncodingBrotli: false
+          EnableAcceptEncodingGzip: false
+          HeadersConfig:
+            HeaderBehavior: none
+          QueryStringsConfig:
+            QueryStringBehavior: none
+
+  ApiOriginRequestPolicy:
+    Type: AWS::CloudFront::OriginRequestPolicy
+    Properties:
+      OriginRequestPolicyConfig:
+        Name: !Sub '${AppName}-${EnvironmentName}-api-origin-request'
+        Comment: Forward dynamic request context to the API origin.
+        CookiesConfig:
+          CookieBehavior: all
+        HeadersConfig:
+          HeaderBehavior: allViewer
+        QueryStringsConfig:
+          QueryStringBehavior: all
+
+  WebsiteDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: !Sub '${AppName} ${EnvironmentName} static site and API edge'
+        Aliases:
+          - !Ref DomainName
+        DefaultRootObject: index.html
+        HttpVersion: http2and3
+        IPV6Enabled: true
+        PriceClass: PriceClass_100
+        Origins:
+          - Id: website-origin
+            DomainName: !GetAtt WebsiteBucket.RegionalDomainName
+            OriginAccessControlId: !GetAtt WebsiteOriginAccessControl.Id
+            S3OriginConfig: {}
+          - Id: api-origin
+            DomainName: !GetAtt ApplicationLoadBalancer.DNSName
+            CustomOriginConfig:
+              HTTPPort: 80
+              HTTPSPort: 443
+              OriginProtocolPolicy: http-only
+              OriginSSLProtocols:
+                - TLSv1.2
+        DefaultCacheBehavior:
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          CachedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          CachePolicyId: !Ref WebsiteCachePolicy
+          Compress: true
+          FunctionAssociations:
+            - EventType: viewer-request
+              FunctionARN: !GetAtt SpaRewriteFunction.FunctionARN
+          TargetOriginId: website-origin
+          ViewerProtocolPolicy: redirect-to-https
+        CacheBehaviors:
+          - PathPattern: api/*
+            AllowedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+              - PUT
+              - POST
+              - PATCH
+              - DELETE
+            CachedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            CachePolicyId: !Ref ApiCachePolicy
+            Compress: true
+            OriginRequestPolicyId: !Ref ApiOriginRequestPolicy
+            TargetOriginId: api-origin
+            ViewerProtocolPolicy: redirect-to-https
+          - PathPattern: user/*
+            AllowedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+              - PUT
+              - POST
+              - PATCH
+              - DELETE
+            CachedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            CachePolicyId: !Ref ApiCachePolicy
+            Compress: true
+            OriginRequestPolicyId: !Ref ApiOriginRequestPolicy
+            TargetOriginId: api-origin
+            ViewerProtocolPolicy: redirect-to-https
+          - PathPattern: metadataconfiguration
+            AllowedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            CachedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            CachePolicyId: !Ref ApiCachePolicy
+            Compress: true
+            OriginRequestPolicyId: !Ref ApiOriginRequestPolicy
+            TargetOriginId: api-origin
+            ViewerProtocolPolicy: redirect-to-https
+          - PathPattern: health
+            AllowedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            CachedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            CachePolicyId: !Ref ApiCachePolicy
+            Compress: true
+            OriginRequestPolicyId: !Ref ApiOriginRequestPolicy
+            TargetOriginId: api-origin
+            ViewerProtocolPolicy: redirect-to-https
+        Restrictions:
+          GeoRestriction:
+            RestrictionType: none
+        ViewerCertificate:
+          AcmCertificateArn: !Ref CloudFrontCertificateArn
+          MinimumProtocolVersion: TLSv1.2_2021
+          SslSupportMethod: sni-only
+
+  WebsiteDnsRecordA:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Ref DomainName
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt WebsiteDistribution.DomainName
+        HostedZoneId: Z2FDTNDATAQYW2
+
+  WebsiteDnsRecordAaaa:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Ref DomainName
+      Type: AAAA
+      AliasTarget:
+        DNSName: !GetAtt WebsiteDistribution.DomainName
+        HostedZoneId: Z2FDTNDATAQYW2
+
+  SesDomainIdentity:
+    Type: AWS::SES::EmailIdentity
+    Properties:
+      EmailIdentity: !Ref DomainName
+      DkimAttributes:
+        SigningEnabled: true
+      MailFromAttributes:
+        BehaviorOnMxFailure: USE_DEFAULT_VALUE
+        MailFromDomain: !Sub 'mail.${DomainName}'
+
+  SesDkimRecord1:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !GetAtt SesDomainIdentity.DkimDNSTokenName1
+      Type: CNAME
+      TTL: 300
+      ResourceRecords:
+        - !GetAtt SesDomainIdentity.DkimDNSTokenValue1
+
+  SesDkimRecord2:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !GetAtt SesDomainIdentity.DkimDNSTokenName2
+      Type: CNAME
+      TTL: 300
+      ResourceRecords:
+        - !GetAtt SesDomainIdentity.DkimDNSTokenValue2
+
+  SesDkimRecord3:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !GetAtt SesDomainIdentity.DkimDNSTokenName3
+      Type: CNAME
+      TTL: 300
+      ResourceRecords:
+        - !GetAtt SesDomainIdentity.DkimDNSTokenValue3
+
+  SesMailFromMxRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Sub 'mail.${DomainName}'
+      Type: MX
+      TTL: 300
+      ResourceRecords:
+        - !Sub '10 feedback-smtp.${AWS::Region}.amazonses.com'
+
+  SesMailFromSpfRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Sub 'mail.${DomainName}'
+      Type: TXT
+      TTL: 300
+      ResourceRecords:
+        - '"v=spf1 include:amazonses.com ~all"'
+
+  SsmPublicApiBaseUrl:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/${AppName}/${EnvironmentName}/publicmetadata/apibaseurl'
+      Type: String
+      Value: /
+      Description: Public API base URL used by the web frontend
+
+  SsmPublicCacheTtlSeconds:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/${AppName}/${EnvironmentName}/publicmetadata/cachettlseconds'
+      Type: String
+      Value: !Ref PublicMetadataCacheTtlSeconds
+      Description: Public metadata cache TTL in seconds
+
+  SsmPublicAddressAutocompleteProvider:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/${AppName}/${EnvironmentName}/publicmetadata/addressautocompleteprovider'
+      Type: String
+      Value: !Ref AddressAutocompleteProvider
+      Description: Public metadata address autocomplete provider
+
+  SsmPublicGoogleAnalyticsMeasurementId:
+    Type: AWS::SSM::Parameter
+    Condition: HasGoogleAnalyticsMeasurementId
+    Properties:
+      Name: !Sub '/${AppName}/${EnvironmentName}/publicmetadata/googleanalyticsmeasurementid'
+      Type: String
+      Value: !Ref GoogleAnalyticsMeasurementId
+      Description: Public metadata GA4 measurement ID
+
+  SsmCorsAllowedOrigins:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/${AppName}/${EnvironmentName}/cors/allowedorigins'
+      Type: String
+      Value: !Sub 'https://${DomainName},https://${AppDomainName}'
+      Description: Allowed browser origins for the API
+
+  SsmAppBaseUrl:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/${AppName}/${EnvironmentName}/app/baseurl'
+      Type: String
+      Value: !Sub 'https://${AppDomainName}'
+      Description: Public application base URL
+
+  SsmEmailSmtpEnableSes:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/${AppName}/${EnvironmentName}/email/smtp/enableses'
+      Type: String
+      Value: !Ref EmailSmtpEnableSes
+      Description: Redirect SES sandbox delivery to the configured test address
+
+  SsmEmailSmtpTestAddress:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/${AppName}/${EnvironmentName}/email/smtp/testaddress'
+      Type: String
+      Value: !Ref EmailSmtpTestAddress
+      Description: Verified recipient used for SES sandbox email testing
+
+  SsmQuoteRequestEmailMode:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/${AppName}/${EnvironmentName}/quoterequestemail/mode'
+      Type: String
+      Value: ses
+      Description: Quote request delivery mode for the API
+
+  SsmQuoteRequestEmailFromName:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/${AppName}/${EnvironmentName}/quoterequestemail/fromname'
+      Type: String
+      Value: !Ref QuoteRequestSenderName
+      Description: Display name used for quote request emails
+
+  SsmQuoteRequestEmailFromEmail:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/${AppName}/${EnvironmentName}/quoterequestemail/fromemail'
+      Type: String
+      Value: !Sub '${QuoteRequestSenderLocalPart}@${DomainName}'
+      Description: Sender email address used for quote request emails
+
+  SsmQuoteRequestEmailRequestExpiryHours:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/${AppName}/${EnvironmentName}/quoterequestemail/requestexpiryhours'
+      Type: String
+      Value: !Ref QuoteRequestExpiryHours
+      Description: Quote request response window in hours
+
+Outputs:
+  AppUrl:
+    Value: !Sub 'https://${DomainName}'
+  AlbDnsName:
+    Value: !GetAtt ApplicationLoadBalancer.DNSName
+  WebsiteBucketName:
+    Value: !Ref WebsiteBucket
+  CloudFrontDistributionId:
+    Value: !Ref WebsiteDistribution
+  CloudFrontDomainName:
+    Value: !GetAtt WebsiteDistribution.DomainName
+  AppTaskRoleArn:
+    Value: !GetAtt AppTaskRole.Arn
+  QuoteRequestSenderEmail:
+    Value: !Sub '${QuoteRequestSenderLocalPart}@${DomainName}'

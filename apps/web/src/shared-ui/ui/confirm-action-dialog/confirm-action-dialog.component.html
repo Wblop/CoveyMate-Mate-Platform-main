@@ -1,0 +1,34 @@
+<div class="confirm-dialog-overlay" role="presentation" (click)="onOverlayClick($event)">
+  <section class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="confirm-action-title">
+    <header class="confirm-dialog__header">
+      <div>
+        <p class="confirm-dialog__eyebrow">{{ tone === 'danger' ? 'Permanent action' : 'Workspace action' }}</p>
+        <h2 id="confirm-action-title" class="confirm-dialog__title">{{ title }}</h2>
+      </div>
+      <button type="button" class="confirm-dialog__close" aria-label="Close confirmation dialog" [disabled]="busy" (click)="cancel()">✕</button>
+    </header>
+
+    <div class="confirm-dialog__body">
+      <p class="confirm-dialog__description">{{ description }}</p>
+      @if (detail) {
+        <p class="confirm-dialog__detail">{{ detail }}</p>
+      }
+    </div>
+
+    <footer class="confirm-dialog__actions">
+      <button type="button" class="confirm-dialog__btn confirm-dialog__btn--ghost" [disabled]="busy" (click)="cancel()">
+        {{ cancelLabel }}
+      </button>
+      <button
+        type="button"
+        class="confirm-dialog__btn"
+        [class.confirm-dialog__btn--danger]="tone === 'danger'"
+        [class.confirm-dialog__btn--primary]="tone !== 'danger'"
+        [disabled]="busy"
+        (click)="confirm()"
+      >
+        {{ busy ? 'Working...' : confirmLabel }}
+      </button>
+    </footer>
+  </section>
+</div>

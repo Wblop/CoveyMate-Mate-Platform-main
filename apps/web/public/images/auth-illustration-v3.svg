@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 640" fill="none" aria-hidden="true">
+  <defs>
+    <filter id="auth-v3-shadow" x="-24%" y="-24%" width="172%" height="172%">
+      <feDropShadow dx="0" dy="24" stdDeviation="26" flood-color="#07131f" flood-opacity="0.24" />
+    </filter>
+    <radialGradient id="auth-v3-glow-left" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#d7edf8" stop-opacity="0.44" />
+      <stop offset="58%" stop-color="#d7edf8" stop-opacity="0.12" />
+      <stop offset="100%" stop-color="#d7edf8" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="auth-v3-glow-right" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#98cce8" stop-opacity="0.34" />
+      <stop offset="62%" stop-color="#98cce8" stop-opacity="0.1" />
+      <stop offset="100%" stop-color="#98cce8" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="auth-v3-sheet-main" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.24" />
+      <stop offset="100%" stop-color="#d8ebf7" stop-opacity="0.08" />
+    </linearGradient>
+    <linearGradient id="auth-v3-sheet-soft" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f8fbff" stop-opacity="0.17" />
+      <stop offset="100%" stop-color="#d7e9f5" stop-opacity="0.05" />
+    </linearGradient>
+  </defs>
+
+  <g opacity="0.86">
+    <circle cx="48" cy="492" r="234" fill="url(#auth-v3-glow-left)" />
+    <circle cx="566" cy="232" r="176" fill="url(#auth-v3-glow-right)" />
+  </g>
+
+  <g opacity="0.2">
+    <path d="M-38 462c154-82 318-98 488-48 170 50 306 54 450-20" stroke="#dceef9" stroke-width="1.6" stroke-linecap="round" />
+    <path d="M20 562c170-70 334-76 494-20 160 56 290 60 410 26" stroke="#d0e6f4" stroke-width="1.5" stroke-linecap="round" />
+    <path d="M126 346c122-48 236-56 342-18 106 38 214 48 330 16" stroke="#d7ebf8" stroke-width="1.4" stroke-linecap="round" />
+    <circle cx="112" cy="470" r="166" stroke="#e8f4fc" stroke-width="1.4" />
+    <circle cx="112" cy="470" r="238" stroke="#e8f4fc" stroke-width="1.1" />
+    <circle cx="548" cy="246" r="136" stroke="#e8f4fc" stroke-width="1.2" />
+  </g>
+
+  <g transform="translate(-92 398) rotate(-14 112 126)" filter="url(#auth-v3-shadow)">
+    <rect x="10" y="16" width="204" height="252" rx="28" fill="#07131f" fill-opacity="0.1" />
+    <rect x="0" y="0" width="204" height="252" rx="28" fill="url(#auth-v3-sheet-soft)" stroke="#eef7ff" stroke-opacity="0.22" stroke-width="1.6" />
+    <rect x="24" y="28" width="92" height="14" rx="7" fill="#dcecf8" fill-opacity="0.22" />
+    <rect x="24" y="60" width="128" height="9" rx="4.5" fill="#dcecf8" fill-opacity="0.14" />
+    <rect x="24" y="80" width="106" height="9" rx="4.5" fill="#dcecf8" fill-opacity="0.1" />
+    <rect x="24" y="118" width="128" height="42" rx="14" fill="#8fc0de" fill-opacity="0.1" />
+  </g>
+
+  <g transform="translate(334 184)" filter="url(#auth-v3-shadow)">
+    <rect x="16" y="22" width="274" height="338" rx="36" fill="#07131f" fill-opacity="0.16" />
+    <rect x="0" y="0" width="274" height="338" rx="36" fill="url(#auth-v3-sheet-main)" stroke="#eef7ff" stroke-opacity="0.38" stroke-width="2" />
+    <rect x="32" y="40" width="142" height="18" rx="9" fill="#dcecf8" fill-opacity="0.42" />
+    <rect x="32" y="86" width="196" height="12" rx="6" fill="#dcecf8" fill-opacity="0.22" />
+    <rect x="32" y="110" width="170" height="12" rx="6" fill="#dcecf8" fill-opacity="0.16" />
+    <rect x="32" y="164" width="206" height="62" rx="20" fill="#86badb" fill-opacity="0.17" stroke="#b7d7eb" stroke-opacity="0.34" />
+    <rect x="52" y="186" width="134" height="8" rx="4" fill="#edf7ff" fill-opacity="0.42" />
+    <rect x="52" y="202" width="92" height="8" rx="4" fill="#d7ecf8" fill-opacity="0.24" />
+    <rect x="32" y="252" width="148" height="12" rx="6" fill="#dcecf8" fill-opacity="0.22" />
+    <rect x="32" y="276" width="118" height="12" rx="6" fill="#dcecf8" fill-opacity="0.14" />
+    <rect x="32" y="300" width="170" height="12" rx="6" fill="#dcecf8" fill-opacity="0.18" />
+    <circle cx="216" cy="246" r="30" fill="#0b3c5d" fill-opacity="0.94" />
+    <path d="m203 246 9 9 18-20" stroke="#ffffff" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+
+  <g transform="translate(574 380) rotate(10 92 116)" filter="url(#auth-v3-shadow)">
+    <rect x="10" y="18" width="184" height="228" rx="28" fill="#07131f" fill-opacity="0.12" />
+    <rect x="0" y="0" width="184" height="228" rx="28" fill="url(#auth-v3-sheet-soft)" stroke="#eef7ff" stroke-opacity="0.3" stroke-width="1.8" />
+    <rect x="24" y="32" width="90" height="14" rx="7" fill="#dcecf8" fill-opacity="0.32" />
+    <rect x="24" y="66" width="124" height="9" rx="4.5" fill="#dcecf8" fill-opacity="0.18" />
+    <rect x="24" y="86" width="106" height="9" rx="4.5" fill="#dcecf8" fill-opacity="0.12" />
+    <rect x="24" y="122" width="128" height="42" rx="14" fill="#86badb" fill-opacity="0.14" />
+  </g>
+
+  <g transform="translate(246 442) rotate(-8 82 98)" filter="url(#auth-v3-shadow)">
+    <rect x="8" y="12" width="164" height="196" rx="24" fill="#07131f" fill-opacity="0.1" />
+    <rect x="0" y="0" width="164" height="196" rx="24" fill="url(#auth-v3-sheet-soft)" stroke="#eef7ff" stroke-opacity="0.24" stroke-width="1.6" />
+    <rect x="20" y="26" width="72" height="13" rx="6.5" fill="#dcecf8" fill-opacity="0.28" />
+    <rect x="20" y="56" width="100" height="8" rx="4" fill="#dcecf8" fill-opacity="0.14" />
+    <rect x="20" y="74" width="88" height="8" rx="4" fill="#dcecf8" fill-opacity="0.1" />
+    <rect x="20" y="106" width="100" height="34" rx="12" fill="#86badb" fill-opacity="0.12" />
+  </g>
+
+  <g opacity="0.82">
+    <rect x="518" y="130" width="94" height="38" rx="14" fill="#f6fbff" fill-opacity="0.11" stroke="#eef7ff" stroke-opacity="0.16" />
+    <circle cx="538" cy="149" r="6" fill="#84d6ad" />
+    <rect x="552" y="143" width="38" height="7" rx="3.5" fill="#eef7ff" fill-opacity="0.24" />
+    <rect x="552" y="155" width="24" height="6" rx="3" fill="#eef7ff" fill-opacity="0.14" />
+  </g>
+
+  <g opacity="0.7">
+    <rect x="190" y="306" width="86" height="36" rx="14" fill="#f6fbff" fill-opacity="0.09" stroke="#eef7ff" stroke-opacity="0.14" />
+    <circle cx="210" cy="324" r="6" fill="#f0be71" />
+    <rect x="224" y="318" width="32" height="7" rx="3.5" fill="#eef7ff" fill-opacity="0.22" />
+    <rect x="224" y="330" width="22" height="6" rx="3" fill="#eef7ff" fill-opacity="0.12" />
+  </g>
+</svg>

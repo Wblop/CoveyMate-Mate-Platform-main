@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" fill="none">
+  <defs>
+    <radialGradient id="rt-bg" cx="38%" cy="30%" r="72%">
+      <stop offset="0%" stop-color="#134866"/>
+      <stop offset="55%" stop-color="#0b3251"/>
+      <stop offset="100%" stop-color="#06192a"/>
+    </radialGradient>
+    <radialGradient id="rt-ring" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(26,123,164,0)" />
+      <stop offset="70%" stop-color="rgba(26,123,164,0.06)"/>
+      <stop offset="100%" stop-color="rgba(26,123,164,0.22)"/>
+    </radialGradient>
+    <radialGradient id="rt-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(42,180,255,0.28)"/>
+      <stop offset="100%" stop-color="rgba(42,180,255,0)"/>
+    </radialGradient>
+    <filter id="rt-blur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="60"/>
+    </filter>
+    <filter id="rt-blur-sm" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="24"/>
+    </filter>
+    <pattern id="rt-dots" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.4" fill="rgba(255,255,255,0.06)"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1080" height="1080" fill="url(#rt-bg)"/>
+  <rect width="1080" height="1080" fill="url(#rt-dots)"/>
+
+  <!-- Atmospheric glows -->
+  <ellipse cx="540" cy="340" rx="460" ry="360" fill="rgba(26,123,164,0.14)" filter="url(#rt-blur)"/>
+  <ellipse cx="280" cy="820" rx="320" ry="240" fill="rgba(11,60,93,0.6)" filter="url(#rt-blur)"/>
+  <ellipse cx="820" cy="200" rx="220" ry="180" fill="rgba(42,100,140,0.25)" filter="url(#rt-blur-sm)"/>
+
+  <!-- Decorative outer rings -->
+  <circle cx="540" cy="460" r="330" stroke="rgba(255,255,255,0.04)" stroke-width="1.5"/>
+  <circle cx="540" cy="460" r="280" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+  <circle cx="540" cy="460" r="230" stroke="rgba(26,123,164,0.18)" stroke-width="1.5"/>
+
+  <!-- Centre glow orb behind number -->
+  <ellipse cx="540" cy="460" rx="180" ry="180" fill="url(#rt-glow)" filter="url(#rt-blur-sm)"/>
+
+  <!-- Eyebrow chip -->
+  <rect x="390" y="160" width="300" height="44" rx="22" fill="rgba(26,123,164,0.22)" stroke="rgba(42,156,200,0.40)" stroke-width="1.5"/>
+  <text x="540" y="188" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="18" font-weight="700" fill="rgba(160,220,255,0.90)" letter-spacing="0.12em">CONTRACT REVIEW</text>
+
+  <!-- Big number -->
+  <text x="540" y="530" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="300" font-weight="800" fill="#ffffff" letter-spacing="-0.06em" opacity="0.97">8</text>
+
+  <!-- Unit label -->
+  <text x="540" y="596" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="52" font-weight="700" fill="rgba(160,210,240,0.85)" letter-spacing="0.08em">MINUTES</text>
+
+  <!-- Divider line -->
+  <rect x="400" y="636" width="280" height="2" rx="1" fill="rgba(255,255,255,0.12)"/>
+
+  <!-- Supporting copy -->
+  <text x="540" y="710" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="38" font-weight="500" fill="rgba(255,255,255,0.72)">Your contract pack reviewed,</text>
+  <text x="540" y="758" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="38" font-weight="500" fill="rgba(255,255,255,0.72)">flagged, and ready to discuss.</text>
+
+  <!-- Sub-label -->
+  <text x="540" y="826" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="26" fill="rgba(120,180,220,0.65)" letter-spacing="0.02em">Typical turnaround · all Australian states</text>
+
+  <!-- Shield logo mark -->
+  <line x1="100" y1="876" x2="980" y2="876" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <g transform="translate(474, 900)">
+    <path d="M50 4 L16 15 V32 C16 50 30 62 50 68 C70 62 84 50 84 32 V15 Z" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+    <path d="M34 44 L44 54 L66 32" stroke="rgba(255,255,255,0.70)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="540" y="960" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="38" font-weight="700" fill="rgba(255,255,255,0.88)" letter-spacing="-0.01em">ConveyMate</text>
+  <text x="540" y="995" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="20" font-weight="700" fill="rgba(120,180,220,0.55)" letter-spacing="0.10em">PREPARE WITH CONFIDENCE</text>
+
+  <!-- Bottom disclaimer -->
+  <text x="540" y="1036" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="18" fill="rgba(255,255,255,0.28)">conveymate.com.au · Not legal advice</text>
+</svg>

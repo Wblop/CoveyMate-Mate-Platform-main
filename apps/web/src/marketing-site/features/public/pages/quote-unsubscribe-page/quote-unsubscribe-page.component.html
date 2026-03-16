@@ -1,0 +1,35 @@
+<section class="sm-page-section">
+  <div class="sm-container unsubscribe-layout">
+    <ui-page-header
+      eyebrow="Quote requests"
+      title="Email preferences updated"
+      description="Manage whether your firm receives future ConveyMate quote requests."
+    ></ui-page-header>
+
+    @if (loading()) {
+      <ui-skeleton-block [height]="180"></ui-skeleton-block>
+    } @else if (errorMessage()) {
+      <ui-alert-banner tone="error" title="Could not update preference" [message]="errorMessage()"></ui-alert-banner>
+    } @else if (result(); as result) {
+      <section class="sm-surface unsubscribe-card">
+        <p class="sm-eyebrow">Preference saved</p>
+        <h2>{{ result.conveyancerDisplayName || 'Conveyancer' }} will no longer receive new quote requests.</h2>
+        <p class="sm-muted">
+          Your directory listing is unchanged. This only stops future ConveyMate quote-request emails and removes the firm from shortlisting.
+        </p>
+
+        @if (result.quoteRequestsDisabledAtUtc) {
+          <p class="unsubscribe-card__timestamp">
+            Updated {{ result.quoteRequestsDisabledAtUtc | date: 'd MMM yyyy, h:mm a' }}
+          </p>
+        }
+
+        <div class="unsubscribe-card__actions">
+          <a routerLink="/">
+            <ui-button>Return to ConveyMate</ui-button>
+          </a>
+        </div>
+      </section>
+    }
+  </div>
+</section>

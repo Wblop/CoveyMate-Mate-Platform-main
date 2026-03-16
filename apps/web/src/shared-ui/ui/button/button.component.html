@@ -1,0 +1,22 @@
+<button
+  [attr.type]="type"
+  [routerLink]="routerLink"
+  [fragment]="fragment ?? undefined"
+  [queryParams]="queryParams ?? undefined"
+  [attr.title]="title || null"
+  [disabled]="disabled"
+  [attr.aria-busy]="loading ? true : null"
+  class="ui-button"
+  [ngClass]="{
+    'ui-button--primary': variant === 'primary',
+    'ui-button--secondary': variant === 'secondary',
+    'ui-button--tertiary': variant === 'tertiary',
+    'ui-button--destructive': variant === 'destructive'
+  }"
+  (click)="pressed.emit($event)"
+>
+  @if (loading) {
+    <span class="ui-button__spinner" aria-hidden="true"></span>
+  }
+  <ng-content></ng-content>
+</button>

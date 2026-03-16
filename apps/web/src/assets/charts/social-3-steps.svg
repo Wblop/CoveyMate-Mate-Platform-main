@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" fill="none">
+  <defs>
+    <linearGradient id="s3-bg" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0%" stop-color="#0d3a56"/>
+      <stop offset="50%" stop-color="#092d46"/>
+      <stop offset="100%" stop-color="#061d30"/>
+    </linearGradient>
+    <radialGradient id="s3-glow1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(26,123,164,0.30)"/>
+      <stop offset="100%" stop-color="rgba(26,123,164,0)"/>
+    </radialGradient>
+    <radialGradient id="s3-glow2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(42,156,82,0.22)"/>
+      <stop offset="100%" stop-color="rgba(42,156,82,0)"/>
+    </radialGradient>
+    <filter id="s3-blur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="50"/>
+    </filter>
+    <filter id="s3-shadow-card" x="-8%" y="-8%" width="125%" height="130%">
+      <feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#000000" flood-opacity="0.22"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1080" height="1080" fill="url(#s3-bg)"/>
+
+  <!-- Atmospheric glows -->
+  <ellipse cx="200" cy="380" rx="340" ry="280" fill="url(#s3-glow1)" filter="url(#s3-blur)"/>
+  <ellipse cx="900" cy="700" rx="300" ry="250" fill="url(#s3-glow2)" filter="url(#s3-blur)"/>
+
+  <!-- Subtle dot pattern -->
+  <g opacity="0.07">
+    <line x1="0" y1="360" x2="1080" y2="360" stroke="#7aa9c7" stroke-width="1"/>
+    <line x1="0" y1="720" x2="1080" y2="720" stroke="#7aa9c7" stroke-width="1"/>
+    <line x1="360" y1="0" x2="360" y2="1080" stroke="#7aa9c7" stroke-width="1"/>
+    <line x1="720" y1="0" x2="720" y2="1080" stroke="#7aa9c7" stroke-width="1"/>
+  </g>
+
+  <!-- Header -->
+  <text x="540" y="130" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="22" font-weight="700" fill="rgba(160,210,240,0.70)" letter-spacing="0.14em">HOW IT WORKS</text>
+  <text x="540" y="200" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="56" font-weight="800" fill="#ffffff" letter-spacing="-0.02em">3 steps to being prepared</text>
+  <text x="540" y="254" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="28" font-weight="400" fill="rgba(180,215,235,0.65)">From contract pack to legal handover</text>
+
+  <!-- Connector dots between cards (centered in the 30px gaps: 360-390 and 690-720) -->
+  <circle cx="363" cy="576" r="6" fill="rgba(255,255,255,0.16)"/>
+  <circle cx="375" cy="576" r="6" fill="rgba(255,255,255,0.24)"/>
+  <circle cx="387" cy="576" r="6" fill="rgba(255,255,255,0.32)"/>
+  <circle cx="693" cy="576" r="6" fill="rgba(255,255,255,0.16)"/>
+  <circle cx="705" cy="576" r="6" fill="rgba(255,255,255,0.24)"/>
+  <circle cx="717" cy="576" r="6" fill="rgba(255,255,255,0.32)"/>
+
+  <!-- ── CARD 1: Upload ──────────────────────────────────── -->
+  <rect x="60" y="304" width="300" height="420" rx="28" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" filter="url(#s3-shadow-card)"/>
+  <!-- Step num -->
+  <circle cx="210" cy="366" r="34" fill="rgba(26,123,164,0.22)" stroke="rgba(42,156,200,0.40)" stroke-width="2"/>
+  <text x="210" y="378" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="26" font-weight="800" fill="rgba(160,220,255,0.90)">01</text>
+  <!-- Icon: upload arrow -->
+  <g transform="translate(210, 414)">
+    <circle r="28" fill="rgba(26,123,164,0.18)" stroke="rgba(42,156,200,0.30)" stroke-width="1.5"/>
+    <path d="M0 6 L0 -6" stroke="rgba(255,255,255,0.85)" stroke-width="3" stroke-linecap="round"/>
+    <path d="M-8 -2 L0 -10 L8 -2" stroke="rgba(255,255,255,0.85)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M-14 10 L14 10" stroke="rgba(255,255,255,0.60)" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+  <text x="210" y="494" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="28" font-weight="700" fill="rgba(255,255,255,0.92)" letter-spacing="-0.01em">Upload</text>
+  <text x="210" y="524" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="28" font-weight="700" fill="rgba(255,255,255,0.92)">the pack</text>
+  <text x="210" y="572" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="20" font-weight="400" fill="rgba(180,215,235,0.60)">Contract, annexures,</text>
+  <text x="210" y="598" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="20" font-weight="400" fill="rgba(180,215,235,0.60)">disclosures - all in.</text>
+  <!-- Chip -->
+  <rect x="130" y="672" width="160" height="34" rx="17" fill="rgba(26,123,164,0.22)" stroke="rgba(42,156,200,0.30)" stroke-width="1"/>
+  <text x="210" y="694" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="17" font-weight="700" fill="rgba(160,220,255,0.80)" letter-spacing="0.06em">ANY STATE</text>
+
+  <!-- ── CARD 2: Review ──────────────────────────────────── -->
+  <rect x="390" y="304" width="300" height="420" rx="28" fill="rgba(255,255,255,0.09)" stroke="rgba(255,255,255,0.18)" stroke-width="1.5" filter="url(#s3-shadow-card)"/>
+  <circle cx="540" cy="366" r="34" fill="rgba(26,123,164,0.28)" stroke="rgba(42,156,200,0.50)" stroke-width="2"/>
+  <text x="540" y="378" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="26" font-weight="800" fill="rgba(160,220,255,0.95)">02</text>
+  <!-- Icon: magnifier / processing -->
+  <g transform="translate(540, 442)">
+    <circle r="28" fill="rgba(26,123,164,0.22)" stroke="rgba(42,156,200,0.35)" stroke-width="1.5"/>
+    <circle cx="0" cy="-3" r="10" stroke="rgba(255,255,255,0.82)" stroke-width="2.5" fill="none"/>
+    <path d="M7 4 L14 11" stroke="rgba(255,255,255,0.82)" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M-6 -3 L-2 -3" stroke="rgba(255,255,255,0.55)" stroke-width="2" stroke-linecap="round"/>
+    <path d="M0 -9 L0 -6" stroke="rgba(255,255,255,0.55)" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  <text x="540" y="494" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="28" font-weight="700" fill="rgba(255,255,255,0.95)" letter-spacing="-0.01em">AI reviews</text>
+  <text x="540" y="524" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="28" font-weight="700" fill="rgba(255,255,255,0.95)">the contract</text>
+  <text x="540" y="572" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="20" fill="rgba(180,215,235,0.62)">Flags issues, maps</text>
+  <text x="540" y="598" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="20" fill="rgba(180,215,235,0.62)">clause references.</text>
+  <rect x="460" y="672" width="160" height="34" rx="17" fill="rgba(26,123,164,0.28)" stroke="rgba(42,156,200,0.40)" stroke-width="1"/>
+  <text x="540" y="694" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="17" font-weight="700" fill="rgba(160,220,255,0.88)" letter-spacing="0.06em">~8 MINUTES</text>
+
+  <!-- ── CARD 3: Handover ──────────────────────────────────── -->
+  <rect x="720" y="304" width="300" height="420" rx="28" fill="rgba(42,156,82,0.08)" stroke="rgba(42,156,82,0.22)" stroke-width="1.5" filter="url(#s3-shadow-card)"/>
+  <circle cx="870" cy="366" r="34" fill="rgba(42,156,82,0.20)" stroke="rgba(42,200,100,0.40)" stroke-width="2"/>
+  <text x="870" y="378" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="26" font-weight="800" fill="rgba(120,230,160,0.90)">03</text>
+  <!-- Icon: checkmark doc -->
+  <g transform="translate(870, 442)">
+    <circle r="28" fill="rgba(42,156,82,0.20)" stroke="rgba(42,200,100,0.30)" stroke-width="1.5"/>
+    <rect x="-10" y="-14" width="20" height="24" rx="3" fill="none" stroke="rgba(255,255,255,0.70)" stroke-width="2"/>
+    <path d="M-6 4 L-1 9 L8 0" stroke="rgba(120,230,160,0.90)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </g>
+  <text x="870" y="494" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="28" font-weight="700" fill="rgba(255,255,255,0.95)">Walk into</text>
+  <text x="870" y="524" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="28" font-weight="700" fill="rgba(255,255,255,0.95)">your meeting</text>
+  <text x="870" y="572" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="20" fill="rgba(180,215,235,0.62)">Report in hand, risks</text>
+  <text x="870" y="598" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="20" fill="rgba(180,215,235,0.62)">mapped, questions ready.</text>
+  <rect x="790" y="672" width="160" height="34" rx="17" fill="rgba(42,156,82,0.22)" stroke="rgba(42,200,100,0.35)" stroke-width="1"/>
+  <text x="870" y="694" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="17" font-weight="700" fill="rgba(120,230,160,0.85)" letter-spacing="0.06em">PREPARED</text>
+
+  <!-- Branding -->
+  <line x1="60" y1="792" x2="1020" y2="792" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <g transform="translate(440, 822)">
+    <path d="M50 4 L16 15 V32 C16 50 30 62 50 68 C70 62 84 50 84 32 V15 Z" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.14)" stroke-width="1.2"/>
+    <path d="M34 44 L44 54 L66 32" stroke="rgba(255,255,255,0.65)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="540" y="870" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="40" font-weight="700" fill="rgba(255,255,255,0.88)" letter-spacing="-0.01em">ConveyMate</text>
+  <text x="540" y="910" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="22" font-weight="700" fill="rgba(120,180,220,0.55)" letter-spacing="0.10em">PREPARE WITH CONFIDENCE</text>
+
+  <!-- Disclaimer -->
+  <text x="540" y="990" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="20" fill="rgba(255,255,255,0.22)">conveymate.com.au · Not legal advice · For Australian residential buyers</text>
+</svg>

@@ -1,0 +1,208 @@
+:host {
+  display: block;
+}
+
+.host-redirect {
+  min-height: 100vh;
+  display: grid;
+  align-items: center;
+  background:
+    radial-gradient(48rem 24rem at 50% 12%, rgba(111, 182, 219, 0.18), transparent 68%),
+    linear-gradient(180deg, #f5f9fc 0%, #edf4f8 100%);
+}
+
+.host-redirect__shell {
+  display: flex;
+  justify-content: center;
+}
+
+.host-redirect__panel {
+  width: min(100%, 28rem);
+  display: grid;
+  justify-items: center;
+  gap: 1.1rem;
+  padding: clamp(2rem, 4vw, 3rem) clamp(1.5rem, 4vw, 2.25rem);
+  text-align: center;
+}
+
+.host-redirect__animation,
+.host-redirect__copy,
+.host-redirect__status,
+.host-redirect__manual {
+  position: relative;
+}
+
+.host-redirect__animation {
+  width: 8.5rem;
+  height: 8.5rem;
+  display: grid;
+  place-items: center;
+}
+
+.host-redirect__orbit,
+.host-redirect__glow {
+  position: absolute;
+  border-radius: 50%;
+}
+
+.host-redirect__orbit {
+  inset: 0;
+  border: 1px solid rgba(32, 90, 123, 0.14);
+}
+
+.host-redirect__orbit::before {
+  content: '';
+  position: absolute;
+  top: 0.45rem;
+  left: 50%;
+  width: 0.8rem;
+  height: 0.8rem;
+  margin-left: -0.4rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, #9fe0ff 0%, #4b99c5 58%, #2d739e 100%);
+  box-shadow: 0 0 18px rgba(101, 180, 224, 0.75);
+  animation: host-redirect-orbit 1.6s linear infinite;
+  transform-origin: 0 calc(3.8rem);
+}
+
+.host-redirect__glow {
+  inset: 1.2rem;
+  background: radial-gradient(circle, rgba(104, 182, 219, 0.26) 0%, rgba(104, 182, 219, 0) 72%);
+  animation: host-redirect-breathe 2.2s ease-in-out infinite;
+}
+
+.host-redirect__document {
+  position: relative;
+  width: 4.4rem;
+  height: 5.6rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(160, 194, 214, 0.9);
+  background: linear-gradient(180deg, #fff 0%, #f3f8fb 100%);
+  box-shadow: 0 14px 34px rgba(18, 54, 77, 0.12);
+  display: grid;
+  align-content: start;
+  gap: 0.5rem;
+  padding: 1.4rem 0.8rem 0.9rem;
+  transform-origin: center;
+  animation: host-redirect-document 2.2s ease-in-out infinite;
+}
+
+.host-redirect__document-fold {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 1.2rem;
+  height: 1.2rem;
+  background: linear-gradient(135deg, rgba(194, 220, 236, 0.9) 0%, rgba(239, 247, 251, 0.4) 100%);
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+  border-top-right-radius: 1rem;
+}
+
+.host-redirect__document-line {
+  display: block;
+  height: 0.38rem;
+  border-radius: 999px;
+  background: rgba(84, 124, 148, 0.24);
+}
+
+.host-redirect__document-line--strong {
+  background: linear-gradient(90deg, rgba(40, 114, 155, 0.96) 0%, rgba(97, 169, 209, 0.7) 100%);
+}
+
+.host-redirect__document-line--short {
+  width: 68%;
+}
+
+.host-redirect__panel h1 {
+  margin: 0;
+  color: #0f3148;
+  font-size: clamp(2rem, 4vw, 2.7rem);
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+  max-width: 11ch;
+}
+
+.host-redirect__lead {
+  margin: 0.15rem 0 0;
+  color: #567184;
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 30ch;
+}
+
+.host-redirect__status {
+  margin: 0;
+  color: #1e5d82;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.host-redirect__manual {
+  margin: 0;
+  color: #6e8696;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.host-redirect__manual a {
+  color: #124b6b;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.host-redirect__manual a:hover {
+  color: #0d3953;
+}
+
+@keyframes host-redirect-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes host-redirect-breathe {
+  0%,
+  100% {
+    transform: scale(0.96);
+    opacity: 0.55;
+  }
+
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+}
+
+@keyframes host-redirect-document {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-3deg);
+  }
+
+  50% {
+    transform: translateY(-0.18rem) rotate(3deg);
+  }
+}
+
+@media (max-width: 720px) {
+  .host-redirect {
+    min-height: auto;
+  }
+
+  .host-redirect__panel {
+    padding-block: 4.75rem;
+  }
+
+  .host-redirect__panel h1 {
+    font-size: clamp(1.85rem, 8vw, 2.35rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .host-redirect__orbit::before,
+  .host-redirect__glow,
+  .host-redirect__document {
+    animation: none;
+  }
+}

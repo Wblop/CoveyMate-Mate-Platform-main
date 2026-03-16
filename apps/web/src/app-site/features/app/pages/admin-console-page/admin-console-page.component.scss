@@ -1,0 +1,1080 @@
+    .admin-grid {
+      display: grid;
+      gap: var(--sm-space-4);
+    }
+
+    .section-card {
+      padding: var(--sm-space-4);
+      display: grid;
+      gap: var(--sm-space-4);
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--sm-space-3);
+      padding-bottom: var(--sm-space-3);
+      border-bottom: 1px solid var(--sm-color-border);
+    }
+
+    .section-header__actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: var(--sm-space-2);
+    }
+
+    .section-header h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .section-header p {
+      margin: 6px 0 0;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sm-space-2);
+      align-items: flex-end;
+      padding: var(--sm-space-3);
+      border: 1px solid var(--sm-color-border);
+      border-radius: var(--sm-radius-md);
+      background: linear-gradient(180deg, var(--sm-color-surface-muted) 0%, var(--sm-color-surface) 100%);
+    }
+
+    .toolbar input,
+    .toolbar select {
+      flex: 1 1 240px;
+      min-width: 0;
+      min-height: 44px;
+      border: 1px solid var(--sm-color-border-strong);
+      border-radius: var(--sm-radius-sm);
+      padding: 0 12px;
+      background: var(--sm-color-surface);
+    }
+
+    .toolbar ui-button {
+      display: block;
+      flex: 0 0 auto;
+    }
+
+    .admin-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 6px;
+      border: 1px solid var(--sm-color-border);
+      border-radius: var(--sm-radius-md);
+      background: linear-gradient(180deg, var(--sm-color-surface-muted) 0%, var(--sm-color-surface) 100%);
+    }
+
+    .admin-tab {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: 10px 16px;
+      min-height: 42px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--sm-color-text-muted);
+      cursor: pointer;
+      transition: background-color var(--sm-motion-fast), border-color var(--sm-motion-fast), color var(--sm-motion-fast),
+        box-shadow var(--sm-motion-fast);
+    }
+
+    .admin-tab:hover {
+      color: var(--sm-color-text);
+      background: rgba(255, 255, 255, 0.65);
+    }
+
+    .admin-tab.is-active {
+      color: var(--sm-color-primary);
+      border-color: var(--sm-color-border-strong);
+      background: var(--sm-color-surface);
+      box-shadow: 0 1px 2px rgba(16, 33, 48, 0.08);
+    }
+
+    .table-wrap {
+      position: relative;
+      overflow: auto;
+      border: 1px solid rgba(16, 33, 48, 0.1);
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.96) 100%);
+      box-shadow: 0 18px 38px rgba(15, 27, 40, 0.06);
+      scrollbar-width: thin;
+      scrollbar-color: rgba(11, 60, 93, 0.28) transparent;
+    }
+
+    .table-wrap::-webkit-scrollbar {
+      width: 12px;
+      height: 12px;
+    }
+
+    .table-wrap::-webkit-scrollbar-thumb {
+      background: rgba(11, 60, 93, 0.24);
+      border: 3px solid transparent;
+      border-radius: 999px;
+      background-clip: content-box;
+    }
+
+    .table-wrap::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .admin-table {
+      width: 100%;
+      min-width: 860px;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    .admin-table--feedback {
+      min-width: 860px;
+    }
+
+    .admin-table--audit {
+      min-width: 1080px;
+    }
+
+    .admin-table--notifications {
+      min-width: 940px;
+    }
+
+    .admin-table--conveyancers {
+      min-width: 1100px;
+    }
+
+    .admin-table--documents {
+      min-width: 720px;
+    }
+
+    .col-job {
+      width: 30%;
+    }
+
+    .col-user {
+      width: 20%;
+    }
+
+    .col-status,
+    .col-payment,
+    .col-type {
+      width: 12%;
+    }
+
+    .col-amount,
+    .col-jobs,
+    .col-credits {
+      width: 10%;
+    }
+
+    .col-created,
+    .col-submitted,
+    .col-login {
+      width: 13%;
+    }
+
+    .col-flags {
+      width: 18%;
+    }
+
+    .col-action {
+      width: 72px;
+    }
+
+    .col-action-wide {
+      width: 220px;
+    }
+
+    .col-feedback {
+      width: 42%;
+    }
+
+    .col-tone,
+    .col-surface,
+    .col-status {
+      width: 13%;
+    }
+
+    .col-message {
+      width: 33%;
+    }
+
+    .col-updated {
+      width: 14%;
+    }
+
+    th,
+    td {
+      text-align: left;
+      vertical-align: top;
+      padding: 16px;
+      border-bottom: 1px solid rgba(16, 33, 48, 0.08);
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--sm-color-text-muted);
+      font-weight: 800;
+      background: rgba(246, 248, 250, 0.96);
+      backdrop-filter: blur(16px);
+    }
+
+    th:first-child {
+      border-top-left-radius: 20px;
+    }
+
+    th:last-child {
+      border-top-right-radius: 20px;
+    }
+
+    tbody td {
+      transition: background-color var(--sm-motion-fast), border-color var(--sm-motion-fast);
+    }
+
+    tbody tr:hover td {
+      background: rgba(11, 60, 93, 0.035);
+    }
+
+    tbody tr.is-selected td {
+      background: rgba(11, 60, 93, 0.075);
+    }
+
+    tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .cell-nowrap {
+      white-space: nowrap;
+    }
+
+    .table-title {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--sm-color-primary);
+      line-height: 1.4;
+      overflow-wrap: anywhere;
+    }
+
+    .table-title--secondary {
+      color: var(--sm-color-text);
+    }
+
+    .table-meta {
+      margin: 6px 0 0;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--sm-color-text-muted);
+      overflow-wrap: anywhere;
+    }
+
+    .table-meta--strong {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: rgba(11, 60, 93, 0.72);
+    }
+
+    .status-pill,
+    .metric-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 30px;
+      border-radius: 999px;
+      padding: 4px 11px;
+      font-size: 12px;
+      line-height: 1.3;
+      font-weight: 700;
+      white-space: nowrap;
+      border: 1px solid var(--sm-color-border);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+    }
+
+    .status-pill {
+      background: #f2f4f6;
+      color: #44525d;
+      border-color: #ccd4db;
+    }
+
+    .status-pill[data-tone='neutral'] {
+      background: #f2f4f6;
+      color: #44525d;
+      border-color: #ccd4db;
+    }
+
+    .status-pill[data-tone='info'] {
+      background: #eef4fa;
+      color: #1f557a;
+      border-color: #bfd0e0;
+    }
+
+    .status-pill[data-tone='success'] {
+      background: #edf7f1;
+      color: #1f7a3d;
+      border-color: #badcc6;
+    }
+
+    .status-pill[data-tone='warning'] {
+      background: #fff4df;
+      color: #8a5a00;
+      border-color: #e5cf9b;
+    }
+
+    .status-pill[data-tone='danger'] {
+      background: #fbeeee;
+      color: #912018;
+      border-color: #e3bcbc;
+    }
+
+    .metric-pill {
+      min-width: 40px;
+      background: rgba(11, 60, 93, 0.08);
+      color: var(--sm-color-primary);
+      border-color: rgba(11, 60, 93, 0.12);
+    }
+
+    .audit-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: var(--sm-space-3);
+    }
+
+    .audit-stat {
+      padding: 16px 18px;
+      border: 1px solid rgba(16, 33, 48, 0.08);
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(247, 250, 252, 0.94) 100%);
+      box-shadow: 0 10px 24px rgba(15, 27, 40, 0.05);
+    }
+
+    .audit-stat__label {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.4;
+      color: var(--sm-color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+    }
+
+    .audit-stat__value {
+      margin: 10px 0 0;
+      font-size: clamp(24px, 3vw, 34px);
+      line-height: 1;
+      font-weight: 800;
+      color: var(--sm-color-primary);
+    }
+
+    .audit-top-actions {
+      display: grid;
+      gap: 10px;
+      padding: 16px 18px;
+      border: 1px solid rgba(16, 33, 48, 0.08);
+      border-radius: 18px;
+      background: rgba(248, 250, 252, 0.78);
+    }
+
+    .flag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .credits-cell {
+      display: flex;
+      align-items: center;
+    }
+
+    .actions-cell {
+      width: 72px;
+      min-width: 72px;
+      padding-inline: 10px 16px;
+      text-align: right;
+      vertical-align: middle;
+    }
+
+    .admin-actions-trigger {
+      width: 40px;
+      min-width: 40px;
+      min-height: 40px;
+      border: 1px solid rgba(11, 60, 93, 0.16);
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(242, 246, 249, 0.98) 100%);
+      color: var(--sm-color-primary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 10px 20px rgba(15, 27, 40, 0.08);
+      transition: transform var(--sm-motion-fast), background-color var(--sm-motion-fast),
+        border-color var(--sm-motion-fast), box-shadow var(--sm-motion-fast), color var(--sm-motion-fast);
+    }
+
+    .admin-actions-trigger:hover:not(:disabled) {
+      transform: translateY(-1px);
+      border-color: rgba(11, 60, 93, 0.28);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(236, 242, 247, 1) 100%);
+      box-shadow: 0 14px 28px rgba(15, 27, 40, 0.12);
+    }
+
+    .admin-actions-trigger:focus-visible {
+      outline: 2px solid rgba(11, 60, 93, 0.24);
+      outline-offset: 2px;
+    }
+
+    .admin-actions-trigger:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .admin-actions-trigger__dots {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .admin-actions-trigger__dots span {
+      width: 4px;
+      height: 4px;
+      border-radius: 999px;
+      background: currentColor;
+      display: block;
+    }
+
+    .actions-menu__pane {
+      width: 240px;
+      max-height: calc(100dvh - 24px);
+      overflow-y: auto;
+      padding: 10px;
+      display: grid;
+      gap: 4px;
+      border: 1px solid rgba(16, 33, 48, 0.1);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.98);
+      box-shadow: 0 26px 52px rgba(15, 27, 40, 0.18);
+      backdrop-filter: blur(18px);
+      z-index: 560;
+    }
+
+    .actions-menu__pane--floating {
+      position: fixed;
+    }
+
+    .actions-menu__context {
+      margin: 0 0 4px;
+      padding: 4px 8px 10px;
+      border-bottom: 1px solid rgba(16, 33, 48, 0.08);
+      font-size: 11px;
+      line-height: 1.4;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--sm-color-text-muted);
+      overflow-wrap: anywhere;
+    }
+
+    .actions-menu__item {
+      width: 100%;
+      border: 0;
+      border-radius: 12px;
+      background: transparent;
+      color: var(--sm-color-text);
+      padding: 11px 12px;
+      text-align: left;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.4;
+      cursor: pointer;
+      transition: background-color var(--sm-motion-fast), color var(--sm-motion-fast);
+    }
+
+    .actions-menu__item:hover:not(:disabled),
+    .actions-menu__item:focus-visible {
+      background: rgba(11, 60, 93, 0.08);
+      outline: none;
+    }
+
+    .actions-menu__item--danger {
+      color: #912018;
+    }
+
+    .actions-menu__item--danger:hover:not(:disabled),
+    .actions-menu__item--danger:focus-visible {
+      background: #fbeeee;
+    }
+
+    .actions-menu__item:disabled {
+      opacity: 0.48;
+      cursor: not-allowed;
+    }
+
+    .feedback-cell {
+      min-width: 360px;
+    }
+
+    .notification-form-card {
+      display: grid;
+      gap: var(--sm-space-3);
+      padding: var(--sm-space-3);
+      border: 1px solid var(--sm-color-border);
+      border-radius: var(--sm-radius-md);
+      background: linear-gradient(180deg, var(--sm-color-surface-muted) 0%, var(--sm-color-surface) 100%);
+    }
+
+    .conveyancer-form-card {
+      display: grid;
+      gap: var(--sm-space-3);
+      padding: var(--sm-space-3);
+      border: 1px solid var(--sm-color-border);
+      border-radius: var(--sm-radius-md);
+      background: linear-gradient(180deg, var(--sm-color-surface-muted) 0%, var(--sm-color-surface) 100%);
+    }
+
+    .notification-form {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--sm-space-3);
+    }
+
+    .conveyancer-form {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--sm-space-3);
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .field--wide {
+      grid-column: 1 / -1;
+    }
+
+    .field__label {
+      font-size: 13px;
+      line-height: 1.4;
+      font-weight: 700;
+      color: var(--sm-color-text);
+    }
+
+    .field__meta {
+      font-size: 12px;
+      line-height: 1.4;
+      color: var(--sm-color-text-muted);
+      justify-self: end;
+    }
+
+    .field__hint {
+      font-size: 12px;
+      line-height: 1.45;
+      color: var(--sm-color-text-muted);
+    }
+
+    .notification-form select,
+    .notification-form textarea,
+    .conveyancer-form input,
+    .conveyancer-form select {
+      width: 100%;
+      min-width: 0;
+      border: 1px solid var(--sm-color-border-strong);
+      border-radius: var(--sm-radius-sm);
+      background: var(--sm-color-surface);
+      padding: 10px 12px;
+      font: inherit;
+      color: var(--sm-color-text);
+    }
+
+    .notification-form select,
+    .conveyancer-form select {
+      min-height: 44px;
+    }
+
+    .notification-form textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .checkbox-field {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 44px;
+      font-size: 14px;
+      line-height: 1.4;
+      color: var(--sm-color-text);
+      font-weight: 600;
+    }
+
+    .checkbox-field input {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      accent-color: var(--sm-color-primary);
+    }
+
+    .notification-preview {
+      grid-column: 1 / -1;
+      display: grid;
+      gap: 0;
+      border: 1px solid var(--sm-color-border);
+      border-radius: var(--sm-radius-md);
+      background: rgba(255, 255, 255, 0.7);
+      overflow: hidden;
+    }
+
+    .notification-preview__header {
+      display: grid;
+      gap: 4px;
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid var(--sm-color-border);
+      background: rgba(255, 255, 255, 0.45);
+    }
+
+    .notification-preview__eyebrow,
+    .notification-preview__hint,
+    .notification-preview__empty {
+      margin: 0;
+    }
+
+    .notification-preview__eyebrow {
+      font-size: 12px;
+      line-height: 1.35;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--sm-color-text);
+    }
+
+    .notification-preview__hint,
+    .notification-preview__empty {
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--sm-color-text-muted);
+    }
+
+    .notification-preview__empty {
+      padding: 16px;
+    }
+
+    .notification-preview__surface {
+      min-width: 0;
+    }
+
+    .notification-preview__surface ui-site-notification-stack {
+      display: block;
+    }
+
+    .notification-form__actions {
+      display: flex;
+      justify-content: flex-start;
+    }
+
+    .notification-message-cell {
+      min-width: 320px;
+    }
+
+    .notification-message {
+      margin: 0;
+      line-height: 1.5;
+      font-weight: 600;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .inline-actions {
+      display: grid;
+      gap: 8px;
+    }
+
+    .inline-actions__button {
+      width: 100%;
+      min-height: 40px;
+      border: 1px solid rgba(11, 60, 93, 0.16);
+      border-radius: 12px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(242, 246, 249, 0.98) 100%);
+      color: var(--sm-color-primary);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: border-color var(--sm-motion-fast), background-color var(--sm-motion-fast), transform var(--sm-motion-fast);
+    }
+
+    .inline-actions__button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      border-color: rgba(11, 60, 93, 0.28);
+    }
+
+    .inline-actions__button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .feedback-message {
+      margin: 0;
+      line-height: 1.5;
+      font-weight: 600;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .feedback-meta {
+      white-space: pre-wrap;
+    }
+
+    .detail-grid {
+      display: grid;
+      gap: var(--sm-space-3);
+    }
+
+    .detail-list {
+      margin: 0;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--sm-space-3);
+      padding: var(--sm-space-3);
+      border: 1px solid var(--sm-color-border);
+      border-radius: var(--sm-radius-md);
+      background: var(--sm-color-surface-muted);
+    }
+
+    .detail-list div {
+      display: grid;
+      gap: 2px;
+    }
+
+    .detail-list dt {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--sm-color-text-muted);
+    }
+
+    .detail-list dd {
+      margin: 0;
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+
+    .artifact-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sm-space-2);
+    }
+
+    .quote-workflow-admin {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--sm-space-3);
+      flex-wrap: wrap;
+      padding: var(--sm-space-3);
+      border: 1px solid var(--sm-color-border);
+      border-radius: var(--sm-radius-md);
+      background: var(--sm-color-surface-muted);
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--sm-space-3);
+      flex-wrap: wrap;
+      border-top: 1px solid var(--sm-color-border);
+      padding-top: var(--sm-space-2);
+    }
+
+    .pagination p {
+      margin: 0;
+    }
+
+    .pagination-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--sm-space-2);
+      flex-wrap: wrap;
+    }
+
+    .conveyancer-editor-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 27, 40, 0.50);
+      z-index: 520;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .conveyancer-editor-dialog {
+      background: var(--sm-color-surface);
+      border: 1px solid var(--sm-color-border-strong);
+      border-radius: var(--sm-radius-md, 8px);
+      box-shadow: var(--sm-shadow-soft);
+      width: min(100%, 760px);
+      max-height: 85dvh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .conveyancer-editor-dialog__header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--sm-space-3);
+      padding: 16px 20px 14px;
+      border-bottom: 1px solid var(--sm-color-border);
+      position: sticky;
+      top: 0;
+      background: var(--sm-color-surface);
+      z-index: 1;
+    }
+
+    .conveyancer-editor-dialog__title {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--sm-color-text);
+      line-height: 1.3;
+    }
+
+    .conveyancer-editor-dialog__subtitle {
+      margin: 6px 0 0;
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--sm-color-text-muted);
+    }
+
+    .conveyancer-editor-dialog__close {
+      min-width: 32px;
+      min-height: 32px;
+      border: 0;
+      background: transparent;
+      color: var(--sm-color-text-muted);
+      font-size: 16px;
+      line-height: 1;
+      cursor: pointer;
+      border-radius: var(--sm-radius-sm);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .conveyancer-editor-dialog__close:hover:not(:disabled) {
+      background: var(--sm-color-surface-muted);
+      color: var(--sm-color-text);
+    }
+
+    .conveyancer-editor-dialog__close:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .conveyancer-editor-dialog__body {
+      padding: 20px;
+      display: grid;
+      gap: 20px;
+    }
+
+    .conveyancer-editor-dialog__intro {
+      display: grid;
+      gap: 6px;
+    }
+
+    .conveyancer-editor-dialog__intro h3,
+    .conveyancer-editor-dialog__intro p {
+      margin: 0;
+    }
+
+    .conveyancer-editor-dialog__actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--sm-space-2);
+      flex-wrap: wrap;
+    }
+
+    .jd-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 27, 40, 0.50);
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .jd-dialog {
+      background: var(--sm-color-surface);
+      border: 1px solid var(--sm-color-border-strong);
+      border-radius: var(--sm-radius-md, 8px);
+      box-shadow: var(--sm-shadow-soft);
+      width: 100%;
+      max-width: 720px;
+      max-height: 85dvh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .jd-dialog__header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--sm-space-3);
+      padding: 16px 20px 14px;
+      border-bottom: 1px solid var(--sm-color-border);
+      position: sticky;
+      top: 0;
+      background: var(--sm-color-surface);
+      z-index: 1;
+    }
+
+    .jd-dialog__title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--sm-color-text);
+      line-height: 1.3;
+    }
+
+    .jd-dialog__subtitle {
+      margin: 4px 0 0;
+      font-size: 12px;
+      color: var(--sm-color-text-muted);
+      font-family: monospace;
+      word-break: break-all;
+    }
+
+    .jd-dialog__close {
+      min-width: 32px;
+      min-height: 32px;
+      border: 0;
+      background: transparent;
+      color: var(--sm-color-text-muted);
+      font-size: 16px;
+      line-height: 1;
+      cursor: pointer;
+      border-radius: var(--sm-radius-sm);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .jd-dialog__close:hover {
+      background: var(--sm-color-surface-muted);
+      color: var(--sm-color-text);
+    }
+
+    .jd-dialog__body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    @media (max-width: 960px) {
+      .section-header,
+      .pagination {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .pagination-actions {
+        justify-content: space-between;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .section-card {
+        padding: var(--sm-space-3);
+      }
+
+      .section-header__actions {
+        width: 100%;
+        justify-content: stretch;
+      }
+
+      .section-header__actions ui-button {
+        flex: 1 1 100%;
+      }
+
+      .admin-tab {
+        flex: 1 1 calc(50% - 4px);
+        text-align: center;
+      }
+
+      .toolbar input,
+      .toolbar select,
+      .toolbar ui-button {
+        flex: 1 1 100%;
+      }
+
+      .notification-form {
+        grid-template-columns: 1fr;
+      }
+
+      .conveyancer-form {
+        grid-template-columns: 1fr;
+      }
+
+      .detail-list {
+        grid-template-columns: 1fr;
+      }
+
+      .quote-workflow-admin {
+        align-items: stretch;
+      }
+
+      .conveyancer-editor-dialog__header {
+        padding: 14px 16px 12px;
+      }
+
+      .conveyancer-editor-dialog__body {
+        padding: 16px;
+      }
+
+      .jd-dialog__header {
+        padding: 14px 16px 12px;
+      }
+
+      .jd-dialog__body {
+        padding: 16px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .admin-tab {
+        flex-basis: 100%;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      tbody tr,
+      tbody td,
+      .admin-tab,
+      .admin-actions-trigger,
+      .actions-menu__item {
+        transition: none;
+      }
+    }

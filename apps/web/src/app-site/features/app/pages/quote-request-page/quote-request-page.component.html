@@ -1,0 +1,776 @@
+<section class="sm-page-section">
+  <div class="sm-container page-grid">
+    @if (loading()) {
+      <ui-skeleton-block [height]="48"></ui-skeleton-block>
+      <ui-skeleton-block [height]="520"></ui-skeleton-block>
+    } @else if (errorMessage()) {
+      <ui-alert-banner tone="error" title="Could not prepare quote request" [message]="errorMessage()"></ui-alert-banner>
+    } @else if (report(); as report) {
+      <ui-page-header
+        title="Build quote request"
+        [description]="report.propertyAddress"
+        eyebrow="Request, shortlist, send"
+      >
+        <div actions class="header-actions">
+          <a [routerLink]="['/reports', report.id]">
+            <ui-button variant="secondary">Back to report</ui-button>
+          </a>
+        </div>
+      </ui-page-header>
+
+      @if (submitError()) {
+        <ui-alert-banner tone="error" title="Could not send quote request" [message]="submitError()"></ui-alert-banner>
+      }
+
+      @if (quoteRequestLookupPending()) {
+        <ui-alert-banner
+          tone="info"
+          title="Checking for an existing request"
+          message="We are confirming whether this report already has a quote request before allowing a new one."
+        ></ui-alert-banner>
+      }
+
+      @if (existingRequest(); as existingRequest) {
+        <section class="sm-surface existing-request-card">
+          <div class="existing-request-card__copy">
+            <p class="sm-eyebrow">Request already created</p>
+            <h2>Use the existing quote request for this report</h2>
+            <p>
+              Only one quote request can exist per report, so delivery history and responses stay attached to the same matter.
+            </p>
+          </div>
+
+          <div class="existing-request-card__stats">
+            <article class="summary-stat">
+              <p class="summary-stat__label">Status</p>
+              <p class="summary-stat__value summary-stat__value--compact">{{ statusLabel(existingRequest.status) }}</p>
+              <p class="summary-stat__meta">Current request state</p>
+            </article>
+            <article class="summary-stat">
+              <p class="summary-stat__label">Responses</p>
+              <p class="summary-stat__value">{{ existingRequest.responseCount }}</p>
+              <p class="summary-stat__meta">Out of {{ existingRequest.targetCount }} selected firms</p>
+            </article>
+            <article class="summary-stat">
+              <p class="summary-stat__label">Created</p>
+              <p class="summary-stat__value summary-stat__value--compact">{{ existingRequest.createdAtUtc | date: 'd MMM yyyy' }}</p>
+              <p class="summary-stat__meta">Request created</p>
+            </article>
+          </div>
+
+          <div class="existing-request-card__actions">
+            <a [routerLink]="['/quotes', existingRequest.id]">
+              <ui-button>Open quote request</ui-button>
+            </a>
+            <a [routerLink]="['/reports', report.id]">
+              <ui-button variant="secondary">Back to report</ui-button>
+            </a>
+          </div>
+        </section>
+      } @else {
+        <section class="sm-surface workflow-stepper">
+          <ol class="workflow-stepper__list">
+            @for (step of workflowSteps; track step.step) {
+              <li class="workflow-stepper__item">
+                <button
+                  type="button"
+                  class="workflow-stepper__button"
+                  [class.is-active]="currentStep() === step.step"
+                  [class.is-complete]="step.step < currentStep()"
+                  [disabled]="(step.step === 2 && !canEnterShortlistStep()) || (step.step === 3 && !canEnterSendStep())"
+                  (click)="goToStep(step.step)"
+                >
+                  <span class="workflow-stepper__number">{{ step.step }}</span>
+                  <span class="workflow-stepper__copy">
+                    <span class="workflow-stepper__label">{{ step.label }}</span>
+                    <span class="workflow-stepper__description">{{ step.description }}</span>
+                  </span>
+                </button>
+              </li>
+            }
+          </ol>
+        </section>
+
+        @if (currentStep() === 1) {
+          <section class="sm-surface step-card">
+            <div class="step-heading">
+              <p class="sm-eyebrow">Step 1</p>
+              <h2>Build the request</h2>
+              <p class="sm-muted">
+                Work through the summary, questions, and final request details before you shortlist firms.
+              </p>
+            </div>
+
+            <section class="request-builder-nav" aria-label="Request builder sections">
+              <ol class="request-builder-nav__list">
+                @for (requestBuilderStep of requestBuilderSteps; track requestBuilderStep.step) {
+                  <li class="request-builder-nav__item">
+                    <button
+                      type="button"
+                      class="request-builder-nav__button"
+                      [class.is-active]="requestStep() === requestBuilderStep.step"
+                      [class.is-complete]="requestBuilderStep.step < requestStep()"
+                      (click)="goToRequestSubstep(requestBuilderStep.step)"
+                    >
+                      <span class="request-builder-nav__label">{{ requestBuilderStep.label }}</span>
+                      <span class="request-builder-nav__description">{{ requestBuilderStep.description }}</span>
+                    </button>
+                  </li>
+                }
+              </ol>
+            </section>
+
+            @if (requestStep() === 1) {
+              <section class="request-stage">
+                <div class="step-heading">
+                  <p class="sm-eyebrow">Step 1.1</p>
+                  <h2>Start with the report summary</h2>
+                  <p class="sm-muted">Confirm the report summary and choose the type of service you want quoted.</p>
+                </div>
+
+                <section class="request-foundation" aria-label="Report-derived request draft">
+                  <div class="request-foundation__copy">
+                    <div>
+                      <p class="sm-eyebrow">Built from the report</p>
+                      <h3>Start with the request ConveyMate prepared</h3>
+                    </div>
+                    <p class="sm-muted">
+                      The report summary and follow-up prompts are used as the starting brief below. You can edit any of it before sending.
+                    </p>
+
+                    <div class="request-foundation__facts">
+                      <span class="directory-summary__chip">Summary included</span>
+                      <span class="directory-summary__chip">
+                        {{ seededQuestionCount() }} question{{ seededQuestionCount() === 1 ? '' : 's' }} seeded
+                      </span>
+                      <span class="directory-summary__chip">{{ report.stateOrTerritory }} directory match</span>
+                    </div>
+                  </div>
+
+                  <article class="request-foundation__summary">
+                    <p class="sm-eyebrow">Report summary</p>
+                    <p>{{ reportRequestSummary() }}</p>
+                  </article>
+                </section>
+
+                <div class="service-options" role="list" aria-label="Requested service options">
+                  @for (option of serviceOptions; track option.value) {
+                    <button
+                      type="button"
+                      class="service-option"
+                      [class.is-selected]="serviceNeed === option.value"
+                      [attr.aria-pressed]="serviceNeed === option.value"
+                      (click)="serviceNeed = option.value"
+                    >
+                      <span class="service-option__header">
+                        <span class="service-option__label">{{ option.label }}</span>
+                        @if (serviceNeed === option.value) {
+                          <span class="service-option__badge">Selected</span>
+                        }
+                      </span>
+                      <span class="service-option__description">{{ option.description }}</span>
+                      <span class="service-option__hint">{{ option.timingHint }}</span>
+                    </button>
+                  }
+                </div>
+
+                <div class="step-actions">
+                  <span class="step-actions__spacer"></span>
+                  <ui-button (pressed)="goToNextRequestSubstep()">Next: questions</ui-button>
+                </div>
+              </section>
+            }
+
+            @if (requestStep() === 2) {
+              <section class="request-stage">
+                <div class="step-heading">
+                  <p class="sm-eyebrow">Step 1.2</p>
+                  <h2>Edit the questions</h2>
+                  <p class="sm-muted">Use the report-generated questions as a starting point, then refine them for the request you want to send.</p>
+                </div>
+
+                <article class="editor-card editor-card--wide">
+                  <div class="editor-card__header">
+                    <p class="sm-eyebrow">Questions</p>
+                    <h3>Start with the questions generated from the report</h3>
+                    <p class="sm-muted">These come from report prompts and recommended follow-up. Edit them and add buyer-specific questions if needed.</p>
+                  </div>
+
+                  <div class="brief-builder">
+                    <div class="brief-builder__toolbar">
+                      <div class="brief-builder__toolbar-copy">
+                        <span class="brief-card__pill">{{ parsedConveyancerQuestions().length }}/{{ conveyancerQuestionLimit() }} included</span>
+                        <p class="editor-card__meta">
+                          {{ reportQuestionCount() }} from report
+                          @if (customQuestionCount() > 0) {
+                            <span> · {{ customQuestionCount() }} additional</span>
+                          }
+                          @if (conveyancerQuestionSlotsRemaining() > 0) {
+                            <span> · add up to {{ conveyancerQuestionSlotsRemaining() }} more.</span>
+                          }
+                        </p>
+                      </div>
+
+                      <div class="brief-builder__actions">
+                        <button
+                          type="button"
+                          class="brief-builder__action"
+                          [disabled]="!canResetConveyancerQuestions()"
+                          (click)="resetConveyancerQuestions()"
+                        >
+                          Reset to report
+                        </button>
+                        <button
+                          type="button"
+                          class="brief-builder__action brief-builder__action--primary"
+                          [disabled]="!canAddConveyancerQuestion()"
+                          (click)="addConveyancerQuestion()"
+                        >
+                          Add additional question
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="brief-builder__list">
+                      @if (conveyancerQuestionDrafts().length === 0) {
+                        <div class="empty-panel">
+                          <h3>No questions prefilled</h3>
+                          <p class="sm-muted">Add the key questions you want each conveyancer to answer in their quote.</p>
+                        </div>
+                      } @else {
+                        @for (question of conveyancerQuestionDrafts(); track question.id; let index = $index) {
+                          <article class="brief-builder__item">
+                            <div class="brief-builder__item-header">
+                              <div class="brief-builder__item-title">
+                                <span class="brief-builder__index">Q{{ index + 1 }}</span>
+                                <span class="brief-builder__source" [class.brief-builder__source--custom]="question.source === 'custom'">
+                                  {{ question.source === 'report' ? 'From report' : 'Additional' }}
+                                </span>
+                                <p class="brief-builder__item-status">{{ question.value.trim() ? 'Included in request' : 'Draft question' }}</p>
+                              </div>
+
+                              <button type="button" class="brief-builder__remove" (click)="removeConveyancerQuestion(index)">Remove</button>
+                            </div>
+
+                            <label class="brief-builder__field" [attr.for]="'conveyancerQuestion-' + index">
+                              <span class="brief-builder__field-label">Question {{ index + 1 }}</span>
+                              <textarea
+                                [id]="'conveyancerQuestion-' + index"
+                                rows="3"
+                                [ngModel]="question.value"
+                                (ngModelChange)="updateConveyancerQuestion(index, $event)"
+                                placeholder="Ask about fees, scope, timing, assumptions, or anything the report flagged for follow-up."
+                              ></textarea>
+                            </label>
+                          </article>
+                        }
+                      }
+                    </div>
+                  </div>
+
+                  <p class="editor-card__meta">
+                    {{ parsedConveyancerQuestions().length }}
+                    question{{ parsedConveyancerQuestions().length === 1 ? '' : 's' }} will be shared with each conveyancer.
+                    @if (customQuestionCount() > 0) {
+                      <span> {{ customQuestionCount() }} {{ customQuestionCount() === 1 ? 'is' : 'are' }} buyer-added.</span>
+                    }
+                  </p>
+                </article>
+
+                <div class="step-actions">
+                  <ui-button variant="secondary" (pressed)="goToPreviousRequestSubstep()">Back</ui-button>
+                  <ui-button (pressed)="goToNextRequestSubstep()">Next: finish request</ui-button>
+                </div>
+              </section>
+            }
+
+            @if (requestStep() === 3) {
+              <section class="request-stage">
+                <div class="step-heading">
+                  <p class="sm-eyebrow">Step 1.3</p>
+                  <h2>Add a buyer note and finish the request</h2>
+                  <p class="sm-muted">Use the buyer note for any final context, then confirm the request is ready before you move to shortlist.</p>
+                </div>
+
+                <article class="editor-card editor-card--wide">
+                  <div class="editor-card__header">
+                    <p class="sm-eyebrow">Buyer note</p>
+                    <h3>Add any final context for the request email</h3>
+                    <p class="sm-muted">Optional. Use this for urgency, budget, timing, or any context that sits outside the structured questions.</p>
+                  </div>
+
+                  <ui-form-field
+                    label="Buyer note"
+                    forId="buyerNote"
+                    hint="Optional. This is the final note added to the request before you shortlist firms."
+                  >
+                    <textarea id="buyerNote" rows="5" [ngModel]="message" (ngModelChange)="message = $event" name="buyerNote"></textarea>
+                  </ui-form-field>
+                </article>
+
+                <section class="review-card">
+                  <div class="review-card__header">
+                    <h3>Request recap</h3>
+                    <span class="brief-card__pill">{{ serviceLabel(serviceNeed) }}</span>
+                  </div>
+
+                  <article class="brief-card">
+                    <p class="sm-eyebrow">Report summary</p>
+                    <p>{{ reportRequestSummary() }}</p>
+                  </article>
+
+                  <article class="brief-card">
+                    <p class="sm-eyebrow">Questions</p>
+                    @if (parsedConveyancerQuestions().length === 0) {
+                      <p>No questions will be included.</p>
+                    } @else {
+                      <ul class="simple-list simple-list--tight">
+                        @for (item of parsedConveyancerQuestions(); track item) {
+                          <li>{{ item }}</li>
+                        }
+                      </ul>
+                    }
+                  </article>
+
+                  <article class="brief-card">
+                    <p class="sm-eyebrow">Buyer note</p>
+                    <p>{{ message.trim() || 'No buyer note added.' }}</p>
+                  </article>
+                </section>
+
+                <section class="review-card review-card--final-checks">
+                  <div class="review-card__header">
+                    <h3>Before you shortlist</h3>
+                    <a class="request-stage__link" [routerLink]="['/reports', report.id]" target="_blank" rel="noreferrer">
+                      Open report
+                    </a>
+                  </div>
+
+                  <p class="review-card__meta">
+                    If you need to confirm the report summary or any question before shortlisting, reopen the report and then come back here to finish.
+                  </p>
+
+                  <label class="share-toggle-card" for="shareReportPdf">
+                    <div>
+                      <p class="share-toggle-card__title">Allow secure access to the uploaded contract pack and report</p>
+                      <p class="share-toggle-card__body">
+                        Turn this on if you want shortlisted conveyancers to review the uploaded contract pack and report through their secure quote link. Leave it off if you want initial pricing based only on the request brief.
+                      </p>
+                    </div>
+                    <input
+                      id="shareReportPdf"
+                      type="checkbox"
+                      [ngModel]="shareReportPdf"
+                      (ngModelChange)="onShareReportPdfChange($event)"
+                      name="shareReportPdf"
+                    />
+                  </label>
+
+                  @if (shareReportPdf) {
+                    <label class="share-toggle-card share-toggle-card--confirm" for="confirmSecureDocumentSharing">
+                      <div>
+                        <p class="share-toggle-card__title">Confirm secure document sharing</p>
+                        <p class="share-toggle-card__body">
+                          I understand shortlisted conveyancers will get access to the uploaded contract pack and report through their private quote link.
+                        </p>
+                      </div>
+                      <input
+                        id="confirmSecureDocumentSharing"
+                        type="checkbox"
+                        [(ngModel)]="confirmSecureDocumentSharing"
+                        name="confirmSecureDocumentSharing"
+                      />
+                    </label>
+                  }
+
+                  <label class="share-toggle-card share-toggle-card--confirm" for="confirmRequestReviewed">
+                    <div>
+                      <p class="share-toggle-card__title">I have reviewed this request</p>
+                      <p class="share-toggle-card__body">
+                        I have checked the service, questions, buyer note, and document sharing settings and they are ready for shortlist.
+                      </p>
+                    </div>
+                    <input
+                      id="confirmRequestReviewed"
+                      type="checkbox"
+                      [checked]="requestReviewConfirmed()"
+                      (change)="onRequestReviewConfirmationChange($event)"
+                    />
+                  </label>
+                </section>
+
+                <div class="step-actions">
+                  <ui-button variant="secondary" (pressed)="goToPreviousRequestSubstep()">Back</ui-button>
+                  <ui-button [disabled]="!canEnterShortlistStep()" (pressed)="goToNextRequestSubstep()">Continue to shortlist</ui-button>
+                </div>
+              </section>
+            }
+          </section>
+        }
+
+        @if (currentStep() === 2) {
+          <section class="sm-surface step-card">
+            <div class="step-heading">
+              <p class="sm-eyebrow">Step 2</p>
+              <h2>Shortlist conveyancers</h2>
+              <p class="sm-muted">
+                Choose up to three firms to receive this request. You can switch directory jurisdiction if needed, but firms outside the sale state may not be able to act on the matter.
+              </p>
+            </div>
+
+            @if (directoryError()) {
+              <ui-alert-banner tone="error" title="Could not load directory" [message]="directoryError()"></ui-alert-banner>
+            }
+
+            @if (directoryLoading()) {
+              <ui-alert-banner
+                tone="info"
+                title="Updating shortlist"
+                [message]="'Loading the ' + activeDirectoryJurisdiction() + ' conveyancer directory.'"
+              ></ui-alert-banner>
+            }
+
+            @if (crossJurisdictionDirectory()) {
+              <ui-alert-banner
+                tone="warn"
+                title="Different jurisdiction selected"
+                [message]="'You are viewing ' + activeDirectoryJurisdictionLabel() + ' firms for a ' + propertyJurisdictionLabel() + ' sale. Check they are able to act before shortlisting.'"
+              ></ui-alert-banner>
+            }
+
+            @if (quoteRequestOptOutCount() > 0) {
+              <ui-alert-banner
+                tone="info"
+                title="Some firms are not shown here"
+                [message]="quoteRequestOptOutCount() + ' conveyancer' + (quoteRequestOptOutCount() === 1 ? ' has' : 's have') + ' opted out of ConveyMate quote requests and remain excluded from shortlisting.'"
+              ></ui-alert-banner>
+            }
+
+            <div class="directory-head">
+              <div class="directory-head__top">
+                <div class="directory-summary">
+                  <span class="directory-summary__chip">{{ selectedSummary() }}</span>
+                  <span class="directory-summary__chip">{{ searchResultSummary() }}</span>
+                  <span class="directory-summary__chip">Property state {{ propertyJurisdiction() }}</span>
+                  <span class="directory-summary__chip">Viewing {{ activeDirectoryJurisdiction() }} directory</span>
+                  <span class="directory-summary__chip">Page {{ directoryPage() }} of {{ directoryPageCount() }}</span>
+                </div>
+              </div>
+
+              <div class="directory-head__controls">
+                <ui-form-field label="Directory jurisdiction" forId="directoryJurisdiction">
+                  <select
+                    id="directoryJurisdiction"
+                    [value]="activeDirectoryJurisdiction()"
+                    [disabled]="directoryLoading()"
+                    (change)="onDirectoryJurisdictionChange($event)"
+                  >
+                    @for (option of jurisdictionOptions; track option.code) {
+                      <option [value]="option.code">{{ option.code }} · {{ option.label }}</option>
+                    }
+                  </select>
+                </ui-form-field>
+
+                <div class="directory-head__search">
+                  <ui-form-field label="Search directory" forId="directorySearch">
+                    <input
+                      id="directorySearch"
+                      type="search"
+                      [value]="searchQuery()"
+                      [disabled]="directoryLoading()"
+                      placeholder="Search by firm, contact, or email"
+                      (input)="onSearchInput($event)"
+                    />
+                  </ui-form-field>
+                </div>
+              </div>
+            </div>
+
+            @if (selectedConveyancers().length > 0) {
+              <section class="selected-strip" aria-label="Selected conveyancers">
+                @for (item of selectedConveyancers(); track item.sourceIdentifier) {
+                  <article class="selected-pill-card">
+                    <div>
+                      <h3>{{ displayName(item) }}</h3>
+                      <p class="sm-muted">{{ item.jurisdiction }} directory · {{ item.email }}</p>
+                    </div>
+                    <button type="button" class="selected-pill-card__remove" (click)="removeSelection(item)">Remove</button>
+                  </article>
+                }
+              </section>
+            }
+
+            <section class="shortlist-helper">
+              <div>
+                <p class="sm-eyebrow">Shortlist guidance</p>
+                <h3>Make the selection explicit</h3>
+              </div>
+              <p class="sm-muted">
+                Use the shortlist button on each card. Once you have three firms selected, the rest lock until you remove one.
+              </p>
+            </section>
+
+            @if (selectableConveyancers().length === 0) {
+              <div class="empty-panel">
+                <h3>No matching conveyancers</h3>
+                <p class="sm-muted">Try a broader search term, switch jurisdiction, or clear the search to see more firms.</p>
+              </div>
+            } @else {
+              <div class="directory-grid">
+                @for (item of selectableConveyancers(); track item.sourceIdentifier) {
+                  <article class="directory-item" [class.is-selected]="isSelected(item)">
+                    <div class="directory-item__selection-row">
+                      <div class="directory-item__selection-copy">
+                        <span class="directory-item__selection-indicator" [class.is-selected]="isSelected(item)" aria-hidden="true"></span>
+                        <p class="directory-item__selection-status">{{ selectionStatusLabel(item) }}</p>
+                      </div>
+                      <span class="directory-item__jurisdiction">{{ item.jurisdiction }} directory</span>
+                    </div>
+
+                    <div class="directory-item__top">
+                      <div class="directory-item__copy">
+                        <div class="directory-item__title-row">
+                          <h3>{{ displayName(item) }}</h3>
+                          @if (isSelected(item)) {
+                            <span class="directory-item__pill">Selected</span>
+                          }
+                        </div>
+                        <p class="directory-item__subtitle">{{ subtitle(item) }}</p>
+                        <p class="sm-muted">{{ item.email }}</p>
+                      </div>
+
+                      <button
+                        type="button"
+                        class="select-button"
+                        [class.is-selected]="isSelected(item)"
+                        [disabled]="isSelectionDisabled(item) || directoryLoading()"
+                        (click)="toggleSelection(item)"
+                      >
+                        {{ selectionActionLabel(item) }}
+                      </button>
+                    </div>
+
+                    @if (isSelectionDisabled(item)) {
+                      <p class="directory-item__warning">Shortlist full. Remove one selected firm to add this conveyancer.</p>
+                    }
+
+                    <div class="directory-item__meta">
+                      @if (item.phone) {
+                        <span>{{ item.phone }}</span>
+                      }
+                      @if (hasPracticeSummary(item)) {
+                        <span>{{ practiceSummary(item) }}</span>
+                      }
+                    </div>
+
+                    <div class="directory-item__actions">
+                      @if (item.website) {
+                        <a [href]="item.website" target="_blank" rel="noreferrer">Website</a>
+                      }
+                      <a [href]="item.sourceUrl" target="_blank" rel="noreferrer">Directory listing</a>
+                    </div>
+                  </article>
+                }
+              </div>
+
+              <footer class="directory-pagination">
+                <ui-button variant="secondary" [disabled]="directoryPage() === 1" (pressed)="goToPreviousDirectoryPage()">Previous</ui-button>
+                <div class="directory-pagination__pages">
+                  @for (page of visibleDirectoryPages(); track page) {
+                    <button
+                      type="button"
+                      class="page-chip"
+                      [class.page-chip--active]="page === directoryPage()"
+                      (click)="goToDirectoryPage(page)"
+                    >
+                      {{ page }}
+                    </button>
+                  }
+                </div>
+                <ui-button variant="secondary" [disabled]="directoryPage() >= directoryPageCount()" (pressed)="goToNextDirectoryPage()">
+                  Next
+                </ui-button>
+              </footer>
+            }
+
+            <div class="step-actions">
+              <ui-button variant="secondary" (pressed)="goToPreviousStep()">Back</ui-button>
+              <ui-button [disabled]="!canMoveToReview()" (pressed)="goToNextStep()">Review and send</ui-button>
+            </div>
+          </section>
+        }
+
+        @if (currentStep() === 3) {
+          <section class="sm-surface step-card">
+            <div class="step-heading">
+              <p class="sm-eyebrow">Step 3</p>
+              <h2>Send request</h2>
+              <p class="sm-muted">
+                Review the request that will be sent to your shortlist. ConveyMate can send it for you, or you can download draft emails and send them yourself.
+              </p>
+            </div>
+
+            <div class="review-grid">
+              <section class="review-card">
+                <div class="review-card__header">
+                  <h3>Selected conveyancers</h3>
+                  <span class="brief-card__pill">{{ selectedKeys().length }}/3 selected</span>
+                </div>
+
+                <div class="selected-list">
+                  @for (item of selectedConveyancers(); track item.sourceIdentifier) {
+                    <article class="selected-card">
+                      <div class="selected-card__header">
+                        <div>
+                          <h3>{{ displayName(item) }}</h3>
+                          <p class="selected-card__subtitle">{{ item.jurisdiction }} directory · {{ subtitle(item) }}</p>
+                        </div>
+                        <button type="button" class="selected-card__remove" (click)="removeSelection(item)">Remove</button>
+                      </div>
+                      <p class="sm-muted">{{ item.email }}</p>
+                      @if (item.phone) {
+                        <p class="sm-muted">{{ item.phone }}</p>
+                      }
+                      @if (hasPracticeSummary(item)) {
+                        <p class="sm-muted">{{ practiceSummary(item) }}</p>
+                      }
+                    </article>
+                  }
+                </div>
+              </section>
+
+              <section class="review-card">
+                <div class="review-card__header">
+                  <h3>Request to be sent</h3>
+                  <span class="brief-card__pill">{{ serviceLabel(serviceNeed) }}</span>
+                </div>
+
+                <article class="brief-card">
+                  <p class="sm-eyebrow">Report summary</p>
+                  <p>{{ reportRequestSummary() }}</p>
+                </article>
+
+                <article class="brief-card">
+                  <p class="sm-eyebrow">Buyer note</p>
+                  <p>{{ message.trim() || 'No additional buyer note added.' }}</p>
+                </article>
+
+                <article class="brief-card">
+                  <p class="sm-eyebrow">Questions for the conveyancer</p>
+                  @if (parsedConveyancerQuestions().length === 0) {
+                    <p>No extra questions will be included.</p>
+                  } @else {
+                    <ul class="simple-list simple-list--tight">
+                      @for (item of parsedConveyancerQuestions(); track item) {
+                        <li>{{ item }}</li>
+                      }
+                    </ul>
+                  }
+                </article>
+
+                <article class="brief-card">
+                  <p class="sm-eyebrow">Shared documents</p>
+                  <p>
+                    {{
+                      shareReportPdf
+                        ? 'Selected conveyancers will be able to review the uploaded contract documents and report through their secure quote link. ConveyMate keeps those files behind private download endpoints rather than public storage links.'
+                        : 'Initial pricing will rely on the brief only. Uploaded documents will stay private until you share them outside this request.'
+                    }}
+                  </p>
+                </article>
+              </section>
+            </div>
+
+            @if (shareReportPdf) {
+              <label class="share-toggle-card share-toggle-card--confirm" for="confirmSecureDocumentSharing">
+                <div>
+                  <p class="share-toggle-card__title">Confirm secure document sharing</p>
+                  <p class="share-toggle-card__body">
+                    I understand each selected conveyancer will get access to the uploaded contract pack and report through their own private quote link. These files are not attached to the email and are not exposed as public storage URLs.
+                  </p>
+                </div>
+                <input
+                  id="confirmSecureDocumentSharing"
+                  type="checkbox"
+                  [(ngModel)]="confirmSecureDocumentSharing"
+                  name="confirmSecureDocumentSharing"
+                />
+              </label>
+            }
+
+            <section class="delivery-options">
+              <article class="delivery-card">
+                <div class="delivery-card__copy">
+                  <p class="sm-eyebrow">Manual send</p>
+                  <h3>Download email drafts and send them yourself</h3>
+                  <p class="sm-muted">
+                    Use this if you want to send the first outreach from your own inbox. The quote conversation and any document sharing will then happen outside ConveyMate.
+                  </p>
+                </div>
+                <ui-button variant="secondary" [disabled]="selectedKeys().length === 0" (pressed)="downloadManualEmailPack()">
+                  Download email pack
+                </ui-button>
+              </article>
+
+              <article class="delivery-card delivery-card--primary">
+                <div class="delivery-card__copy">
+                  <p class="sm-eyebrow">Send with ConveyMate</p>
+                  <h3>Let ConveyMate send the request</h3>
+                  <p class="sm-muted">
+                    The request is tracked in-app, structured replies come back into the comparison view, and any approved document access stays inside the private quote link.
+                  </p>
+                </div>
+                <ui-button [disabled]="!canSubmit()" [loading]="submitting()" (pressed)="submit()">
+                  {{ submitting() ? 'Sending requests...' : 'Send via ConveyMate' }}
+                </ui-button>
+              </article>
+            </section>
+
+            <div class="step-actions">
+              <ui-button variant="secondary" (pressed)="goToPreviousStep()">Back</ui-button>
+              <a [routerLink]="['/reports', report.id]">
+                <ui-button variant="tertiary">Return to report</ui-button>
+              </a>
+            </div>
+          </section>
+        }
+      }
+    }
+  </div>
+</section>
+
+@if (jurisdictionWarningModalOpen() && report(); as report) {
+  <div class="dialog-modal" role="presentation" (click)="onJurisdictionWarningModalBackdropClick($event)">
+    <section class="dialog-modal__dialog dialog-modal__dialog--compact" role="dialog" aria-modal="true" aria-labelledby="jurisdiction-warning-title">
+      <div class="dialog-modal__header">
+        <div class="dialog-modal__header-copy">
+          <p class="sm-eyebrow">Jurisdiction warning</p>
+          <h2 id="jurisdiction-warning-title">View firms outside the sale state?</h2>
+          <p class="sm-muted">
+            This property is in {{ report.stateOrTerritory }}. Firms listed under {{ pendingDirectoryJurisdiction() }} may not be authorised to act on this matter without local coverage, referral support, or extra checks.
+          </p>
+        </div>
+
+        <button type="button" class="dialog-modal__close" aria-label="Close jurisdiction warning" (click)="closeJurisdictionWarningModal()">
+          Close
+        </button>
+      </div>
+
+      <div class="dialog-modal__body">
+        <div class="jurisdiction-warning__facts">
+          <span class="directory-summary__chip">Sale state {{ report.stateOrTerritory }}</span>
+          <span class="directory-summary__chip">Requested directory {{ pendingDirectoryJurisdiction() }}</span>
+        </div>
+
+        <p class="sm-muted">
+          Continue only if you want to review firms from another jurisdiction and are comfortable checking whether they can operate within the sale state before you send the request.
+        </p>
+
+        <div class="step-actions">
+          <ui-button variant="secondary" (pressed)="closeJurisdictionWarningModal()">Stay in {{ report.stateOrTerritory }}</ui-button>
+          <ui-button (pressed)="confirmJurisdictionWarning()">Continue to {{ pendingDirectoryJurisdiction() }}</ui-button>
+        </div>
+      </div>
+    </section>
+  </div>
+}

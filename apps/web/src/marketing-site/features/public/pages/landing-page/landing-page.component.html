@@ -1,0 +1,85 @@
+<div class="landing-page">
+  <app-landing-hero></app-landing-hero>
+  <app-landing-how-it-works></app-landing-how-it-works>
+
+  @defer (on idle) {
+    <app-landing-benefits></app-landing-benefits>
+  } @placeholder {
+    <section
+      class="sm-page-section landing-section landing-defer-placeholder landing-defer-placeholder--feature"
+      aria-hidden="true"
+    >
+      <div class="sm-container">
+        <div class="landing-defer-placeholder__card"></div>
+      </div>
+    </section>
+  }
+
+  @defer (on idle) {
+    <app-landing-compare></app-landing-compare>
+  } @placeholder {
+    <section
+      class="sm-page-section landing-section landing-section--subtle landing-defer-placeholder landing-defer-placeholder--compare"
+      aria-hidden="true"
+    >
+      <div class="sm-container">
+        <div class="landing-defer-placeholder__card"></div>
+      </div>
+    </section>
+  }
+
+  @defer (on viewport) {
+    <app-landing-pricing></app-landing-pricing>
+  } @placeholder {
+    <section
+      id="pricing"
+      class="sm-page-section landing-section landing-defer-placeholder landing-defer-placeholder--pricing"
+      aria-hidden="true"
+    >
+      <div class="sm-container">
+        <div class="landing-defer-placeholder__card"></div>
+      </div>
+    </section>
+  }
+
+  @defer (on viewport) {
+    <app-landing-directory></app-landing-directory>
+  } @placeholder {
+    <section
+      id="directory"
+      class="sm-page-section landing-section landing-section--subtle landing-defer-placeholder landing-defer-placeholder--directory"
+      aria-hidden="true"
+    >
+      <div class="sm-container">
+        <div class="landing-defer-placeholder__card"></div>
+      </div>
+    </section>
+  }
+
+  @defer (on viewport) {
+    <app-landing-faq></app-landing-faq>
+  } @placeholder {
+    <section
+      id="faq"
+      class="sm-page-section landing-section landing-defer-placeholder landing-defer-placeholder--faq"
+      aria-hidden="true"
+    >
+      <div class="sm-container">
+        <div class="landing-defer-placeholder__card"></div>
+      </div>
+    </section>
+  }
+
+  @defer (on viewport) {
+    <app-landing-final-cta></app-landing-final-cta>
+  } @placeholder {
+    <section
+      class="sm-page-section landing-final-cta landing-defer-placeholder landing-defer-placeholder--cta"
+      aria-hidden="true"
+    >
+      <div class="sm-container">
+        <div class="landing-defer-placeholder__card"></div>
+      </div>
+    </section>
+  }
+</div>

@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/marketing-site",
+    "types": [
+      "node"
+    ]
+  },
+  "files": [
+    "src/marketing-site/main.ts",
+    "src/marketing-site/main.server.ts"
+  ],
+  "include": [
+    "src/**/*.d.ts"
+  ]
+}

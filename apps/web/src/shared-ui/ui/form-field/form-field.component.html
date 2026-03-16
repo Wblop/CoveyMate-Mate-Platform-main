@@ -1,0 +1,33 @@
+    <div class="ui-form-field">
+      <div class="ui-form-field__label-row">
+        <label class="ui-form-field__label" [attr.for]="forId">
+          {{ label }}
+          @if (required) {
+            <span aria-hidden="true" class="ui-form-field__required">*</span>
+          }
+        </label>
+
+        @if (hint) {
+          <div class="ui-form-field__hint-trigger" [class.ui-form-field__hint-trigger--open]="tooltipOpen()">
+            <button
+              type="button"
+              class="ui-form-field__hint-button"
+              aria-label="More information"
+              (click)="toggleTooltip()"
+              (blur)="closeTooltip()"
+            >?</button>
+            <div
+              class="ui-form-field__hint-tooltip"
+              [id]="forId ? forId + '-hint' : null"
+              role="tooltip"
+            >{{ hint }}</div>
+          </div>
+        }
+      </div>
+
+      <ng-content></ng-content>
+
+      @if (error) {
+        <p class="ui-form-field__error" [id]="forId ? forId + '-error' : null" role="alert">{{ error }}</p>
+      }
+    </div>

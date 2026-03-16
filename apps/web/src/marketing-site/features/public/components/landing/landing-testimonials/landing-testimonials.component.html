@@ -1,0 +1,49 @@
+<section
+  class="sm-page-section landing-section landing-section--subtle landing-reveal landing-reveal--delay-3"
+  aria-labelledby="testimonials-title"
+>
+  <div class="sm-container">
+    <div class="landing-section__head">
+      <p class="sm-eyebrow">What buyers say</p>
+      <h2 id="testimonials-title">Buyers walk into their next legal conversation better prepared</h2>
+    </div>
+
+    <div class="landing-testimonials__grid">
+      @for (item of testimonials; track item.name) {
+        <blockquote class="landing-testimonials__card sm-surface">
+          <div class="landing-testimonials__stars" aria-label="5 stars">
+            <svg viewBox="0 0 80 16" aria-hidden="true" focusable="false" fill="currentColor">
+              @for (i of [0, 1, 2, 3, 4]; track i) {
+                <path [attr.transform]="'translate(' + i * 16 + ',0)'" d="M8 1l1.85 3.75L14 5.5l-3 2.92.7 4.08L8 10.5 5.3 12.5l.7-4.08L3 5.5l4.15-.75z"/>
+              }
+            </svg>
+          </div>
+          <p class="landing-testimonials__quote">{{ item.quote }}</p>
+          <footer class="landing-testimonials__attribution">
+            <cite class="landing-testimonials__name">{{ item.name }}</cite>
+            <span class="landing-testimonials__location">{{ item.location }}</span>
+          </footer>
+        </blockquote>
+      }
+    </div>
+
+    <div class="landing-testimonials__trust-bar" role="list" aria-label="Key statistics">
+      @for (stat of trustStats; track stat.label) {
+        <div class="landing-testimonials__stat" role="listitem">
+          <p class="landing-testimonials__stat-value">{{ stat.value }}</p>
+          <p class="landing-testimonials__stat-label">{{ stat.label }}</p>
+        </div>
+      }
+      <div class="landing-testimonials__stat" role="listitem">
+        <div class="landing-testimonials__security-badge" aria-label="Secure payment">
+          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" width="18" height="18">
+            <path d="M10 2L3 5v5c0 4.4 3 8.1 7 9 4-0.9 7-4.6 7-9V5l-7-3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+            <path d="M7 10l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Secure payment
+        </div>
+        <p class="landing-testimonials__stat-label">Stripe-protected checkout</p>
+      </div>
+    </div>
+  </div>
+</section>

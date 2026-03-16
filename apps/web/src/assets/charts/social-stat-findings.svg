@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" fill="none">
+  <defs>
+    <linearGradient id="sf-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f4f8fb"/>
+      <stop offset="100%" stop-color="#e6f0f8"/>
+    </linearGradient>
+    <radialGradient id="sf-glow-tl" cx="0%" cy="0%" r="70%">
+      <stop offset="0%" stop-color="#bed8ea" stop-opacity="0.50"/>
+      <stop offset="100%" stop-color="#bed8ea" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="sf-glow-br" cx="100%" cy="100%" r="60%">
+      <stop offset="0%" stop-color="#d9ebf6" stop-opacity="0.60"/>
+      <stop offset="100%" stop-color="#d9ebf6" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="sf-shadow" x="-5%" y="-5%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="20" stdDeviation="28" flood-color="#0b3c5d" flood-opacity="0.10"/>
+    </filter>
+    <filter id="sf-shadow-sm" x="-10%" y="-10%" width="130%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0b3c5d" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1080" height="1080" fill="url(#sf-bg)"/>
+  <ellipse cx="0" cy="0" rx="600" ry="500" fill="url(#sf-glow-tl)"/>
+  <ellipse cx="1080" cy="1080" rx="560" ry="480" fill="url(#sf-glow-br)"/>
+
+  <!-- Subtle dot grid -->
+  <g opacity="0.18">
+    <line x1="0" y1="270" x2="1080" y2="270" stroke="#b0c8d8" stroke-width="1" stroke-dasharray="6 14"/>
+    <line x1="0" y1="540" x2="1080" y2="540" stroke="#b0c8d8" stroke-width="1" stroke-dasharray="6 14"/>
+    <line x1="0" y1="810" x2="1080" y2="810" stroke="#b0c8d8" stroke-width="1" stroke-dasharray="6 14"/>
+    <line x1="270" y1="0" x2="270" y2="1080" stroke="#b0c8d8" stroke-width="1" stroke-dasharray="6 14"/>
+    <line x1="540" y1="0" x2="540" y2="1080" stroke="#b0c8d8" stroke-width="1" stroke-dasharray="6 14"/>
+    <line x1="810" y1="0" x2="810" y2="1080" stroke="#b0c8d8" stroke-width="1" stroke-dasharray="6 14"/>
+  </g>
+
+  <!-- Eyebrow chip -->
+  <rect x="340" y="120" width="400" height="50" rx="25" fill="#eaf2f8" stroke="#c8d9e6" stroke-width="2"/>
+  <text x="540" y="153" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="20" font-weight="700" fill="#2b5f78" letter-spacing="0.12em">AVERAGE CONTRACT REPORT</text>
+
+  <!-- Large stat -->
+  <text x="540" y="420" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="280" font-weight="800" fill="#0b3c5d" letter-spacing="-0.05em">15</text>
+
+  <!-- Subtitle -->
+  <text x="540" y="488" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="46" font-weight="600" fill="#2b5f78" letter-spacing="-0.01em">issues found &amp; flagged</text>
+
+  <!-- Divider -->
+  <rect x="380" y="530" width="320" height="3" rx="1.5" fill="#cadbe7"/>
+
+  <!-- 4 risk cards in a row -->
+  <!-- Card: Critical -->
+  <rect x="120" y="568" width="198" height="130" rx="20" fill="#ffffff" stroke="#e8d5d2" stroke-width="1.5" filter="url(#sf-shadow-sm)"/>
+  <circle cx="169" cy="608" r="16" fill="rgba(193,68,52,0.12)"/>
+  <circle cx="169" cy="608" r="8" fill="#c14438"/>
+  <text x="219" y="604" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="44" font-weight="800" fill="#b83a30" letter-spacing="-0.03em">2</text>
+  <text x="219" y="656" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="22" font-weight="600" fill="#b83a30">Critical</text>
+  <text x="219" y="682" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="17" fill="#8aa5b8">Urgent action</text>
+
+  <!-- Card: High -->
+  <rect x="334" y="568" width="198" height="130" rx="20" fill="#ffffff" stroke="#e8dfd0" stroke-width="1.5" filter="url(#sf-shadow-sm)"/>
+  <circle cx="383" cy="608" r="16" fill="rgba(196,125,22,0.12)"/>
+  <circle cx="383" cy="608" r="8" fill="#c47d16"/>
+  <text x="433" y="604" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="44" font-weight="800" fill="#c47d16" letter-spacing="-0.03em">4</text>
+  <text x="433" y="656" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="22" font-weight="600" fill="#c47d16">High</text>
+  <text x="433" y="682" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="17" fill="#8aa5b8">Review closely</text>
+
+  <!-- Card: Medium -->
+  <rect x="548" y="568" width="198" height="130" rx="20" fill="#ffffff" stroke="#ccdde8" stroke-width="1.5" filter="url(#sf-shadow-sm)"/>
+  <circle cx="597" cy="608" r="16" fill="rgba(26,123,164,0.12)"/>
+  <circle cx="597" cy="608" r="8" fill="#1a7ba4"/>
+  <text x="647" y="604" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="44" font-weight="800" fill="#1a7ba4" letter-spacing="-0.03em">6</text>
+  <text x="647" y="656" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="22" font-weight="600" fill="#1a7ba4">Medium</text>
+  <text x="647" y="682" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="17" fill="#8aa5b8">Note &amp; discuss</text>
+
+  <!-- Card: Low -->
+  <rect x="762" y="568" width="198" height="130" rx="20" fill="#ffffff" stroke="#c8dbd0" stroke-width="1.5" filter="url(#sf-shadow-sm)"/>
+  <circle cx="811" cy="608" r="16" fill="rgba(42,156,82,0.12)"/>
+  <circle cx="811" cy="608" r="8" fill="#2a9c52"/>
+  <text x="861" y="604" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="44" font-weight="800" fill="#2a9c52" letter-spacing="-0.03em">3</text>
+  <text x="861" y="656" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="22" font-weight="600" fill="#2a9c52">Low</text>
+  <text x="861" y="682" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="17" fill="#8aa5b8">Advisory</text>
+
+  <!-- Main card frame -->
+  <rect x="60" y="555" width="960" height="156" rx="24" stroke="#dce9f3" stroke-width="1.5" fill="none"/>
+
+  <!-- Supporting copy -->
+  <text x="540" y="786" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="34" font-weight="500" fill="#425667">Every finding mapped to a clause.</text>
+  <text x="540" y="830" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="34" font-weight="500" fill="#425667">Walk into your solicitor meeting prepared.</text>
+
+  <!-- Branding bar -->
+  <rect x="60" y="900" width="960" height="120" rx="22" fill="#0b3c5d"/>
+  <!-- Shield icon small -->
+  <g transform="translate(106, 924)">
+    <path d="M36 4 L10 12 V26 C10 42 21 53 36 58 C51 53 62 42 62 26 V12 Z" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.22)" stroke-width="1.2"/>
+    <path d="M22 35 L30 43 L50 24" stroke="rgba(255,255,255,0.80)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="186" y="956" font-family="Inter, -apple-system, sans-serif" font-size="36" font-weight="700" fill="rgba(255,255,255,0.92)" letter-spacing="-0.01em">ConveyMate</text>
+  <text x="186" y="990" font-family="Inter, -apple-system, sans-serif" font-size="18" font-weight="700" fill="rgba(160,210,240,0.65)" letter-spacing="0.10em">PREPARE WITH CONFIDENCE</text>
+  <text x="980" y="956" text-anchor="end" font-family="Inter, -apple-system, sans-serif" font-size="22" fill="rgba(255,255,255,0.50)">conveymate.com.au</text>
+  <text x="980" y="990" text-anchor="end" font-family="Inter, -apple-system, sans-serif" font-size="16" fill="rgba(255,255,255,0.28)">Not legal advice</text>
+</svg>

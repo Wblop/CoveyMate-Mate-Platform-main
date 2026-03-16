@@ -1,0 +1,755 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ConveyMate www core infrastructure (network, auth, data, registry, and shared artifacts)
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: www
+    AllowedValues: [www]
+  AppName:
+    Type: String
+    Default: conveymate
+  DomainName:
+    Type: String
+    Default: conveymate.com.au
+    Description: Public marketing domain.
+  AppDomainName:
+    Type: String
+    Default: app.conveymate.com.au
+    Description: Authenticated application domain used for Cognito callbacks.
+  HostedUiDomainPrefix:
+    Type: String
+    Default: ''
+    AllowedPattern: '^$|[a-z0-9-]{1,63}$'
+    Description: Optional Cognito hosted UI domain prefix.
+  HostedUiCustomDomainName:
+    Type: String
+    Default: ''
+    AllowedPattern: '^$|[a-z0-9.-]+$'
+    Description: Optional custom domain name for the Cognito hosted UI.
+  HostedUiCustomDomainCertificateArn:
+    Type: String
+    Default: ''
+    AllowedPattern: '^$|arn:aws(-[a-z]+)?:acm:us-east-1:[0-9]{12}:certificate/[A-Za-z0-9-]+$'
+    Description: ACM certificate ARN in us-east-1 for the Cognito hosted UI custom domain.
+  HostedUiCustomDomainHostedZoneId:
+    Type: String
+    Default: ''
+    AllowedPattern: '^$|[A-Z0-9]+$'
+    Description: Route53 hosted zone ID for the Cognito hosted UI custom domain.
+  EnableGoogleIdentityProvider:
+    Type: String
+    Default: 'false'
+    AllowedValues: ['true', 'false']
+    Description: Enable Google as a Cognito federated sign-in provider.
+  HostedUiSignInRedirectPath:
+    Type: String
+    Default: /google/callback
+    AllowedPattern: '^/.*$'
+    Description: Public SPA path that receives Cognito hosted UI sign-in redirects.
+  HostedUiSignOutRedirectPath:
+    Type: String
+    Default: /signin
+    AllowedPattern: '^/.*$'
+    Description: Public SPA path used after Cognito hosted UI sign-out completes.
+  VpcCidr:
+    Type: String
+    Default: 10.42.0.0/16
+  PublicSubnetACidr:
+    Type: String
+    Default: 10.42.0.0/24
+  PublicSubnetBCidr:
+    Type: String
+    Default: 10.42.1.0/24
+  AppSubnetACidr:
+    Type: String
+    Default: 10.42.10.0/24
+  AppSubnetBCidr:
+    Type: String
+    Default: 10.42.11.0/24
+  DbSubnetACidr:
+    Type: String
+    Default: 10.42.20.0/24
+  DbSubnetBCidr:
+    Type: String
+    Default: 10.42.21.0/24
+  NatInstanceAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-arm64-gp2
+  NatInstanceType:
+    Type: String
+    Default: t4g.nano
+  DatabaseName:
+    Type: String
+    Default: conveymate
+  DatabaseUsername:
+    Type: String
+    Default: conveymate_app
+  DatabaseInstanceClass:
+    Type: String
+    Default: db.t4g.micro
+  DatabaseAllocatedStorage:
+    Type: Number
+    Default: 20
+    MinValue: 20
+  DatabaseMaxAllocatedStorage:
+    Type: Number
+    Default: 100
+    MinValue: 20
+
+Rules:
+  HostedUiDomainRequiredWhenGoogleEnabled:
+    RuleCondition: !Equals [!Ref EnableGoogleIdentityProvider, 'true']
+    Assertions:
+      - Assert: !Or
+          - !Not [!Equals [!Ref HostedUiDomainPrefix, '']]
+          - !Not [!Equals [!Ref HostedUiCustomDomainName, '']]
+        AssertDescription: HostedUiDomainPrefix or HostedUiCustomDomainName must be set when Google sign-in is enabled.
+  HostedUiCustomDomainRequiresConfiguration:
+    RuleCondition: !Not [!Equals [!Ref HostedUiCustomDomainName, '']]
+    Assertions:
+      - Assert: !Not [!Equals [!Ref HostedUiCustomDomainCertificateArn, '']]
+        AssertDescription: HostedUiCustomDomainCertificateArn must be set when HostedUiCustomDomainName is configured.
+      - Assert: !Not [!Equals [!Ref HostedUiCustomDomainHostedZoneId, '']]
+        AssertDescription: HostedUiCustomDomainHostedZoneId must be set when HostedUiCustomDomainName is configured.
+
+Conditions:
+  CreateHostedUiPrefixDomain: !Not [!Equals [!Ref HostedUiDomainPrefix, '']]
+  CreateHostedUiCustomDomain: !Not [!Equals [!Ref HostedUiCustomDomainName, '']]
+  CreateHostedUiDomain: !Or
+    - !Condition CreateHostedUiPrefixDomain
+    - !Condition CreateHostedUiCustomDomain
+  GoogleIdentityProviderEnabled: !Equals [!Ref EnableGoogleIdentityProvider, 'true']
+
+Resources:
+  Vpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${AppName}-${EnvironmentName}-vpc'
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub '${AppName}-${EnvironmentName}-igw'
+
+  VpcGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref Vpc
+      InternetGatewayId: !Ref InternetGateway
+
+  PublicSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [0, !GetAZs '']
+      CidrBlock: !Ref PublicSubnetACidr
+      MapPublicIpOnLaunch: true
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: !Sub '${AppName}-${EnvironmentName}-public-a'
+
+  PublicSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [1, !GetAZs '']
+      CidrBlock: !Ref PublicSubnetBCidr
+      MapPublicIpOnLaunch: true
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: !Sub '${AppName}-${EnvironmentName}-public-b'
+
+  AppSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [0, !GetAZs '']
+      CidrBlock: !Ref AppSubnetACidr
+      MapPublicIpOnLaunch: false
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: !Sub '${AppName}-${EnvironmentName}-app-a'
+
+  AppSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [1, !GetAZs '']
+      CidrBlock: !Ref AppSubnetBCidr
+      MapPublicIpOnLaunch: false
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: !Sub '${AppName}-${EnvironmentName}-app-b'
+
+  DbSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [0, !GetAZs '']
+      CidrBlock: !Ref DbSubnetACidr
+      MapPublicIpOnLaunch: false
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: !Sub '${AppName}-${EnvironmentName}-db-a'
+
+  DbSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [1, !GetAZs '']
+      CidrBlock: !Ref DbSubnetBCidr
+      MapPublicIpOnLaunch: false
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: !Sub '${AppName}-${EnvironmentName}-db-b'
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: !Sub '${AppName}-${EnvironmentName}-public-rt'
+
+  PublicDefaultRoute:
+    Type: AWS::EC2::Route
+    DependsOn: VpcGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetA
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetB
+      RouteTableId: !Ref PublicRouteTable
+
+  AppRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: !Sub '${AppName}-${EnvironmentName}-app-rt'
+
+  AppSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref AppSubnetA
+      RouteTableId: !Ref AppRouteTable
+
+  AppSubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref AppSubnetB
+      RouteTableId: !Ref AppRouteTable
+
+  DbRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: !Sub '${AppName}-${EnvironmentName}-db-rt'
+
+  DbSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref DbSubnetA
+      RouteTableId: !Ref DbRouteTable
+
+  DbSubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref DbSubnetB
+      RouteTableId: !Ref DbRouteTable
+
+  NatSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow VPC egress traffic to traverse the low-cost NAT instance.
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - IpProtocol: -1
+          CidrIp: !Ref VpcCidr
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub '${AppName}-${EnvironmentName}-nat-sg'
+
+  NatElasticIp:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Name
+          Value: !Sub '${AppName}-${EnvironmentName}-nat-eip'
+
+  NatInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      AvailabilityZone: !GetAtt PublicSubnetA.AvailabilityZone
+      ImageId: !Ref NatInstanceAmiId
+      InstanceType: !Ref NatInstanceType
+      SourceDestCheck: false
+      SecurityGroupIds:
+        - !Ref NatSecurityGroup
+      SubnetId: !Ref PublicSubnetA
+      Tags:
+        - Key: Name
+          Value: !Sub '${AppName}-${EnvironmentName}-nat'
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          set -euxo pipefail
+          yum install -y iptables-services
+          sysctl -w net.ipv4.ip_forward=1
+          grep -q '^net.ipv4.ip_forward=1$' /etc/sysctl.conf || echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
+          iptables -t nat -C POSTROUTING -o eth0 -j MASQUERADE || iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+          service iptables save
+          systemctl enable iptables
+          systemctl restart iptables
+
+  NatElasticIpAssociation:
+    Type: AWS::EC2::EIPAssociation
+    Properties:
+      AllocationId: !GetAtt NatElasticIp.AllocationId
+      InstanceId: !Ref NatInstance
+
+  AppDefaultRoute:
+    Type: AWS::EC2::Route
+    DependsOn: NatElasticIpAssociation
+    Properties:
+      RouteTableId: !Ref AppRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      InstanceId: !Ref NatInstance
+
+  AppRuntimeSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Shared runtime security group for ECS tasks and the worker lambda.
+      VpcId: !Ref Vpc
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub '${AppName}-${EnvironmentName}-app-runtime-sg'
+
+  DatabaseSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: PostgreSQL access for application runtimes only.
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref AppRuntimeSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub '${AppName}-${EnvironmentName}-db-sg'
+
+  ApiRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Sub '${AppName}-${EnvironmentName}-api'
+      ImageScanningConfiguration:
+        ScanOnPush: true
+      ImageTagMutability: MUTABLE
+      LifecyclePolicy:
+        LifecyclePolicyText: >-
+          {
+            "rules": [
+              {
+                "rulePriority": 1,
+                "description": "Keep the latest 10 images",
+                "selection": {
+                  "tagStatus": "any",
+                  "countType": "imageCountMoreThan",
+                  "countNumber": 10
+                },
+                "action": { "type": "expire" }
+              }
+            ]
+          }
+
+  WebRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Sub '${AppName}-${EnvironmentName}-web'
+      ImageScanningConfiguration:
+        ScanOnPush: true
+      ImageTagMutability: MUTABLE
+      LifecyclePolicy:
+        LifecyclePolicyText: >-
+          {
+            "rules": [
+              {
+                "rulePriority": 1,
+                "description": "Keep the latest 10 images",
+                "selection": {
+                  "tagStatus": "any",
+                  "countType": "imageCountMoreThan",
+                  "countNumber": 10
+                },
+                "action": { "type": "expire" }
+              }
+            ]
+          }
+
+  EcsCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub '${AppName}-${EnvironmentName}-cluster'
+
+  DeploymentArtifactsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${AppName}-${EnvironmentName}-${AWS::AccountId}-${AWS::Region}-artifacts'
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpireOldReleaseArtifacts
+            Status: Enabled
+            NoncurrentVersionExpiration:
+              NoncurrentDays: 30
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 7
+
+  DatabaseCredentialsSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub '${AppName}/${EnvironmentName}/database/master-credentials'
+      GenerateSecretString:
+        SecretStringTemplate: !Sub '{"username":"${DatabaseUsername}"}'
+        GenerateStringKey: password
+        PasswordLength: 32
+        ExcludePunctuation: true
+
+  DatabaseSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: !Sub '${AppName}-${EnvironmentName} database subnets'
+      DBSubnetGroupName: !Sub '${AppName}-${EnvironmentName}-db-subnets'
+      SubnetIds:
+        - !Ref DbSubnetA
+        - !Ref DbSubnetB
+
+  DatabaseInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: !Sub '${AppName}-${EnvironmentName}-postgres'
+      DBName: !Ref DatabaseName
+      DBInstanceClass: !Ref DatabaseInstanceClass
+      AllocatedStorage: !Ref DatabaseAllocatedStorage
+      MaxAllocatedStorage: !Ref DatabaseMaxAllocatedStorage
+      Engine: postgres
+      MasterUsername: !Sub '{{resolve:secretsmanager:${DatabaseCredentialsSecret}:SecretString:username}}'
+      MasterUserPassword: !Sub '{{resolve:secretsmanager:${DatabaseCredentialsSecret}:SecretString:password}}'
+      StorageType: gp3
+      StorageEncrypted: true
+      PubliclyAccessible: false
+      MultiAZ: false
+      AutoMinorVersionUpgrade: true
+      BackupRetentionPeriod: 7
+      DeletionProtection: false
+      DBSubnetGroupName: !Ref DatabaseSubnetGroup
+      VPCSecurityGroups:
+        - !Ref DatabaseSecurityGroup
+
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub '${AppName}-${EnvironmentName}'
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: false
+      AutoVerifiedAttributes:
+        - email
+      UsernameAttributes:
+        - email
+      MfaConfiguration: 'OFF'
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 12
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: false
+          RequireUppercase: true
+          TemporaryPasswordValidityDays: 7
+      Schema:
+        - Name: email
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+
+  GoogleIdentityProvider:
+    Type: AWS::Cognito::UserPoolIdentityProvider
+    Condition: GoogleIdentityProviderEnabled
+    Properties:
+      AttributeMapping:
+        email: email
+        email_verified: email_verified
+        family_name: family_name
+        given_name: given_name
+        name: name
+      ProviderDetails:
+        authorize_scopes: openid email profile
+        client_id: !Sub '{{resolve:ssm:/${AppName}/${EnvironmentName}/sso/google/clientid}}'
+        client_secret: !Sub '{{resolve:ssm:/${AppName}/${EnvironmentName}/sso/google/clientsecret}}'
+      ProviderName: Google
+      ProviderType: Google
+      UserPoolId: !Ref UserPool
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub '${AppName}-${EnvironmentName}'
+      UserPoolId: !Ref UserPool
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_USER_SRP_AUTH
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthFlows:
+        - code
+      AllowedOAuthScopes:
+        - email
+        - openid
+        - profile
+      CallbackURLs:
+        - !Sub 'https://${AppDomainName}${HostedUiSignInRedirectPath}'
+      LogoutURLs:
+        - !Sub 'https://${AppDomainName}${HostedUiSignOutRedirectPath}'
+      PreventUserExistenceErrors: ENABLED
+      SupportedIdentityProviders: !If
+        - GoogleIdentityProviderEnabled
+        - [COGNITO, Google]
+        - [COGNITO]
+
+  UserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Condition: CreateHostedUiPrefixDomain
+    Properties:
+      Domain: !Ref HostedUiDomainPrefix
+      UserPoolId: !Ref UserPool
+
+  UserPoolCustomDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Condition: CreateHostedUiCustomDomain
+    Properties:
+      Domain: !Ref HostedUiCustomDomainName
+      CustomDomainConfig:
+        CertificateArn: !Ref HostedUiCustomDomainCertificateArn
+      UserPoolId: !Ref UserPool
+
+  HostedUiCustomDomainRecordA:
+    Type: AWS::Route53::RecordSet
+    Condition: CreateHostedUiCustomDomain
+    Properties:
+      HostedZoneId: !Ref HostedUiCustomDomainHostedZoneId
+      Name: !Ref HostedUiCustomDomainName
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt UserPoolCustomDomain.CloudFrontDistribution
+        HostedZoneId: Z2FDTNDATAQYW2
+
+  HostedUiCustomDomainRecordAaaa:
+    Type: AWS::Route53::RecordSet
+    Condition: CreateHostedUiCustomDomain
+    Properties:
+      HostedZoneId: !Ref HostedUiCustomDomainHostedZoneId
+      Name: !Ref HostedUiCustomDomainName
+      Type: AAAA
+      AliasTarget:
+        DNSName: !GetAtt UserPoolCustomDomain.CloudFrontDistribution
+        HostedZoneId: Z2FDTNDATAQYW2
+
+  SsmCognitoUserPoolId:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/${AppName}/${EnvironmentName}/cognito/userpoolid'
+      Type: String
+      Value: !Ref UserPool
+      Description: ConveyMate Cognito user pool ID
+
+  SsmCognitoAppClientId:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/${AppName}/${EnvironmentName}/cognito/appclientid'
+      Type: String
+      Value: !Ref UserPoolClient
+      Description: ConveyMate Cognito app client ID
+
+  SsmCognitoClientId:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/${AppName}/${EnvironmentName}/cognito/clientid'
+      Type: String
+      Value: !Ref UserPoolClient
+      Description: ConveyMate Cognito app client ID alias
+
+  SsmCognitoRegion:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/${AppName}/${EnvironmentName}/cognito/region'
+      Type: String
+      Value: !Ref AWS::Region
+      Description: ConveyMate Cognito region
+
+  SsmCognitoIssuer:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/${AppName}/${EnvironmentName}/cognito/issuer'
+      Type: String
+      Value: !Sub 'https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}'
+      Description: ConveyMate Cognito issuer
+
+  SsmCognitoScopes:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/${AppName}/${EnvironmentName}/cognito/scopes'
+      Type: String
+      Value: openid,email,profile
+      Description: ConveyMate Cognito scopes
+
+  SsmCognitoSupportedIdentityProviders:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/${AppName}/${EnvironmentName}/cognito/supportedidentityproviders'
+      Type: String
+      Value: !If
+        - GoogleIdentityProviderEnabled
+        - 'COGNITO,Google'
+        - 'COGNITO'
+      Description: ConveyMate Cognito supported identity providers
+
+  SsmCognitoRedirectSignIn:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/${AppName}/${EnvironmentName}/cognito/redirectsignin'
+      Type: String
+      Value: !Sub 'https://${AppDomainName}${HostedUiSignInRedirectPath}'
+      Description: ConveyMate Cognito sign-in redirect
+
+  SsmCognitoRedirectSignOut:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/${AppName}/${EnvironmentName}/cognito/redirectsignout'
+      Type: String
+      Value: !Sub 'https://${AppDomainName}${HostedUiSignOutRedirectPath}'
+      Description: ConveyMate Cognito sign-out redirect
+
+  SsmCognitoHostedUiDomain:
+    Type: AWS::SSM::Parameter
+    Condition: CreateHostedUiDomain
+    Properties:
+      Name: !Sub '/${AppName}/${EnvironmentName}/cognito/hosteduidomain'
+      Type: String
+      Value: !If
+        - CreateHostedUiCustomDomain
+        - !Sub 'https://${HostedUiCustomDomainName}'
+        - !Sub 'https://${HostedUiDomainPrefix}.auth.${AWS::Region}.amazoncognito.com'
+      Description: ConveyMate Cognito hosted UI domain
+
+Outputs:
+  VpcId:
+    Value: !Ref Vpc
+    Export:
+      Name: !Sub '${AppName}-${EnvironmentName}-VpcId'
+  PublicSubnetAId:
+    Value: !Ref PublicSubnetA
+    Export:
+      Name: !Sub '${AppName}-${EnvironmentName}-PublicSubnetAId'
+  PublicSubnetBId:
+    Value: !Ref PublicSubnetB
+    Export:
+      Name: !Sub '${AppName}-${EnvironmentName}-PublicSubnetBId'
+  AppSubnetAId:
+    Value: !Ref AppSubnetA
+    Export:
+      Name: !Sub '${AppName}-${EnvironmentName}-AppSubnetAId'
+  AppSubnetBId:
+    Value: !Ref AppSubnetB
+    Export:
+      Name: !Sub '${AppName}-${EnvironmentName}-AppSubnetBId'
+  AppRuntimeSecurityGroupId:
+    Value: !Ref AppRuntimeSecurityGroup
+    Export:
+      Name: !Sub '${AppName}-${EnvironmentName}-AppRuntimeSecurityGroupId'
+  DatabaseSecurityGroupId:
+    Value: !Ref DatabaseSecurityGroup
+    Export:
+      Name: !Sub '${AppName}-${EnvironmentName}-DatabaseSecurityGroupId'
+  EcsClusterName:
+    Value: !Ref EcsCluster
+    Export:
+      Name: !Sub '${AppName}-${EnvironmentName}-EcsClusterName'
+  EcsClusterArn:
+    Value: !GetAtt EcsCluster.Arn
+    Export:
+      Name: !Sub '${AppName}-${EnvironmentName}-EcsClusterArn'
+  ApiRepositoryUri:
+    Value: !GetAtt ApiRepository.RepositoryUri
+    Export:
+      Name: !Sub '${AppName}-${EnvironmentName}-ApiRepositoryUri'
+  WebRepositoryUri:
+    Value: !GetAtt WebRepository.RepositoryUri
+    Export:
+      Name: !Sub '${AppName}-${EnvironmentName}-WebRepositoryUri'
+  DeploymentArtifactsBucketName:
+    Value: !Ref DeploymentArtifactsBucket
+    Export:
+      Name: !Sub '${AppName}-${EnvironmentName}-DeploymentArtifactsBucketName'
+  DatabaseEndpointAddress:
+    Value: !GetAtt DatabaseInstance.Endpoint.Address
+    Export:
+      Name: !Sub '${AppName}-${EnvironmentName}-DatabaseEndpointAddress'
+  DatabaseCredentialsSecretName:
+    Value: !Ref DatabaseCredentialsSecret
+    Export:
+      Name: !Sub '${AppName}-${EnvironmentName}-DatabaseCredentialsSecretName'
+  DatabaseConnectionStringParameterName:
+    Value: !Sub '/${AppName}/${EnvironmentName}/database/connectionstring'
+    Export:
+      Name: !Sub '${AppName}-${EnvironmentName}-DatabaseConnectionStringParameterName'
+  UserPoolId:
+    Value: !Ref UserPool
+    Export:
+      Name: !Sub '${AppName}-${EnvironmentName}-UserPoolId'
+  UserPoolClientId:
+    Value: !Ref UserPoolClient
+    Export:
+      Name: !Sub '${AppName}-${EnvironmentName}-UserPoolClientId'

@@ -1,0 +1,10 @@
+[
+  { "ParameterKey": "EnvironmentName", "ParameterValue": "dev" },
+  { "ParameterKey": "AppName", "ParameterValue": "conveymate" },
+  { "ParameterKey": "WorkerCodeS3Bucket", "ParameterValue": "replace-with-worker-artifacts-bucket" },
+  { "ParameterKey": "WorkerCodeS3Key", "ParameterValue": "conveymate/reports-worker/worker.zip" },
+  { "ParameterKey": "AppBaseUrl", "ParameterValue": "http://localhost:4200" },
+  { "ParameterKey": "StripePriceAudCents", "ParameterValue": "1999" },
+  { "ParameterKey": "TextractEnabled", "ParameterValue": "true" },
+  { "ParameterKey": "PostgresConnectionString", "ParameterValue": "" }
+]

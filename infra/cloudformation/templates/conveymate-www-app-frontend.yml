@@ -1,0 +1,324 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ConveyMate authenticated app frontend (CloudFront, S3, DNS)
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: www
+    AllowedValues: [www]
+  AppName:
+    Type: String
+    Default: conveymate
+  AppDomainName:
+    Type: String
+    Default: app.conveymate.com.au
+  HostedZoneId:
+    Type: String
+    Description: Route53 hosted zone ID for the public domain.
+  CloudFrontCertificateArn:
+    Type: String
+    Description: ACM certificate ARN in us-east-1 for the app frontend domain.
+  ApiOriginDomainName:
+    Type: String
+    Description: DNS name of the shared API ALB origin.
+
+Resources:
+  AppWebsiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${AppName}-${EnvironmentName}-${AWS::AccountId}-${AWS::Region}-app-frontend'
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpireNonCurrentAppFrontendObjects
+            Status: Enabled
+            NoncurrentVersionExpiration:
+              NoncurrentDays: 30
+
+  AppWebsiteOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Description: Access control for the ConveyMate authenticated app bucket.
+        Name: !Sub '${AppName}-${EnvironmentName}-app-frontend-oac'
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  AppWebsiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref AppWebsiteBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowCloudFrontRead
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action:
+              - s3:GetObject
+            Resource: !Sub '${AppWebsiteBucket.Arn}/*'
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${AppWebsiteDistribution}'
+
+  AppSpaFunction:
+    Type: AWS::CloudFront::Function
+    Properties:
+      Name: !Sub '${AppName}-${EnvironmentName}-app-frontend-rewrite'
+      AutoPublish: true
+      FunctionConfig:
+        Comment: Rewrites authenticated app routes and redirects public paths to the marketing site.
+        Runtime: cloudfront-js-2.0
+      FunctionCode: |
+        function isMarketingRoute(uri) {
+          return uri === '/' ||
+            uri === '/landing' ||
+            uri === '/create-report' ||
+            uri === '/guides' ||
+            uri.startsWith('/guides/') ||
+            uri === '/insights' ||
+            uri.startsWith('/insights/') ||
+            uri === '/calculators' ||
+            uri.startsWith('/calculators/') ||
+            uri === '/legal/privacy' ||
+            uri === '/legal/terms' ||
+            uri === '/legal/disclaimer' ||
+            uri === '/legal/accessibility';
+        }
+
+        function toQueryString(querystring) {
+          var pairs = [];
+
+          for (var key in querystring) {
+            if (!Object.prototype.hasOwnProperty.call(querystring, key)) {
+              continue;
+            }
+
+            var entry = querystring[key];
+            if (entry.multiValue && entry.multiValue.length > 0) {
+              for (var i = 0; i < entry.multiValue.length; i++) {
+                var item = entry.multiValue[i];
+                pairs.push(item.value === '' ? key : key + '=' + item.value);
+              }
+              continue;
+            }
+
+            pairs.push(entry.value === '' ? key : key + '=' + entry.value);
+          }
+
+          return pairs.length > 0 ? '?' + pairs.join('&') : '';
+        }
+
+        function redirectToMarketingHost(request) {
+          return {
+            statusCode: 307,
+            statusDescription: 'Temporary Redirect',
+            headers: {
+              location: { value: 'https://conveymate.com.au' + request.uri + toQueryString(request.querystring) },
+              'cache-control': { value: 'public, max-age=300' }
+            }
+          };
+        }
+
+        function handler(event) {
+          var request = event.request;
+          var uri = request.uri;
+
+          if (isMarketingRoute(uri)) {
+            return redirectToMarketingHost(request);
+          }
+
+          if (uri.endsWith('/')) {
+            request.uri += 'index.html';
+            return request;
+          }
+
+          if (uri.indexOf('.') === -1) {
+            request.uri = '/index.html';
+          }
+
+          return request;
+        }
+
+  AppWebsiteCachePolicy:
+    Type: AWS::CloudFront::CachePolicy
+    Properties:
+      CachePolicyConfig:
+        Name: !Sub '${AppName}-${EnvironmentName}-app-frontend-cache'
+        Comment: Cache policy for the authenticated app frontend assets.
+        DefaultTTL: 86400
+        MaxTTL: 31536000
+        MinTTL: 0
+        ParametersInCacheKeyAndForwardedToOrigin:
+          CookiesConfig:
+            CookieBehavior: none
+          EnableAcceptEncodingBrotli: true
+          EnableAcceptEncodingGzip: true
+          HeadersConfig:
+            HeaderBehavior: none
+          QueryStringsConfig:
+            QueryStringBehavior: none
+
+  ApiCachePolicy:
+    Type: AWS::CloudFront::CachePolicy
+    Properties:
+      CachePolicyConfig:
+        Name: !Sub '${AppName}-${EnvironmentName}-app-api-cache'
+        Comment: Cache policy for dynamic API requests on the app frontend.
+        DefaultTTL: 0
+        MaxTTL: 0
+        MinTTL: 0
+        ParametersInCacheKeyAndForwardedToOrigin:
+          CookiesConfig:
+            CookieBehavior: none
+          EnableAcceptEncodingBrotli: false
+          EnableAcceptEncodingGzip: false
+          HeadersConfig:
+            HeaderBehavior: none
+          QueryStringsConfig:
+            QueryStringBehavior: none
+
+  ApiOriginRequestPolicy:
+    Type: AWS::CloudFront::OriginRequestPolicy
+    Properties:
+      OriginRequestPolicyConfig:
+        Name: !Sub '${AppName}-${EnvironmentName}-app-api-origin-request'
+        Comment: Forward dynamic request context to the shared API origin.
+        CookiesConfig:
+          CookieBehavior: all
+        HeadersConfig:
+          HeaderBehavior: allViewer
+        QueryStringsConfig:
+          QueryStringBehavior: all
+
+  AppNoIndexResponseHeadersPolicy:
+    Type: AWS::CloudFront::ResponseHeadersPolicy
+    Properties:
+      ResponseHeadersPolicyConfig:
+        Name: !Sub '${AppName}-${EnvironmentName}-app-noindex'
+        Comment: Adds noindex headers to the authenticated app frontend.
+        CustomHeadersConfig:
+          Items:
+            - Header: X-Robots-Tag
+              Value: noindex, nofollow
+              Override: true
+
+  AppWebsiteDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: !Sub '${AppName} ${EnvironmentName} authenticated app frontend'
+        Aliases:
+          - !Ref AppDomainName
+        DefaultRootObject: index.html
+        HttpVersion: http2and3
+        IPV6Enabled: true
+        PriceClass: PriceClass_100
+        Origins:
+          - Id: app-website-origin
+            DomainName: !GetAtt AppWebsiteBucket.RegionalDomainName
+            OriginAccessControlId: !GetAtt AppWebsiteOriginAccessControl.Id
+            S3OriginConfig: {}
+          - Id: api-origin
+            DomainName: !Ref ApiOriginDomainName
+            CustomOriginConfig:
+              HTTPPort: 80
+              HTTPSPort: 443
+              OriginProtocolPolicy: http-only
+              OriginSSLProtocols:
+                - TLSv1.2
+        DefaultCacheBehavior:
+          AllowedMethods: [GET, HEAD, OPTIONS]
+          CachedMethods: [GET, HEAD, OPTIONS]
+          CachePolicyId: !Ref AppWebsiteCachePolicy
+          Compress: true
+          FunctionAssociations:
+            - EventType: viewer-request
+              FunctionARN: !GetAtt AppSpaFunction.FunctionARN
+          ResponseHeadersPolicyId: !Ref AppNoIndexResponseHeadersPolicy
+          TargetOriginId: app-website-origin
+          ViewerProtocolPolicy: redirect-to-https
+        CacheBehaviors:
+          - PathPattern: api/*
+            AllowedMethods: [GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE]
+            CachedMethods: [GET, HEAD, OPTIONS]
+            CachePolicyId: !Ref ApiCachePolicy
+            Compress: true
+            OriginRequestPolicyId: !Ref ApiOriginRequestPolicy
+            TargetOriginId: api-origin
+            ViewerProtocolPolicy: redirect-to-https
+          - PathPattern: user/*
+            AllowedMethods: [GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE]
+            CachedMethods: [GET, HEAD, OPTIONS]
+            CachePolicyId: !Ref ApiCachePolicy
+            Compress: true
+            OriginRequestPolicyId: !Ref ApiOriginRequestPolicy
+            TargetOriginId: api-origin
+            ViewerProtocolPolicy: redirect-to-https
+          - PathPattern: metadataconfiguration
+            AllowedMethods: [GET, HEAD, OPTIONS]
+            CachedMethods: [GET, HEAD, OPTIONS]
+            CachePolicyId: !Ref ApiCachePolicy
+            Compress: true
+            OriginRequestPolicyId: !Ref ApiOriginRequestPolicy
+            TargetOriginId: api-origin
+            ViewerProtocolPolicy: redirect-to-https
+          - PathPattern: health
+            AllowedMethods: [GET, HEAD, OPTIONS]
+            CachedMethods: [GET, HEAD, OPTIONS]
+            CachePolicyId: !Ref ApiCachePolicy
+            Compress: true
+            OriginRequestPolicyId: !Ref ApiOriginRequestPolicy
+            TargetOriginId: api-origin
+            ViewerProtocolPolicy: redirect-to-https
+        Restrictions:
+          GeoRestriction:
+            RestrictionType: none
+        ViewerCertificate:
+          AcmCertificateArn: !Ref CloudFrontCertificateArn
+          MinimumProtocolVersion: TLSv1.2_2021
+          SslSupportMethod: sni-only
+
+  AppWebsiteDnsRecordA:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Ref AppDomainName
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt AppWebsiteDistribution.DomainName
+        HostedZoneId: Z2FDTNDATAQYW2
+
+  AppWebsiteDnsRecordAaaa:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Ref AppDomainName
+      Type: AAAA
+      AliasTarget:
+        DNSName: !GetAtt AppWebsiteDistribution.DomainName
+        HostedZoneId: Z2FDTNDATAQYW2
+
+Outputs:
+  AppWebsiteBucketName:
+    Value: !Ref AppWebsiteBucket
+  AppCloudFrontDistributionId:
+    Value: !Ref AppWebsiteDistribution
+  AppCloudFrontDomainName:
+    Value: !GetAtt AppWebsiteDistribution.DomainName

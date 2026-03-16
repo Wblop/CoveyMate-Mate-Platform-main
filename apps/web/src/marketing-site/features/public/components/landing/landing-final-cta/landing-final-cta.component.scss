@@ -1,0 +1,66 @@
+:host {
+  display: block;
+}
+
+.landing-final-cta {
+  border-bottom: 0;
+}
+
+.landing-final-cta__inner {
+  padding: var(--sm-space-6);
+  border-color: #9db9cc;
+  box-shadow: none;
+  background:
+    radial-gradient(80% 120% at 15% 0%, rgba(98, 156, 192, 0.22) 0%, transparent 56%),
+    linear-gradient(180deg, #e7f0f7 0%, #dbe9f3 100%);
+  display: grid;
+  gap: var(--sm-space-3);
+  text-align: center;
+}
+
+.landing-final-cta__inner h2,
+.landing-final-cta__inner p {
+  margin: 0;
+}
+
+.landing-final-cta__inner p {
+  color: var(--sm-color-text-muted);
+  max-width: 68ch;
+  justify-self: center;
+}
+
+.landing-final-cta__actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--sm-space-3);
+}
+
+.landing-final-cta__actions a {
+  text-decoration: none;
+}
+
+@media (max-width: 720px) {
+  .landing-final-cta__inner {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 560px) {
+  .landing-final-cta__inner {
+    padding: 16px;
+  }
+
+  .landing-final-cta__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .landing-final-cta__actions a {
+    display: block;
+  }
+
+  :host ::ng-deep .landing-final-cta__actions .ui-button {
+    width: 100%;
+  }
+}

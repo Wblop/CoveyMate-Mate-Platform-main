@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 336" fill="none" aria-hidden="true">
+  <defs>
+    <filter id="cb-shadow" x="-5%" y="-5%" width="114%" height="116%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#0f2a3c" flood-opacity="0.09"/>
+    </filter>
+    <radialGradient id="cb-glow" cx="80%" cy="18%" r="55%">
+      <stop offset="0%" stop-color="#bed8ea" stop-opacity="0.50"/>
+      <stop offset="100%" stop-color="#bed8ea" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Bar gradients - varying shades of brand blue -->
+    <linearGradient id="cb-b1" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0b3c5d"/><stop offset="100%" stop-color="#134866"/>
+    </linearGradient>
+    <linearGradient id="cb-b2" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#165c80"/><stop offset="100%" stop-color="#1a7ba4"/>
+    </linearGradient>
+    <linearGradient id="cb-b3" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2b5f78"/><stop offset="100%" stop-color="#3a7d9c"/>
+    </linearGradient>
+    <linearGradient id="cb-b4" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#4a7f9a"/><stop offset="100%" stop-color="#5e96b2"/>
+    </linearGradient>
+    <linearGradient id="cb-b5" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#6a9cb6"/><stop offset="100%" stop-color="#80b2c8"/>
+    </linearGradient>
+    <linearGradient id="cb-b6" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#96b8cc"/><stop offset="100%" stop-color="#aecbd9"/>
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="420" cy="52" rx="200" ry="130" fill="url(#cb-glow)"/>
+
+  <!-- Card -->
+  <rect x="20" y="10" width="520" height="316" rx="22" fill="#ffffff" stroke="#d0dce7" stroke-width="1.5" filter="url(#cb-shadow)"/>
+
+  <!-- Header band -->
+  <rect x="20" y="10" width="520" height="56" rx="22" fill="#f0f6fb"/>
+  <rect x="20" y="46" width="520" height="20" fill="#f0f6fb"/>
+
+  <text x="50" y="44" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="700" fill="#0b3c5d" letter-spacing="-0.01em">Contract Clause Breakdown</text>
+  <rect x="370" y="27" width="148" height="22" rx="11" fill="#eaf2f8" stroke="#c8d9e6" stroke-width="1"/>
+  <text x="444" y="42" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="700" fill="#2b5f78" letter-spacing="0.04em">AVG RESIDENTIAL CONTRACT</text>
+
+  <!--
+    Bar area: x=210-490 (280px max), rows at y=94,134,174,214,254,294
+    Max percentage = 28%
+    Bars at 100% of relative width:
+      Settlement terms  28% → 280px (reference max)
+      Title & encumb.   22% → 220px
+      Special conds.    18% → 180px
+      Disclosures       16% → 160px
+      Finance clauses   10% → 100px
+      Other              6% →  60px
+  -->
+
+  <!-- Grid marks -->
+  <text x="210" y="82" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#8aa5b8" text-anchor="middle">0%</text>
+  <text x="280" y="82" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#8aa5b8" text-anchor="middle">10%</text>
+  <text x="350" y="82" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#8aa5b8" text-anchor="middle">18%</text>
+  <text x="420" y="82" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#8aa5b8" text-anchor="middle">25%</text>
+  <text x="490" y="82" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#8aa5b8" text-anchor="middle">30%</text>
+  <line x1="210" y1="86" x2="210" y2="308" stroke="#e8f1f7" stroke-width="1"/>
+  <line x1="280" y1="86" x2="280" y2="308" stroke="#e8f1f7" stroke-width="1" stroke-dasharray="3 3"/>
+  <line x1="350" y1="86" x2="350" y2="308" stroke="#e8f1f7" stroke-width="1" stroke-dasharray="3 3"/>
+  <line x1="420" y1="86" x2="420" y2="308" stroke="#e8f1f7" stroke-width="1" stroke-dasharray="3 3"/>
+  <line x1="490" y1="86" x2="490" y2="308" stroke="#dde8f0" stroke-width="1"/>
+
+  <!-- Row 1: Settlement terms 28% -->
+  <text x="48" y="98"  font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#172532">Settlement terms</text>
+  <rect x="210" y="90" width="280" height="14" rx="7" fill="#f4f7fa"/>
+  <rect x="210" y="90" width="280" height="14" rx="7" fill="url(#cb-b1)"/>
+  <text x="496" y="101" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="700" fill="#0b3c5d">28%</text>
+
+  <!-- Row 2: Title & encumbrances 22% -->
+  <text x="48" y="138" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#172532">Title &amp; encumbrances</text>
+  <rect x="210" y="130" width="280" height="14" rx="7" fill="#f4f7fa"/>
+  <rect x="210" y="130" width="220" height="14" rx="7" fill="url(#cb-b2)"/>
+  <text x="496" y="141" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="700" fill="#165c80">22%</text>
+
+  <!-- Row 3: Special conditions 18% -->
+  <text x="48" y="178" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#172532">Special conditions</text>
+  <rect x="210" y="170" width="280" height="14" rx="7" fill="#f4f7fa"/>
+  <rect x="210" y="170" width="180" height="14" rx="7" fill="url(#cb-b3)"/>
+  <text x="496" y="181" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="700" fill="#2b5f78">18%</text>
+
+  <!-- Row 4: Disclosures 16% -->
+  <text x="48" y="218" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#172532">Disclosures</text>
+  <rect x="210" y="210" width="280" height="14" rx="7" fill="#f4f7fa"/>
+  <rect x="210" y="210" width="160" height="14" rx="7" fill="url(#cb-b4)"/>
+  <text x="496" y="221" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="700" fill="#4a7f9a">16%</text>
+
+  <!-- Row 5: Finance clauses 10% -->
+  <text x="48" y="258" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#172532">Finance clauses</text>
+  <rect x="210" y="250" width="280" height="14" rx="7" fill="#f4f7fa"/>
+  <rect x="210" y="250" width="100" height="14" rx="7" fill="url(#cb-b5)"/>
+  <text x="496" y="261" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="700" fill="#6a9cb6">10%</text>
+
+  <!-- Row 6: Other 6% -->
+  <text x="48" y="298" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#172532">Other</text>
+  <rect x="210" y="290" width="280" height="14" rx="7" fill="#f4f7fa"/>
+  <rect x="210" y="290" width="60"  height="14" rx="7" fill="url(#cb-b6)"/>
+  <text x="496" y="301" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="700" fill="#96b8cc">6%</text>
+
+  <!-- Label divider -->
+  <line x1="44" y1="112" x2="200" y2="112" stroke="#eef4f8" stroke-width="1"/>
+  <line x1="44" y1="152" x2="200" y2="152" stroke="#eef4f8" stroke-width="1"/>
+  <line x1="44" y1="192" x2="200" y2="192" stroke="#eef4f8" stroke-width="1"/>
+  <line x1="44" y1="232" x2="200" y2="232" stroke="#eef4f8" stroke-width="1"/>
+  <line x1="44" y1="272" x2="200" y2="272" stroke="#eef4f8" stroke-width="1"/>
+</svg>

@@ -1,0 +1,190 @@
+    .feedback-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 27, 40, 0.50);
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .feedback-dialog {
+      background: var(--sm-color-surface);
+      border: 1px solid var(--sm-color-border-strong);
+      border-radius: var(--sm-radius-md, 8px);
+      box-shadow: var(--sm-shadow-soft);
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .feedback-dialog__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid var(--sm-color-border);
+    }
+
+    .feedback-dialog__title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--sm-color-text);
+      line-height: 1.3;
+    }
+
+    .feedback-dialog__close {
+      min-width: 32px;
+      min-height: 32px;
+      border: 0;
+      background: transparent;
+      color: var(--sm-color-text-muted);
+      font-size: 16px;
+      line-height: 1;
+      cursor: pointer;
+      border-radius: var(--sm-radius-sm);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .feedback-dialog__close:hover {
+      background: var(--sm-color-surface-muted);
+      color: var(--sm-color-text);
+    }
+
+    .feedback-dialog__body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .feedback-dialog__field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .feedback-dialog__label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--sm-color-text);
+      line-height: 1.4;
+    }
+
+    .feedback-dialog__required {
+      color: var(--sm-color-danger);
+    }
+
+    .feedback-dialog__select,
+    .feedback-dialog__textarea {
+      width: 100%;
+      border: 1px solid var(--sm-color-border-strong);
+      border-radius: var(--sm-radius-sm);
+      background: var(--sm-color-surface);
+      color: var(--sm-color-text);
+      font-size: 14px;
+      line-height: 1.5;
+      font-family: inherit;
+      box-sizing: border-box;
+    }
+
+    .feedback-dialog__select {
+      padding: 8px 10px;
+      height: 40px;
+      cursor: pointer;
+    }
+
+    .feedback-dialog__textarea {
+      padding: 8px 10px;
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .feedback-dialog__select:focus,
+    .feedback-dialog__textarea:focus {
+      outline: 2px solid var(--sm-color-primary);
+      outline-offset: 1px;
+      border-color: var(--sm-color-primary);
+    }
+
+    .feedback-dialog__char-count {
+      font-size: 12px;
+      color: var(--sm-color-text-muted);
+      text-align: right;
+    }
+
+    .feedback-dialog__error {
+      margin: 0;
+      padding: 10px 12px;
+      background: rgba(211, 47, 47, 0.08);
+      border: 1px solid rgba(211, 47, 47, 0.30);
+      border-radius: var(--sm-radius-sm);
+      color: var(--sm-color-danger);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .feedback-dialog__actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding-top: 4px;
+    }
+
+    .feedback-dialog__btn {
+      min-height: 38px;
+      padding: 0 16px;
+      border-radius: var(--sm-radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s, opacity 0.15s;
+    }
+
+    .feedback-dialog__btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .feedback-dialog__btn--ghost {
+      border: 1px solid var(--sm-color-border-strong);
+      background: transparent;
+      color: var(--sm-color-text);
+    }
+
+    .feedback-dialog__btn--ghost:hover:not(:disabled) {
+      background: var(--sm-color-surface-muted);
+    }
+
+    .feedback-dialog__btn--primary {
+      border: 1px solid transparent;
+      background: var(--sm-color-primary);
+      color: #fff;
+    }
+
+    .feedback-dialog__btn--primary:hover:not(:disabled) {
+      opacity: 0.88;
+    }
+
+    .feedback-dialog__success {
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      text-align: center;
+    }
+
+    .feedback-dialog__success-msg {
+      margin: 0;
+      font-size: 15px;
+      color: var(--sm-color-text);
+      line-height: 1.5;
+    }

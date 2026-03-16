@@ -1,0 +1,121 @@
+<section class="sm-page-section">
+  <div class="sm-container page-grid">
+    <ui-page-header
+      title="Dashboard"
+      description="Review current report status, open historical records, and continue manually with the conveyancer directory."
+      eyebrow="Workspace"
+    >
+      <div actions class="header-actions">
+        <ui-button variant="secondary" routerLink="/reports">Open Reports</ui-button>
+        <ui-button variant="secondary" routerLink="/conveyancers">Browse conveyancers</ui-button>
+      </div>
+    </ui-page-header>
+
+    <ui-alert-banner
+      tone="info"
+      title="Workflows retired"
+      message="New report creation and quote-request workflows are no longer available. Existing records remain accessible below."
+    ></ui-alert-banner>
+
+    @if (loading()) {
+      <section class="skeleton-list" aria-label="Loading dashboard">
+        <ui-skeleton-block [height]="104"></ui-skeleton-block>
+        <ui-skeleton-block [height]="212"></ui-skeleton-block>
+      </section>
+    } @else if (errorMessage()) {
+      <ui-alert-banner tone="error" title="Could not load dashboard" [message]="errorMessage()"></ui-alert-banner>
+      <div class="retry-actions">
+        <ui-button variant="secondary" (pressed)="loadDashboard()">Retry</ui-button>
+      </div>
+    } @else if (allReports().length > 0) {
+      <ui-alert-banner
+        tone="info"
+        title="No reports available"
+        message="Completed and historical reports will appear here when they are available."
+      ></ui-alert-banner>
+    } @else {
+      <section class="overview-grid" aria-label="Dashboard summary">
+        <article class="sm-surface overview-card">
+          <p class="overview-card__label">Reports in progress</p>
+          <p class="overview-card__value">{{ reportsInProgress().length }}</p>
+          <p class="overview-card__meta">Draft and processing jobs retained in the workspace</p>
+        </article>
+
+        <article class="sm-surface overview-card">
+          <p class="overview-card__label">Ready reports</p>
+          <p class="overview-card__value">{{ readyReports().length }}</p>
+          <p class="overview-card__meta">Completed reports available to open or download</p>
+        </article>
+
+        <article class="sm-surface overview-card">
+          <p class="overview-card__label">Failed jobs</p>
+          <p class="overview-card__value">{{ failedReports().length }}</p>
+          <p class="overview-card__meta">Records that stopped before a final report was produced</p>
+        </article>
+
+        <article class="sm-surface overview-card">
+          <p class="overview-card__label">Archived reports</p>
+          <p class="overview-card__value">{{ archivedReports().length }}</p>
+          <p class="overview-card__meta">Included in the report library when archived view is enabled</p>
+        </article>
+      </section>
+
+      <section class="sm-surface section-card">
+        <header class="panel-header">
+          <div>
+            <p class="panel-header__eyebrow">Reports</p>
+            <h2>Recent records</h2>
+          </div>
+          <a routerLink="/reports">Open Reports explorer</a>
+        </header>
+
+        <div class="table-wrap">
+          <table>
+            <caption class="sm-sr-only">
+              Recent reports table
+            </caption>
+            <colgroup>
+              <col class="col-job" />
+              <col class="col-status" />
+              <col class="col-updated" />
+              <col class="col-action" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th scope="col">Report</th>
+                <th scope="col">Status</th>
+                <th scope="col">Updated</th>
+                <th scope="col">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (report of recentReports(); track report.id) {
+                <tr>
+                  <td>
+                    <p class="table-title">{{ report.propertyAddress }}</p>
+                    <p class="sm-muted">{{ report.stateOrTerritory }}</p>
+                    @if (report.archivedAtUtc) {
+                      <p class="table-meta">Archived</p>
+                    }
+                  </td>
+                  <td>
+                    <div class="status-cell">
+                      <ui-status-badge [status]="report.status"></ui-status-badge>
+                      <p class="table-meta">{{ reportRowSummary(report) }}</p>
+                    </div>
+                  </td>
+                  <td>{{ report.updatedAt | date: 'd MMM yyyy, h:mm a' }}</td>
+                  <td>
+                    <button type="button" class="table-link-button" (click)="openReport(report.id)">
+                      {{ primaryActionLabel(report) }}
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
+  </div>
+</section>

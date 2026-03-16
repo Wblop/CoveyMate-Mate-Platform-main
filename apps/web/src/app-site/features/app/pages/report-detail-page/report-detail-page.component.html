@@ -1,0 +1,1045 @@
+<section class="sm-page-section">
+  <div class="sm-container page-grid">
+    @if (loading()) {
+      <ui-skeleton-block [height]="48"></ui-skeleton-block>
+      <ui-skeleton-block [height]="420"></ui-skeleton-block>
+    } @else if (errorMessage()) {
+      <ui-alert-banner tone="error" title="Could not load report" [message]="errorMessage()"></ui-alert-banner>
+    } @else if (viewModel(); as vm) {
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <ol>
+          <li><a routerLink="/dashboard">Dashboard</a></li>
+          <li><a routerLink="/reports">Reports</a></li>
+          <li aria-current="page">{{ vm.canonicalPropertyAddress }}</li>
+        </ol>
+      </nav>
+
+      <ui-page-header
+        [title]="vm.canonicalPropertyAddress"
+        [description]="'Created ' + (report()!.createdAt | date: 'd MMM yyyy, h:mm a')"
+        eyebrow="Report detail"
+      >
+        <div actions class="header-actions">
+          @if (report()!.status === 'ready') {
+            <div class="header-actions__buttons">
+              <ui-button
+                variant="secondary"
+                [disabled]="downloading()"
+                [title]="downloadTitle()"
+                (pressed)="downloadReport()"
+              >
+                {{ downloading() ? 'Preparing download...' : 'Download PDF' }}
+              </ui-button>
+              <ui-button variant="secondary" [routerLink]="['/conveyancers']" [queryParams]="conveyancerDirectoryQueryParams()">Talk to a conveyancer</ui-button>
+            </div>
+          } @else {
+            <ui-status-badge [status]="report()!.status"></ui-status-badge>
+          }
+        </div>
+      </ui-page-header>
+
+      @if (report()!.archivedAtUtc) {
+        <ui-alert-banner
+          tone="info"
+          title="This report is archived"
+          message="Archived jobs are hidden from standard report views unless Show archived is enabled."
+        ></ui-alert-banner>
+      }
+
+      @if (report()!.status === 'draft') {
+        <ui-alert-banner tone="info" title="Awaiting action" [message]="draftMessage()"></ui-alert-banner>
+      }
+
+      @if (report()!.status === 'processing') {
+        <ui-alert-banner
+          tone="info"
+          title="Processing in progress"
+          message="This job started before workflow retirement. Existing status is shown here until processing finishes."
+        ></ui-alert-banner>
+      }
+
+      @if (report()!.status === 'failed') {
+        <ui-alert-banner
+          tone="error"
+          title="Processing failed"
+          message="This report needs technical review before relying on it for exchange decisions."
+        ></ui-alert-banner>
+      }
+
+      @if (report()!.status === 'ready') {
+        <ui-alert-banner
+          tone="success"
+          title="Report ready"
+          message="Your report is ready. Review the findings tab by tab and download when ready."
+        ></ui-alert-banner>
+      }
+
+      <section class="sm-surface workspace-actions-card">
+        <div class="workspace-actions-card__copy">
+          <p class="section-eyebrow">Workspace actions</p>
+          <h2>Manage this job</h2>
+          <p class="sm-muted">Archive hides this report from the main workspace. Delete removes the report, files, and related records permanently.</p>
+        </div>
+
+        <div class="workspace-actions-card__controls">
+          @if (report()!.archivedAtUtc) {
+            <span class="workspace-actions-card__status">Archived</span>
+          }
+          <ui-button variant="secondary" (pressed)="openArchiveDialog()">{{ archiveActionLabel() }}</ui-button>
+          <ui-button variant="secondary" (pressed)="openDeleteDialog()">Delete job</ui-button>
+        </div>
+      </section>
+
+      <div class="report-tabs sm-surface">
+        <nav class="report-tabs__nav" role="tablist" aria-label="Report sections">
+          @for (tab of reportTabs(); track tab.id) {
+            <button
+              type="button"
+              class="report-tabs__tab"
+              role="tab"
+              [id]="tabButtonId(tab.id)"
+              [class.is-active]="activeTab() === tab.id"
+              [attr.aria-selected]="activeTab() !== tab.id"
+              [attr.aria-controls]="tabPanelId(tab.id)"
+              [attr.tabindex]="activeTab() === tab.id ? -1 : 0"
+              (click)="selectTab(tab.id)"
+              (keydown)="onTabKeydown($event, tab.id)"
+            >
+              {{ tab.label }}
+            </button>
+          }
+        </nav>
+      </div>
+
+      <section
+        class="tab-panel"
+        role="tabpanel"
+        tabindex="0"
+        [id]="tabPanelId(activeTab())"
+        [attr.aria-labelledby]="tabButtonId(activeTab())"
+      >
+        @switch (activeTab()) {
+          @case ('overview') {
+            <div class="tab-stack">
+              <section class="sm-surface section-card section-card--hero">
+                <p class="section-eyebrow">Start here</p>
+                <h2>Overview</h2>
+
+                <div class="verdict-row">
+                  <span class="verdict-chip" [class]="'verdict-chip verdict-chip--' + vm.verdictTone">{{ vm.decisionRecommendationLabel }}</span>
+                  <span class="sm-muted"
+                    >{{ vm.severityCounts.high }} high · {{ vm.severityCounts.medium }} medium · {{ vm.severityCounts.low }} low</span
+                  >
+                </div>
+
+                <div class="summary-metrics" aria-label="Report summary metrics">
+                  <article class="metric-card">
+                    <p class="metric-card__label">High priority issues</p>
+                    <p class="metric-card__value">{{ vm.severityCounts.high }}</p>
+                  </article>
+                  <article class="metric-card">
+                    <p class="metric-card__label">Manual checks</p>
+                    <p class="metric-card__value">{{ vm.manualChecks.length }}</p>
+                  </article>
+                  <article class="metric-card">
+                    <p class="metric-card__label">Immediate actions</p>
+                    <p class="metric-card__value">{{ vm.topActions.length }}</p>
+                  </article>
+                  <article class="metric-card">
+                    <p class="metric-card__label">Conveyancer questions</p>
+                    <p class="metric-card__value">{{ vm.conveyancerQuestions.length + vm.overflowConveyancerQuestions.length }}</p>
+                  </article>
+                </div>
+
+                <p>{{ vm.decisionRationale }}</p>
+                <p>{{ vm.summaryText }}</p>
+              </section>
+
+              <section class="sm-surface section-card">
+                <h3>Do next</h3>
+                <ol class="simple-list">
+                  @for (action of vm.topActions; track action) {
+                    <li>{{ action }}</li>
+                  }
+                </ol>
+
+                @if (vm.manualChecks.length > 0) {
+                  <article class="manual-check-card" aria-label="Manual checks">
+                    <h3>Needs manual check</h3>
+                    <ul class="simple-list simple-list--tight">
+                      @for (warning of vm.manualChecks; track warning) {
+                        <li>{{ warning }}</li>
+                      }
+                    </ul>
+                  </article>
+                }
+              </section>
+            </div>
+          }
+
+          @case ('risks') {
+            <div class="tab-stack">
+              <section class="sm-surface section-card section-card--hero">
+                <p class="section-eyebrow">Can you exchange yet?</p>
+                <h2>Risks & next steps</h2>
+
+                <div class="verdict-row">
+                  <span class="verdict-chip" [class]="'verdict-chip verdict-chip--' + vm.verdictTone">{{ vm.decisionRecommendationLabel }}</span>
+                  <span class="sm-muted"
+                    >{{ vm.buyerPriorityVisible.length + vm.buyerPriorityOverflow.length }} buyer priorities ·
+                    {{ vm.manualChecks.length }} proof gaps · {{ vm.riskMonitorItems.length }} lower-priority items</span
+                  >
+                </div>
+
+                <div class="summary-metrics" aria-label="Buyer risk summary">
+                  <article class="metric-card">
+                    <p class="metric-card__label">Resolve before exchange</p>
+                    <p class="metric-card__value">{{ vm.buyerPriorityVisible.length + vm.buyerPriorityOverflow.length }}</p>
+                  </article>
+                  <article class="metric-card">
+                    <p class="metric-card__label">High-severity risks</p>
+                    <p class="metric-card__value">{{ vm.severityCounts.high }}</p>
+                  </article>
+                  <article class="metric-card">
+                    <p class="metric-card__label">Still unproven</p>
+                    <p class="metric-card__value">{{ vm.manualChecks.length }}</p>
+                  </article>
+                  <article class="metric-card">
+                    <p class="metric-card__label">Can monitor</p>
+                    <p class="metric-card__value">{{ vm.riskMonitorItems.length }}</p>
+                  </article>
+                </div>
+
+                <p>
+                  {{
+                    vm.risksNarrative?.intro ||
+                      'This tab distils the issues that can change your legal position, settlement timing, or money due before exchange.'
+                  }}
+                </p>
+                <p>{{ vm.risksNarrative?.analysis || vm.decisionRationale }}</p>
+
+                <article class="impact-callout">
+                  <h3>What this means before exchange</h3>
+                  <p>
+                    {{
+                      vm.risksNarrative?.buyerImpact ||
+                        'Treat the high and medium items here as the shortlist to resolve in writing before you commit.'
+                    }}
+                  </p>
+                </article>
+              </section>
+
+              <div class="panel-grid panel-grid--split">
+                <section class="sm-surface section-card">
+                  <p class="section-eyebrow">Resolve these first</p>
+                  <h2>Before you exchange</h2>
+                  <p class="sm-muted">These are the items most likely to change whether you should sign now, renegotiate, or wait for written answers.</p>
+
+                  @if (vm.buyerPriorityVisible.length === 0) {
+                    <p class="sm-muted">No urgent buyer priorities were generated from the uploaded evidence.</p>
+                  } @else {
+                    <ul class="priority-list">
+                      @for (item of vm.buyerPriorityVisible; track item.id) {
+                        <li class="priority-card">
+                          <div class="meta-capsules">
+                            <span class="urgency" [class]="'urgency urgency--' + urgencyClass(item.urgencyLabel)">{{ item.urgencyLabel }}</span>
+                            <span class="chip">{{ item.impactLabel }}</span>
+                            <span class="chip">{{ item.sourceLabel }}</span>
+                          </div>
+                          <h3>{{ item.title }}</h3>
+                          <p>{{ item.summary }}</p>
+                          <div class="priority-card__outcome">
+                            <p class="priority-card__label">What you need before exchange</p>
+                            <p>{{ item.whatToGetInWriting }}</p>
+                          </div>
+                          <p class="item-meta">Owner: {{ item.owner }} · Milestone: {{ item.milestone }}</p>
+                          @if (item.supportNote) {
+                            <p class="item-meta"><strong>Support:</strong> {{ item.supportNote }}</p>
+                          }
+                          @if (item.pages.length > 0) {
+                            <p class="item-meta">Source pages: {{ formatPages(item.pages) }}</p>
+                          }
+                        </li>
+                        }
+                      </ul>
+                  }
+
+                  @if (vm.buyerPriorityOverflow.length > 0) {
+                    <details class="expandable">
+                      <summary>More buyer priorities ({{ vm.buyerPriorityOverflow.length }})</summary>
+                      <ul class="priority-list">
+                        @for (item of vm.buyerPriorityOverflow; track item.id) {
+                          <li class="priority-card">
+                            <div class="meta-capsules">
+                              <span class="urgency" [class]="'urgency urgency--' + urgencyClass(item.urgencyLabel)">{{ item.urgencyLabel }}</span>
+                              <span class="chip">{{ item.impactLabel }}</span>
+                              <span class="chip">{{ item.sourceLabel }}</span>
+                            </div>
+                            <h3>{{ item.title }}</h3>
+                            <p>{{ item.summary }}</p>
+                            <div class="priority-card__outcome">
+                              <p class="priority-card__label">What you need before exchange</p>
+                              <p>{{ item.whatToGetInWriting }}</p>
+                            </div>
+                          </li>
+                        }
+                      </ul>
+                    </details>
+                  }
+                </section>
+
+                <section class="sm-surface section-card">
+                  <p class="section-eyebrow">Send this today</p>
+                  <h2>What to send your conveyancer</h2>
+                  <p>
+                    {{
+                      vm.actionPlanNarrative?.intro ||
+                        'Use this as your short buyer brief so the biggest decision points are closed out in writing before exchange.'
+                    }}
+                  </p>
+                  @if (vm.actionPlanNarrative?.analysis) {
+                    <p>{{ vm.actionPlanNarrative?.analysis }}</p>
+                  }
+
+                  <article class="impact-callout">
+                    <h3>Why this matters</h3>
+                    <p>
+                      {{
+                        vm.actionPlanNarrative?.buyerImpact ||
+                          'A short, focused request list makes it easier to get written answers on the points that actually affect whether you should proceed.'
+                      }}
+                    </p>
+                  </article>
+
+                  @if (vm.nextStepsVisible.length === 0) {
+                    <p class="sm-muted">No specific next steps were generated. Use the overview and risk cards as the action list for your conveyancer.</p>
+                  } @else {
+                    <ol class="simple-list simple-list--airy">
+                      @for (step of vm.nextStepsVisible; track step) {
+                        <li>{{ step }}</li>
+                      }
+                    </ol>
+                  }
+
+                  @if (vm.nextStepsOverflow.length > 0) {
+                    <details class="expandable">
+                      <summary>More next steps ({{ vm.nextStepsOverflow.length }})</summary>
+                      <ol class="simple-list simple-list--airy">
+                        @for (step of vm.nextStepsOverflow; track step) {
+                          <li>{{ step }}</li>
+                        }
+                      </ol>
+                    </details>
+                  }
+
+                  @if (vm.manualChecks.length > 0) {
+                    <article class="manual-check-card" aria-label="Manual checks">
+                      <h3>What still is not proven</h3>
+                      <ul class="simple-list simple-list--tight">
+                        @for (warning of vm.manualChecks; track warning) {
+                          <li>{{ warning }}</li>
+                        }
+                      </ul>
+                    </article>
+                  }
+                </section>
+              </div>
+
+              @if (vm.riskMonitorItems.length > 0) {
+                <section class="sm-surface section-card">
+                  <h2>Can wait until after the first pass</h2>
+                  <p class="sm-muted">These items still matter, but they are not the first blockers to clear before you decide whether to exchange.</p>
+
+                  <ul class="insight-list">
+                    @for (item of vm.riskMonitorItems; track item.id) {
+                      <li class="insight-item">
+                        <div class="meta-capsules">
+                          <span class="urgency" [class]="'urgency urgency--' + urgencyClass(item.urgencyLabel)">{{ item.urgencyLabel }}</span>
+                          <span class="chip">{{ item.impactLabel }}</span>
+                          <span class="chip">{{ item.sourceLabel }}</span>
+                        </div>
+                        <h3>{{ item.title }}</h3>
+                        <p>{{ item.summary }}</p>
+                        <p class="item-meta"><strong>What to check later:</strong> {{ item.whatToGetInWriting }}</p>
+                        @if (item.pages.length > 0) {
+                          <p class="item-meta">Source pages: {{ formatPages(item.pages) }}</p>
+                        }
+                      </li>
+                    }
+                  </ul>
+                </section>
+              }
+            </div>
+          }
+
+          @case ('costs') {
+            <div class="tab-stack">
+              <section class="sm-surface section-card section-card--hero">
+                <p class="section-eyebrow">Budget view</p>
+                <h2>Costs & settlement</h2>
+                <p>
+                  {{
+                    vm.costsNarrative?.intro ||
+                      'This tab separates the figures already visible in the contract from the costs that still need confirmation before settlement.'
+                  }}
+                </p>
+                @if (vm.costsNarrative?.analysis) {
+                  <p>{{ vm.costsNarrative?.analysis }}</p>
+                }
+
+                <article class="impact-callout">
+                  <h3>What this means for your budget</h3>
+                  <p>
+                    {{
+                      vm.costsNarrative?.buyerImpact ||
+                        'Focus on the amount still due at settlement and the notices that can still change it.'
+                    }}
+                  </p>
+                </article>
+
+                @if (vm.costsNarrative?.recommendedActions?.length) {
+                  <div class="section-group">
+                    <h3 class="section-subtitle">Do now</h3>
+                    <ol class="simple-list">
+                      @for (action of vm.costsNarrative?.recommendedActions ?? []; track action) {
+                        <li>{{ action }}</li>
+                      }
+                    </ol>
+                  </div>
+                }
+              </section>
+
+              <div class="panel-grid panel-grid--split">
+                <section class="sm-surface section-card">
+                  <h2>Confirmed figures and timing</h2>
+                  <p class="sm-muted">Amounts already visible in the contract or extracted financials.</p>
+
+                  @if (vm.financialComplianceItems.moneyTiming.length === 0 && !vm.financialModel) {
+                    <p class="sm-muted">No confirmed settlement figures were extracted beyond the general report summary.</p>
+                  } @else {
+                    <ul class="insight-list">
+                      @for (item of vm.financialComplianceItems.moneyTiming; track item.id) {
+                        <li class="insight-item">
+                          <h3>{{ item.title }}</h3>
+                          <p>{{ item.detail }}</p>
+                          <p class="item-meta"><strong>What to check next:</strong> {{ item.recommendedAction }}</p>
+                          @if (item.pages.length > 0) {
+                            <p class="item-meta">Source pages: {{ formatPages(item.pages) }}</p>
+                          }
+                        </li>
+                      }
+                    </ul>
+                  }
+                </section>
+
+                <section class="sm-surface section-card">
+                  <h2>What could still change</h2>
+                  <p class="sm-muted">Missing notices, certificates, or approvals that can still move the final amount due.</p>
+
+                  @if (vm.financialComplianceItems.complianceApproval.length === 0) {
+                    <p class="sm-muted">No additional cost or compliance gaps were identified from the uploaded evidence.</p>
+                  } @else {
+                    <ul class="insight-list">
+                      @for (item of vm.financialComplianceItems.complianceApproval; track item.id) {
+                        <li class="insight-item">
+                          <h3>{{ item.title }}</h3>
+                          <p>{{ item.detail }}</p>
+                          <p class="item-meta"><strong>Why this matters:</strong> {{ item.recommendedAction }}</p>
+                          @if (item.pages.length > 0) {
+                            <p class="item-meta">Source pages: {{ formatPages(item.pages) }}</p>
+                          }
+                        </li>
+                      }
+                    </ul>
+                  }
+                </section>
+              </div>
+
+              @if (vm.financialComplianceItems.settlementAdjustments.length > 0) {
+                <section class="sm-surface section-card">
+                  <h2>Likely settlement adjustments</h2>
+                  <p class="sm-muted">These are the line items your conveyancer will usually confirm on the draft settlement statement.</p>
+                  <ul class="insight-list">
+                    @for (item of vm.financialComplianceItems.settlementAdjustments; track item.id) {
+                      <li class="insight-item">
+                        <h3>{{ item.title }}</h3>
+                        <p>{{ item.detail }}</p>
+                        <p class="item-meta"><strong>What to confirm:</strong> {{ item.recommendedAction }}</p>
+                        @if (item.pages.length > 0) {
+                          <p class="item-meta">Source pages: {{ formatPages(item.pages) }}</p>
+                        }
+                      </li>
+                    }
+                  </ul>
+                </section>
+              }
+
+              @if (vm.costsStateGuidance) {
+                <section class="sm-surface section-card">
+                  <h2>{{ vm.stateOrTerritory }} timing and money checks</h2>
+                  <div class="guidance-grid">
+                    @if (vm.costsStateGuidance.whatThisMeans) {
+                      <article class="guidance-card">
+                        <p class="section-eyebrow">What this means</p>
+                        <p>{{ vm.costsStateGuidance.whatThisMeans }}</p>
+                      </article>
+                    }
+                    @if (vm.costsStateGuidance.whyItMatters) {
+                      <article class="guidance-card">
+                        <p class="section-eyebrow">Why it matters</p>
+                        <p>{{ vm.costsStateGuidance.whyItMatters }}</p>
+                      </article>
+                    }
+                    @if (vm.costsStateGuidance.askYourConveyancer) {
+                      <article class="guidance-card">
+                        <p class="section-eyebrow">Ask your conveyancer</p>
+                        <p>{{ vm.costsStateGuidance.askYourConveyancer }}</p>
+                      </article>
+                    }
+                  </div>
+                </section>
+              }
+            </div>
+          }
+
+          @case ('property') {
+            <div class="tab-stack">
+              <section class="sm-surface section-card section-card--hero">
+                <p class="section-eyebrow">Could this cost you later?</p>
+                <h2>Property condition</h2>
+                <div class="verdict-row">
+                  <span class="verdict-chip" [class]="'verdict-chip verdict-chip--' + vm.propertyConditionSummary.tone">
+                    {{ vm.propertyConditionSummary.label }}
+                  </span>
+                  <span class="sm-muted"
+                    >{{ vm.propertyConditionSections.costExposure.length }} likely cost items ·
+                    {{ vm.propertyConditionSections.unknowns.length }} proof gaps ·
+                    {{ vm.propertyConditionSections.watch.length }} lower-priority notes</span
+                  >
+                </div>
+
+                <div class="summary-metrics" aria-label="Property condition summary">
+                  <article class="metric-card">
+                    <p class="metric-card__label">Could cost you</p>
+                    <p class="metric-card__value">{{ vm.propertyConditionSections.costExposure.length }}</p>
+                  </article>
+                  <article class="metric-card">
+                    <p class="metric-card__label">Still unverified</p>
+                    <p class="metric-card__value">{{ vm.propertyConditionSections.unknowns.length }}</p>
+                  </article>
+                  <article class="metric-card">
+                    <p class="metric-card__label">Total condition items</p>
+                    <p class="metric-card__value">{{ vm.buildingPhysicalItems.length }}</p>
+                  </article>
+                  <article class="metric-card">
+                    <p class="metric-card__label">Can monitor</p>
+                    <p class="metric-card__value">{{ vm.propertyConditionSections.watch.length }}</p>
+                  </article>
+                </div>
+
+                <p>
+                  {{
+                    vm.planningNarrative?.intro ||
+                      'Use this tab to separate likely repair or strata exposure from the places where the pack still leaves the physical condition unproven.'
+                  }}
+                </p>
+                <p>{{ vm.propertyConditionSummary.headline }}</p>
+                @if (vm.planningNarrative?.analysis) {
+                  <p>{{ vm.planningNarrative?.analysis }}</p>
+                }
+
+                <article class="impact-callout">
+                  <h3>What this means if you proceed</h3>
+                  <p>{{ vm.planningNarrative?.buyerImpact || vm.propertyConditionSummary.detail }}</p>
+                </article>
+              </section>
+
+              <div class="property-columns">
+                <div class="property-column">
+                  <section class="sm-surface section-card">
+                    <p class="section-eyebrow">Cost / livability</p>
+                    <h2>Could cost you after settlement</h2>
+                    <p class="sm-muted">Use these items to decide whether you need more inspection, a repair credit, or a different price before exchange.</p>
+
+                    @if (vm.propertyConditionSections.costExposure.length === 0) {
+                      <p class="sm-muted">No material repair-cost or shared-building exposure was extracted from the uploaded evidence.</p>
+                    } @else {
+                      <ul class="priority-list">
+                        @for (item of vm.propertyConditionSections.costExposure; track item.id) {
+                          <li class="priority-card">
+                            <div class="meta-capsules">
+                              <span class="urgency" [class]="'urgency urgency--' + urgencyClass(item.urgencyLabel)">{{ item.urgencyLabel }}</span>
+                              <span class="chip">{{ item.impactLabel }}</span>
+                              <span class="chip">{{ item.sourceLabel }}</span>
+                            </div>
+                            <h3>{{ item.title }}</h3>
+                            <p>{{ item.detail }}</p>
+                            <div class="priority-card__outcome">
+                              <p class="priority-card__label">Use this before exchange</p>
+                              <p>{{ item.recommendedAction }}</p>
+                            </div>
+                            <p class="item-meta"><strong>Ask next:</strong> {{ item.buyerQuestion }}</p>
+                            @if (item.pages.length > 0) {
+                              <p class="item-meta">Source pages: {{ formatPages(item.pages) }}</p>
+                            }
+                          </li>
+                        }
+                      </ul>
+                    }
+                  </section>
+
+                  @if (vm.planningNarrative?.recommendedActions?.length) {
+                    <section class="sm-surface section-card">
+                      <h2>How to use this in due diligence</h2>
+                      <p class="sm-muted">These steps help turn the condition findings into practical buyer follow-up before exchange.</p>
+                      <ol class="simple-list simple-list--airy">
+                        @for (action of vm.planningNarrative?.recommendedActions ?? []; track action) {
+                          <li>{{ action }}</li>
+                        }
+                      </ol>
+                    </section>
+                  }
+                </div>
+
+                <div class="property-column">
+                  <section class="sm-surface section-card">
+                    <p class="section-eyebrow">Proof gaps</p>
+                    <h2>What still is not proven</h2>
+                    <p class="sm-muted">These are the places where the pack, scans, or inspection trail still leave condition uncertainty on the table.</p>
+
+                    @if (vm.propertyConditionSections.unknowns.length === 0) {
+                      <p class="sm-muted">No major property-condition proof gaps were extracted from the uploaded evidence.</p>
+                    } @else {
+                      <ul class="priority-list">
+                        @for (item of vm.propertyConditionSections.unknowns; track item.id) {
+                          <li class="priority-card">
+                            <div class="meta-capsules">
+                              <span class="urgency" [class]="'urgency urgency--' + urgencyClass(item.urgencyLabel)">{{ item.urgencyLabel }}</span>
+                              <span class="chip">{{ item.impactLabel }}</span>
+                              <span class="chip">{{ item.sourceLabel }}</span>
+                            </div>
+                            <h3>{{ item.title }}</h3>
+                            <p>{{ item.detail }}</p>
+                            <div class="priority-card__outcome">
+                              <p class="priority-card__label">What you need before relying on this</p>
+                              <p>{{ item.recommendedAction }}</p>
+                            </div>
+                            <p class="item-meta"><strong>Ask next:</strong> {{ item.buyerQuestion }}</p>
+                            @if (item.pages.length > 0) {
+                              <p class="item-meta">Source pages: {{ formatPages(item.pages) }}</p>
+                            }
+                          </li>
+                        }
+                      </ul>
+                    }
+                  </section>
+
+                  @if (vm.propertyConditionSections.watch.length > 0) {
+                    <section class="sm-surface section-card">
+                      <h2>Lower-priority condition notes</h2>
+                      <p class="sm-muted">Useful context to keep in view, but not the first things that should hold up exchange.</p>
+                      <ul class="insight-list">
+                        @for (item of vm.propertyConditionSections.watch; track item.id) {
+                          <li class="insight-item">
+                            <div class="meta-capsules">
+                              <span class="urgency" [class]="'urgency urgency--' + urgencyClass(item.urgencyLabel)">{{ item.urgencyLabel }}</span>
+                              <span class="chip">{{ item.impactLabel }}</span>
+                              <span class="chip">{{ item.sourceLabel }}</span>
+                            </div>
+                            <h3>{{ item.title }}</h3>
+                            <p>{{ item.detail }}</p>
+                            <p class="item-meta"><strong>Keep in mind:</strong> {{ item.recommendedAction }}</p>
+                            <p class="item-meta"><strong>Ask next:</strong> {{ item.buyerQuestion }}</p>
+                            @if (item.pages.length > 0) {
+                              <p class="item-meta">Source pages: {{ formatPages(item.pages) }}</p>
+                            }
+                          </li>
+                        }
+                      </ul>
+                    </section>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+
+          @case ('negotiation') {
+            <div class="tab-stack">
+              <section class="sm-surface section-card section-card--hero">
+                <p class="section-eyebrow">Is it worth asking?</p>
+                <h2>Negotiation playbook</h2>
+                <p>{{ vm.negotiationSummary }}</p>
+
+                <div class="summary-metrics" aria-label="Negotiation summary">
+                  <article class="metric-card">
+                    <p class="metric-card__label">Usable asks</p>
+                    <p class="metric-card__value">{{ vm.negotiationPlaybookVisible.length + vm.negotiationPlaybookOverflow.length }}</p>
+                  </article>
+                  <article class="metric-card">
+                    <p class="metric-card__label">Run now steps</p>
+                    <p class="metric-card__value">{{ vm.negotiationActionStepsVisible.length + vm.negotiationActionStepsOverflow.length }}</p>
+                  </article>
+                  <article class="metric-card">
+                    <p class="metric-card__label">Best asks shown</p>
+                    <p class="metric-card__value">{{ vm.negotiationPlaybookVisible.length }}</p>
+                  </article>
+                  <article class="metric-card">
+                    <p class="metric-card__label">More options</p>
+                    <p class="metric-card__value">{{ vm.negotiationPlaybookOverflow.length }}</p>
+                  </article>
+                </div>
+
+                <article class="impact-callout">
+                  <h3>How to use this tab</h3>
+                  <p>Lead with the evidence-backed asks first. If an ask is weak, treat it as a fallback rather than the main negotiation position.</p>
+                </article>
+              </section>
+
+              <div class="panel-grid panel-grid--split">
+                <section class="sm-surface section-card">
+                  <p class="section-eyebrow">Best asks first</p>
+                  <h2>Before you negotiate</h2>
+
+                  @if (vm.negotiationPlaybookVisible.length === 0) {
+                    <p class="sm-muted">No strong negotiation angles were identified. Use the risks and property tabs as the practical discussion list instead.</p>
+                  } @else {
+                    <ul class="priority-list">
+                      @for (item of vm.negotiationPlaybookVisible; track item.id) {
+                        <li class="priority-card">
+                          <div class="meta-capsules">
+                            <span class="chip">{{ item.leverageLabel }}</span>
+                            <span class="chip">Impact: {{ item.expectedImpact }}</span>
+                            <span class="chip">Confidence: {{ item.confidence }}</span>
+                            <span class="chip">Timing: {{ item.timing }}</span>
+                          </div>
+                          <h3>{{ item.title }}</h3>
+                          <p><strong>Ask for:</strong> {{ item.suggestedAsk }}</p>
+                          <div class="priority-card__outcome">
+                            <p class="priority-card__label">How to make the ask</p>
+                            <p>{{ item.useInConversation }}</p>
+                          </div>
+                          <p class="item-meta"><strong>Why it may work:</strong> {{ item.whyItMatters }}</p>
+                          <p class="item-meta"><strong>Pushback to expect:</strong> {{ item.tradeoff }}</p>
+                          <p class="item-meta"><strong>Proof point:</strong> {{ item.proofPoint }}</p>
+                        </li>
+                      }
+                    </ul>
+                  }
+                </section>
+
+                <section class="sm-surface section-card">
+                  <p class="section-eyebrow">Run it properly</p>
+                  <h2>How to sequence the negotiation</h2>
+
+                  @if (vm.negotiationActionStepsVisible.length === 0) {
+                    <p class="sm-muted">No dedicated negotiation steps were generated. Start with the strongest evidence-backed ask and have your conveyancer pressure-test it before you send anything.</p>
+                  } @else {
+                    <ul class="insight-list">
+                      @for (step of vm.negotiationActionStepsVisible; track step.id) {
+                        <li class="insight-item">
+                          <h3>{{ step.title }}</h3>
+                          <p>{{ step.detail }}</p>
+                          <p class="item-meta">Owner: {{ step.owner }} · Timing: {{ step.timing }}</p>
+                        </li>
+                      }
+                    </ul>
+                  }
+
+                  @if (vm.negotiationActionStepsOverflow.length > 0) {
+                    <details class="expandable">
+                      <summary>More negotiation steps ({{ vm.negotiationActionStepsOverflow.length }})</summary>
+                      <ul class="insight-list">
+                        @for (step of vm.negotiationActionStepsOverflow; track step.id) {
+                          <li class="insight-item">
+                            <h3>{{ step.title }}</h3>
+                            <p>{{ step.detail }}</p>
+                            <p class="item-meta">Owner: {{ step.owner }} · Timing: {{ step.timing }}</p>
+                          </li>
+                        }
+                      </ul>
+                    </details>
+                  }
+                </section>
+              </div>
+
+              @if (vm.negotiationPlaybookOverflow.length > 0) {
+                <section class="sm-surface section-card">
+                  <h2>More negotiation options</h2>
+                  <p class="sm-muted">Secondary asks you can use if the higher-value items do not land or the seller is more flexible than expected.</p>
+                  <ul class="insight-list">
+                    @for (item of vm.negotiationPlaybookOverflow; track item.id) {
+                      <li class="insight-item">
+                        <div class="meta-capsules">
+                          <span class="chip">{{ item.leverageLabel }}</span>
+                          <span class="chip">Impact: {{ item.expectedImpact }}</span>
+                          <span class="chip">Confidence: {{ item.confidence }}</span>
+                        </div>
+                        <h3>{{ item.title }}</h3>
+                        <p><strong>Ask for:</strong> {{ item.suggestedAsk }}</p>
+                        <p class="item-meta"><strong>Use it like this:</strong> {{ item.useInConversation }}</p>
+                      </li>
+                    }
+                  </ul>
+                </section>
+              }
+            </div>
+          }
+
+          @case ('contract') {
+            <div class="tab-stack">
+              <section class="sm-surface section-card section-card--hero">
+                <p class="section-eyebrow">What these clauses change</p>
+                <h2>Contract conditions & special clauses</h2>
+
+                <div class="verdict-row">
+                  <span class="verdict-chip" [class]="'verdict-chip verdict-chip--' + vm.contractConditionSummary.tone">
+                    {{ vm.contractConditionSummary.label }}
+                  </span>
+                  <span class="sm-muted"
+                    >{{ vm.contractConditionSections.decisionCritical.length }} exchange-risk clauses ·
+                    {{ vm.contractConditionSections.propertyRights.length }} possession or property-risk clauses ·
+                    {{ vm.contractConditionSections.other.length }} other clauses</span
+                  >
+                </div>
+
+                <div class="summary-metrics" aria-label="Contract condition summary">
+                  <article class="metric-card">
+                    <p class="metric-card__label">Critical clauses</p>
+                    <p class="metric-card__value">{{ vm.contractConditionSections.decisionCritical.length }}</p>
+                  </article>
+                  <article class="metric-card">
+                    <p class="metric-card__label">Property rights</p>
+                    <p class="metric-card__value">{{ vm.contractConditionSections.propertyRights.length }}</p>
+                  </article>
+                  <article class="metric-card">
+                    <p class="metric-card__label">Other clauses</p>
+                    <p class="metric-card__value">{{ vm.contractConditionSections.other.length }}</p>
+                  </article>
+                  <article class="metric-card">
+                    <p class="metric-card__label">Total clauses</p>
+                    <p class="metric-card__value">{{ vm.contractConditionItems.length }}</p>
+                  </article>
+                </div>
+
+                <p>{{ vm.contractConditionSummary.headline }}</p>
+                <article class="impact-callout">
+                  <h3>Buyer view</h3>
+                  <p>{{ vm.contractConditionSummary.detail }}</p>
+                </article>
+              </section>
+
+              @if (vm.contractConditionItems.length === 0) {
+                <section class="sm-surface section-card">
+                  <p class="sm-muted">No contract conditions or special clauses were identified from the uploaded evidence.</p>
+                </section>
+              } @else {
+                <div class="panel-grid panel-grid--split">
+                  <section class="sm-surface section-card">
+                    <p class="section-eyebrow">Exchange risk</p>
+                    <h2>Could change your deadlines or finance position</h2>
+
+                    @if (vm.contractConditionSections.decisionCritical.length === 0) {
+                      <p class="sm-muted">No non-standard timing or finance clauses were surfaced from the uploaded evidence.</p>
+                    } @else {
+                      <ul class="priority-list">
+                        @for (item of vm.contractConditionSections.decisionCritical; track item.id) {
+                          <li class="priority-card">
+                            <div class="meta-capsules">
+                              <span class="chip">{{ item.impactLabel }}</span>
+                            </div>
+                            <h3>{{ item.title }}</h3>
+                            <p>{{ item.whatThisMeans }}</p>
+                            <div class="priority-card__outcome">
+                              <p class="priority-card__label">What to confirm before exchange</p>
+                              <p>{{ item.whatToConfirm }}</p>
+                            </div>
+                            <p class="item-meta"><strong>Why it matters:</strong> {{ item.whyItMatters }}</p>
+                            <details class="expandable">
+                              <summary>See clause wording</summary>
+                              <p><strong>Clause says:</strong> {{ item.clauseText }}</p>
+                              <p><strong>Ask your conveyancer:</strong> {{ item.askConveyancer }}</p>
+                              @if (item.pages.length > 0) {
+                                <p class="item-meta">Source pages: {{ formatPages(item.pages) }}</p>
+                              }
+                            </details>
+                          </li>
+                        }
+                      </ul>
+                    }
+                  </section>
+
+                  <section class="sm-surface section-card">
+                    <p class="section-eyebrow">Settlement rights</p>
+                    <h2>Could change what you get or who carries the risk</h2>
+
+                    @if (vm.contractConditionSections.propertyRights.length === 0) {
+                      <p class="sm-muted">No non-standard possession or property-risk clauses were surfaced from the uploaded evidence.</p>
+                    } @else {
+                      <ul class="priority-list">
+                        @for (item of vm.contractConditionSections.propertyRights; track item.id) {
+                          <li class="priority-card">
+                            <div class="meta-capsules">
+                              <span class="chip">{{ item.impactLabel }}</span>
+                            </div>
+                            <h3>{{ item.title }}</h3>
+                            <p>{{ item.whatThisMeans }}</p>
+                            <div class="priority-card__outcome">
+                              <p class="priority-card__label">What to confirm before exchange</p>
+                              <p>{{ item.whatToConfirm }}</p>
+                            </div>
+                            <p class="item-meta"><strong>Why it matters:</strong> {{ item.whyItMatters }}</p>
+                            <details class="expandable">
+                              <summary>See clause wording</summary>
+                              <p><strong>Clause says:</strong> {{ item.clauseText }}</p>
+                              <p><strong>Ask your conveyancer:</strong> {{ item.askConveyancer }}</p>
+                              @if (item.pages.length > 0) {
+                                <p class="item-meta">Source pages: {{ formatPages(item.pages) }}</p>
+                              }
+                            </details>
+                          </li>
+                        }
+                      </ul>
+                    }
+                  </section>
+                </div>
+
+                @if (vm.contractConditionSections.other.length > 0) {
+                  <section class="sm-surface section-card">
+                    <h2>Other special conditions worth confirming</h2>
+                    <p class="sm-muted">These are less obviously tied to deadlines or possession, but they still change the standard form and deserve a plain-English explanation.</p>
+                    <ul class="insight-list">
+                      @for (item of vm.contractConditionSections.other; track item.id) {
+                        <li class="insight-item">
+                          <div class="meta-capsules">
+                            <span class="chip">{{ item.impactLabel }}</span>
+                          </div>
+                          <h3>{{ item.title }}</h3>
+                          <p>{{ item.whatThisMeans }}</p>
+                          <p class="item-meta"><strong>What to confirm:</strong> {{ item.whatToConfirm }}</p>
+                          <details class="expandable">
+                            <summary>See clause wording</summary>
+                            <p><strong>Clause says:</strong> {{ item.clauseText }}</p>
+                            <p><strong>Ask your conveyancer:</strong> {{ item.askConveyancer }}</p>
+                            @if (item.pages.length > 0) {
+                              <p class="item-meta">Source pages: {{ formatPages(item.pages) }}</p>
+                            }
+                          </details>
+                        </li>
+                      }
+                    </ul>
+                  </section>
+                }
+              }
+            </div>
+          }
+
+          @case ('questions') {
+            <div class="tab-stack">
+              <section class="sm-surface section-card section-card--hero">
+                <p class="section-eyebrow">Use this in your email</p>
+                <h2>Questions for conveyancer</h2>
+                <p>
+                  {{
+                    vm.questionsNarrative?.intro ||
+                      'Use this tab as your short list of questions so you can get written answers before you commit.'
+                  }}
+                </p>
+                @if (vm.questionsNarrative?.analysis) {
+                  <p>{{ vm.questionsNarrative?.analysis }}</p>
+                }
+
+                <article class="impact-callout">
+                  <h3>Why ask these now</h3>
+                  <p>
+                    {{
+                      vm.questionsNarrative?.buyerImpact ||
+                        'Clear written answers help reduce surprises on timing, money due, and what you are agreeing to.'
+                    }}
+                  </p>
+                </article>
+
+                @if (vm.questionsNarrative?.recommendedActions?.length) {
+                  <div class="section-group">
+                    <h3 class="section-subtitle">How to use this list</h3>
+                    <ol class="simple-list">
+                      @for (action of vm.questionsNarrative?.recommendedActions ?? []; track action) {
+                        <li>{{ action }}</li>
+                      }
+                    </ol>
+                  </div>
+                }
+              </section>
+
+              <section class="sm-surface section-card">
+                <h2>Questions to send today</h2>
+                @if (vm.conveyancerQuestions.length === 0) {
+                  <p class="sm-muted">No specific questions were generated. Use the do-next list on the overview tab as your legal discussion list.</p>
+                } @else {
+                  <ol class="simple-list simple-list--airy">
+                    @for (question of vm.conveyancerQuestions; track question) {
+                      <li>{{ question }}</li>
+                    }
+                  </ol>
+                }
+
+                @if (vm.overflowConveyancerQuestions.length > 0) {
+                  <details class="expandable">
+                    <summary>More questions ({{ vm.overflowConveyancerQuestions.length }})</summary>
+                    <ol class="simple-list simple-list--airy">
+                      @for (question of vm.overflowConveyancerQuestions; track question) {
+                        <li>{{ question }}</li>
+                      }
+                    </ol>
+                  </details>
+                }
+              </section>
+
+              @if (vm.questionsStateGuidance) {
+                <section class="sm-surface section-card">
+                  <h2>{{ vm.stateOrTerritory }} legal follow-up</h2>
+                  <div class="guidance-grid">
+                    @if (vm.questionsStateGuidance.whatThisMeans) {
+                      <article class="guidance-card">
+                        <p class="section-eyebrow">What this means</p>
+                        <p>{{ vm.questionsStateGuidance.whatThisMeans }}</p>
+                      </article>
+                    }
+                    @if (vm.questionsStateGuidance.whyItMatters) {
+                      <article class="guidance-card">
+                        <p class="section-eyebrow">Why it matters</p>
+                        <p>{{ vm.questionsStateGuidance.whyItMatters }}</p>
+                      </article>
+                    }
+                    @if (vm.questionsStateGuidance.askYourConveyancer) {
+                      <article class="guidance-card">
+                        <p class="section-eyebrow">Ask your conveyancer</p>
+                        <p>{{ vm.questionsStateGuidance.askYourConveyancer }}</p>
+                      </article>
+                    }
+                  </div>
+                </section>
+              }
+            </div>
+          }
+        }
+      </section>
+
+      <div class="report-footer">
+        <p class="back-link"><a routerLink="/reports">← Back to reports</a></p>
+      </div>
+
+      @if (dialogState()) {
+        <app-confirm-action-dialog
+          [title]="dialogTitle()"
+          [description]="dialogDescription()"
+          [detail]="report()!.title"
+          [confirmLabel]="dialogConfirmLabel()"
+          [tone]="isDeleteDialog() ? 'danger' : 'neutral'"
+          [busy]="actionBusy()"
+          (confirmed)="confirmDialogAction()"
+          (cancelled)="closeDialog()"
+        ></app-confirm-action-dialog>
+      }
+    }
+  </div>
+</section>

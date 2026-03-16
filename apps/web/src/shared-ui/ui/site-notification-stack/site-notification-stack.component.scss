@@ -1,0 +1,111 @@
+:host {
+  display: block;
+}
+
+.site-notification-stack {
+  display: grid;
+}
+
+.site-notification {
+  border-bottom: 1px solid transparent;
+}
+
+.site-notification[data-tone='info'] {
+  background: #eaf5ff;
+  border-bottom-color: #c2d7ea;
+}
+
+.site-notification[data-tone='warning'] {
+  background: #fdecec;
+  border-bottom-color: #efc4c1;
+}
+
+.site-notification__inner {
+  min-height: 56px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+.site-notification__label,
+.site-notification__message {
+  margin: 0;
+}
+
+.site-notification__icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid currentColor;
+  flex-shrink: 0;
+}
+
+.site-notification__icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.site-notification__content {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  align-content: start;
+}
+
+.site-notification__label {
+  font-size: 12px;
+  line-height: 1.35;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.site-notification__message {
+  min-width: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  font-weight: 600;
+  max-width: 72ch;
+  overflow-wrap: break-word;
+}
+
+.site-notification[data-tone='info'] .site-notification__label,
+.site-notification[data-tone='info'] .site-notification__message,
+.site-notification[data-tone='info'] .site-notification__icon {
+  color: #134b6d;
+}
+
+.site-notification[data-tone='warning'] .site-notification__label,
+.site-notification[data-tone='warning'] .site-notification__message,
+.site-notification[data-tone='warning'] .site-notification__icon {
+  color: #7f1d1d;
+}
+
+.site-notification[data-tone='info'] .site-notification__icon {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: #b9d2e6;
+}
+
+.site-notification[data-tone='warning'] .site-notification__icon {
+  background: rgba(255, 255, 255, 0.74);
+  border-color: #e3b5b1;
+}
+
+@media (max-width: 560px) {
+  .site-notification__inner {
+    gap: 10px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .site-notification__icon {
+    width: 28px;
+    height: 28px;
+  }
+}

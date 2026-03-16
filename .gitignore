@@ -1,0 +1,58 @@
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Node / Frontend
+**/node_modules/
+**/.angular/
+**/.angular/cache/
+**/dist/
+**/coverage/
+**/tmp/
+**/out-tsc/
+**/.npm/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# .NET
+**/bin/
+**/obj/
+**/TestResults/
+**/.vs/
+*.user
+*.suo
+
+# Python
+**/__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Terraform/Cloud/AWS local state
+*.tfstate
+*.tfstate.*
+.terraform/
+.aws-sam/
+cdk.out/
+
+# Env and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+
+# Logs and temp
+*.log
+*.tmp
+*.bak
+tools/conveyancers/_debug/
+
+.claude/
+.serena/
+logs/

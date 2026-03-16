@@ -1,0 +1,22 @@
+    .ui-skeleton {
+      width: 100%;
+      border-radius: var(--sm-radius-sm);
+      background: linear-gradient(90deg, #e4eaf0 25%, #d8e1e9 40%, #e4eaf0 65%);
+      background-size: 300% 100%;
+      animation: shimmer 1.2s linear infinite;
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: 100% 0;
+      }
+      100% {
+        background-position: 0 0;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .ui-skeleton {
+        animation: none;
+      }
+    }

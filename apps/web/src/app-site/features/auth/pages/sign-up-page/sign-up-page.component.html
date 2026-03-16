@@ -1,0 +1,252 @@
+    <section class="sm-page-section auth-page">
+      <div class="sm-container auth-layout">
+        <section class="auth-shell auth-shell--wide">
+          <aside class="auth-spotlight auth-spotlight--signup">
+            <div class="auth-spotlight__art">
+              <img src="images/auth-illustration-v3.svg" alt="" loading="eager" />
+            </div>
+            <div class="auth-spotlight__content">
+              <h2>Get ready - in confidence.</h2>
+              <ul class="auth-spotlight__trust">
+                <li>
+                  <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  </svg>
+                  <div>
+                    <strong>Secure &amp; private</strong>
+                    <span>Documents encrypted at rest. Never shared with third parties.</span>
+                  </div>
+                </li>
+                <li>
+                  <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+                  </svg>
+                  <div>
+                    <strong>Plain-English findings</strong>
+                    <span>Every risk linked to the exact contract clause. No summaries.</span>
+                  </div>
+                </li>
+                <li>
+                  <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 7.1 11.5 7.7 12 .2.2.4.3.7.3s.5-.1.7-.3C12.9 21.5 20 15.4 20 10a8 8 0 0 0-8-8z"/>
+                  </svg>
+                  <div>
+                    <strong>Built for Australians</strong>
+                    <span>Residential contracts across every Australian state and territory.</span>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </aside>
+
+          <article class="auth-panel">
+            <div class="auth-panel__logo">
+              <svg class="auth-panel__mark" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+                <path d="M7 4h22c1.1 0 2 .9 2 2v14c0 7.5-5.5 12.5-13 15-7.5-2.5-13-7.5-13-15V6c0-1.1.9-2 2-2z" fill="#0b3c5d"/>
+                <rect x="11" y="12" width="14" height="1.6" rx=".8" fill="white" fill-opacity=".82"/>
+                <rect x="11" y="16.5" width="9" height="1.6" rx=".8" fill="white" fill-opacity=".82"/>
+                <path d="M10.5 23l5 5 10-11" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="auth-panel__brand-name">ConveyMate</span>
+            </div>
+            <h1 #pageHeading tabindex="-1">{{ awaitingVerification() ? 'Verify your email' : 'Create an account' }}</h1>
+            <p class="sm-muted">
+              @if (!awaitingVerification()) {
+                Start reviewing contracts in minutes - no experience needed.
+              } @else {
+                Enter the verification code sent to {{ email }} to activate your account.
+              }
+            </p>
+
+            @if (!awaitingVerification()) {
+              <form class="auth-form" (submit)="onSubmit($event)" novalidate>
+                <ui-form-field label="Full name" forId="full-name" [required]="true" [error]="fieldErrors().fullName">
+                  <input id="full-name" name="full-name" type="text" autocomplete="name" [(ngModel)]="fullName" [attr.aria-invalid]="fieldErrors().fullName ? true : null" />
+                </ui-form-field>
+
+                <ui-form-field label="Email" forId="email" [required]="true" [error]="fieldErrors().email">
+                  <input id="email" name="email" type="email" autocomplete="email" autocapitalize="off" spellcheck="false" [(ngModel)]="email" [attr.aria-invalid]="fieldErrors().email ? true : null" />
+                </ui-form-field>
+
+                <ui-form-field
+                  label="Password"
+                  forId="password"
+                  hint="Use at least 12 characters."
+                  [required]="true"
+                  [error]="fieldErrors().password"
+                >
+                  <div class="input-password-wrap">
+                    <input
+                      id="password"
+                      name="password"
+                      [type]="showPassword() ? 'text' : 'password'"
+                      autocomplete="new-password"
+                      [(ngModel)]="password"
+                      [attr.aria-invalid]="fieldErrors().password ? true : null"
+                    />
+                    <button
+                      type="button"
+                      class="input-password-toggle"
+                      [attr.aria-pressed]="showPassword()"
+                      [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+                      (click)="showPassword.set(!showPassword())"
+                    >
+                      @if (showPassword()) {
+                        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                          <line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                      } @else {
+                        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                          <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                      }
+                    </button>
+                  </div>
+                </ui-form-field>
+
+                <div aria-live="polite" aria-atomic="true">
+                @if (password) {
+                  <ul class="password-req-list" aria-label="Password requirements">
+                    <li
+                      [class.req-pass]="passwordRequirements.minLength"
+                      [class.req-fail]="!passwordRequirements.minLength"
+                      [attr.aria-label]="(passwordRequirements.minLength ? 'Met: ' : 'Not met: ') + 'At least 12 characters'"
+                    >
+                      <span aria-hidden="true">{{ passwordRequirements.minLength ? '✓' : '✗' }}</span> At least 12 characters
+                    </li>
+                    <li
+                      [class.req-pass]="passwordRequirements.hasUppercase"
+                      [class.req-fail]="!passwordRequirements.hasUppercase"
+                      [attr.aria-label]="(passwordRequirements.hasUppercase ? 'Met: ' : 'Not met: ') + 'One uppercase letter'"
+                    >
+                      <span aria-hidden="true">{{ passwordRequirements.hasUppercase ? '✓' : '✗' }}</span> One uppercase letter
+                    </li>
+                    <li
+                      [class.req-pass]="passwordRequirements.hasNumber"
+                      [class.req-fail]="!passwordRequirements.hasNumber"
+                      [attr.aria-label]="(passwordRequirements.hasNumber ? 'Met: ' : 'Not met: ') + 'One number'"
+                    >
+                      <span aria-hidden="true">{{ passwordRequirements.hasNumber ? '✓' : '✗' }}</span> One number
+                    </li>
+                  </ul>
+                }
+                </div>
+
+                <ui-form-field
+                  label="Confirm password"
+                  forId="confirm-password"
+                  [required]="true"
+                  [error]="fieldErrors().confirmPassword"
+                >
+                  <div class="input-password-wrap">
+                    <input
+                      id="confirm-password"
+                      name="confirm-password"
+                      [type]="showConfirmPassword() ? 'text' : 'password'"
+                      autocomplete="new-password"
+                      [(ngModel)]="confirmPassword"
+                      [attr.aria-invalid]="fieldErrors().confirmPassword ? true : null"
+                    />
+                    <button
+                      type="button"
+                      class="input-password-toggle"
+                      [attr.aria-pressed]="showConfirmPassword()"
+                      [attr.aria-label]="showConfirmPassword() ? 'Hide confirm password' : 'Show confirm password'"
+                      (click)="showConfirmPassword.set(!showConfirmPassword())"
+                    >
+                      @if (showConfirmPassword()) {
+                        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                          <line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                      } @else {
+                        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                          <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                      }
+                    </button>
+                  </div>
+                </ui-form-field>
+
+                <div class="terms-check" [class.terms-check--error]="fieldErrors().terms">
+                  <label class="terms-check__label">
+                    <input
+                      type="checkbox"
+                      name="terms"
+                      [(ngModel)]="termsAccepted"
+                      [attr.aria-invalid]="fieldErrors().terms ? true : null"
+                      [attr.aria-describedby]="fieldErrors().terms ? 'terms-error' : null"
+                    />
+                    <span>I agree to the <a [attr.href]="siteUrls.marketingHref('/legal/terms')" target="_blank" rel="noopener">Terms of Use</a> and <a [attr.href]="siteUrls.marketingHref('/legal/privacy')" target="_blank" rel="noopener">Privacy Policy</a>.</span>
+                  </label>
+                  @if (fieldErrors().terms) {
+                    <p id="terms-error" class="terms-check__error" role="alert">{{ fieldErrors().terms }}</p>
+                  }
+                </div>
+
+                <div role="alert" aria-live="assertive" aria-atomic="true">
+                  @if (errorMessage()) {
+                    <ui-alert-banner tone="error" title="Registration failed" [message]="errorMessage()"></ui-alert-banner>
+                  }
+                </div>
+                <div aria-live="polite" aria-atomic="true">
+                  @if (successMessage()) {
+                    <ui-alert-banner tone="success" title="Registration complete" [message]="successMessage()"></ui-alert-banner>
+                  }
+                </div>
+
+                <div class="auth-actions">
+                  <ui-button type="submit" [disabled]="loading() || !termsAccepted" [loading]="loading()">{{ loading() ? 'Creating account...' : 'Create account' }}</ui-button>
+                </div>
+              </form>
+            } @else {
+              <form class="auth-form" (submit)="onVerifyCode($event)" novalidate>
+                <ui-form-field
+                  label="Verification code"
+                  forId="verification-code"
+                  hint="Enter the 6-digit code from your email."
+                  [required]="true"
+                  [error]="codeError()"
+                >
+                  <input
+                    id="verification-code"
+                    name="verification-code"
+                    type="text"
+                    inputmode="numeric"
+                    maxlength="6"
+                    autocomplete="one-time-code"
+                    [(ngModel)]="verificationCode"
+                    [attr.aria-invalid]="codeError() ? true : null"
+                  />
+                </ui-form-field>
+
+                <div role="alert" aria-live="assertive" aria-atomic="true">
+                  @if (errorMessage()) {
+                    <ui-alert-banner tone="error" title="Verification failed" [message]="errorMessage()"></ui-alert-banner>
+                  }
+                </div>
+                <div aria-live="polite" aria-atomic="true">
+                  @if (successMessage()) {
+                    <ui-alert-banner tone="success" title="Verification update" [message]="successMessage()"></ui-alert-banner>
+                  }
+                </div>
+
+                <div class="auth-actions auth-actions--stacked">
+                  <ui-button type="submit" [disabled]="verifyLoading()" [loading]="verifyLoading()">
+                    {{ verifyLoading() ? 'Verifying...' : 'Verify email' }}
+                  </ui-button>
+                  <ui-button variant="tertiary" type="button" [disabled]="resendLoading()" [loading]="resendLoading()" (pressed)="onResendCode()">
+                    {{ resendLoading() ? 'Sending code...' : 'Resend code' }}
+                  </ui-button>
+                </div>
+              </form>
+            }
+
+            <p class="auth-meta">Already have an account? <a routerLink="/signin">Sign in</a>.</p>
+          </article>
+        </section>
+      </div>
+    </section>

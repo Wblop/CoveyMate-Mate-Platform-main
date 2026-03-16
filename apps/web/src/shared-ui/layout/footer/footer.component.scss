@@ -1,0 +1,135 @@
+    .site-footer {
+      border-top: 1px solid var(--sm-color-border);
+      background: var(--sm-color-surface);
+      margin-top: var(--sm-space-6);
+    }
+
+    :host(.footer--compact) .site-footer {
+      margin-top: 0;
+    }
+
+    .site-footer__inner {
+      padding-block: var(--sm-space-5);
+      display: grid;
+      gap: var(--sm-space-3);
+    }
+
+    :host(.footer--compact) .site-footer__inner {
+      padding-block: var(--sm-space-3);
+      gap: var(--sm-space-2);
+    }
+
+    .site-footer__links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sm-space-3);
+    }
+
+    .site-footer__meta {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(220px, 360px);
+      gap: var(--sm-space-3);
+      align-items: start;
+    }
+
+    .site-footer__help {
+      border-bottom: 1px solid var(--sm-color-border);
+      padding-bottom: var(--sm-space-3);
+      display: grid;
+      gap: var(--sm-space-1);
+    }
+
+    .site-footer__help-title {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.4;
+      font-weight: 700;
+      color: var(--sm-color-primary);
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .site-footer__help-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sm-space-3);
+    }
+
+    .site-footer__help-links a {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--sm-color-primary);
+    }
+
+    .site-footer__links a {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--sm-color-primary);
+    }
+
+    .site-footer__copy {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--sm-color-text-muted);
+    }
+
+    .site-footer__ai-note {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #38556a;
+      text-align: right;
+      font-weight: 600;
+    }
+
+    .site-footer__meta-note {
+      display: grid;
+      gap: 6px;
+      justify-items: end;
+    }
+
+    .site-footer__aussie-made {
+      margin: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      color: #1f5d8a;
+      text-align: right;
+    }
+
+    .site-footer__aussie-icon {
+      width: 1.14rem;
+      height: 1.14rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #1f5d8a;
+    }
+
+    .site-footer__aussie-icon svg {
+      width: 100%;
+      height: 100%;
+      fill: currentColor;
+    }
+
+    @media (max-width: 900px) {
+      .site-footer__meta {
+        grid-template-columns: 1fr;
+      }
+
+      .site-footer__meta-note {
+        justify-items: start;
+      }
+
+      .site-footer__ai-note {
+        text-align: left;
+      }
+
+      .site-footer__aussie-made {
+        text-align: left;
+      }
+    }

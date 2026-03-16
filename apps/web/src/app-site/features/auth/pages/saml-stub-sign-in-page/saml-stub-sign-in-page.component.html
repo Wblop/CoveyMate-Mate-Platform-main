@@ -1,0 +1,89 @@
+<section class="sm-page-section auth-page">
+  <div class="sm-container auth-layout">
+    <section class="auth-shell auth-shell--compact">
+      <aside class="auth-spotlight auth-spotlight--welcome">
+        <div class="auth-spotlight__art">
+          <img src="images/auth-illustration-v3.svg" alt="" loading="eager" />
+        </div>
+        <div class="auth-spotlight__content">
+          <h2>Stub SAML identity provider.</h2>
+          <ul class="auth-spotlight__trust">
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+              <div>
+                <strong>No external IdP required</strong>
+                <span>This screen stands in for your SAML provider during local development.</span>
+              </div>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+              </svg>
+              <div>
+                <strong>Deterministic local identities</strong>
+                <span>Reuse the same email to get the same local subject and restore the same account.</span>
+              </div>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              <div>
+                <strong>Admin role toggle included</strong>
+                <span>Enable the admin claim to test admin-only routes without changing backend settings.</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </aside>
+
+      <article class="auth-panel saml-stub">
+        <div class="auth-panel__logo">
+          <svg class="auth-panel__mark" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+            <path d="M7 4h22c1.1 0 2 .9 2 2v14c0 7.5-5.5 12.5-13 15-7.5-2.5-13-7.5-13-15V6c0-1.1.9-2 2-2z" fill="#0b3c5d"/>
+            <rect x="11" y="12" width="14" height="1.6" rx=".8" fill="white" fill-opacity=".82"/>
+            <rect x="11" y="16.5" width="9" height="1.6" rx=".8" fill="white" fill-opacity=".82"/>
+            <path d="M10.5 23l5 5 10-11" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="auth-panel__brand-name">ConveyMate</span>
+        </div>
+
+        <h1>Test SAML sign-in</h1>
+        <p class="sm-muted">Pick the identity details to return to ConveyMate with a local stub SAML assertion.</p>
+
+        <form class="auth-form saml-stub__form" (submit)="onSubmit($event)" novalidate>
+          <ui-form-field label="Email" forId="stub-email" [required]="true">
+            <input id="stub-email" name="stub-email" type="email" autocomplete="email" autocapitalize="off" spellcheck="false" [(ngModel)]="email" />
+          </ui-form-field>
+
+          <ui-form-field label="Display name" forId="stub-full-name" [required]="true">
+            <input id="stub-full-name" name="stub-full-name" type="text" autocomplete="name" [(ngModel)]="fullName" />
+          </ui-form-field>
+
+          <label class="saml-stub__role">
+            <input type="checkbox" name="stub-admin" [(ngModel)]="isAdmin" />
+            <span>Return with admin claims</span>
+          </label>
+
+          <div role="alert" aria-live="assertive" aria-atomic="true">
+            @if (errorMessage()) {
+              <ui-alert-banner tone="error" title="SAML sign-in failed" [message]="errorMessage()"></ui-alert-banner>
+            }
+          </div>
+
+          <div class="auth-actions">
+            <ui-button type="submit" [disabled]="loading()" [loading]="loading()">
+              {{ loading() ? 'Returning to ConveyMate...' : 'Send SAML response' }}
+            </ui-button>
+          </div>
+        </form>
+
+        <p class="auth-meta">
+          <a routerLink="/signin">Cancel and return to sign in</a>
+        </p>
+      </article>
+    </section>
+  </div>
+</section>

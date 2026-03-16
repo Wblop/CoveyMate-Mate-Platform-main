@@ -1,0 +1,101 @@
+    a.ui-button {
+      text-decoration: none;
+    }
+
+    .ui-button {
+      min-height: 44px;
+      border: 1px solid;
+      border-radius: var(--sm-radius-sm);
+      padding: 9px 16px;
+      font-size: 15px;
+      line-height: 1.3;
+      letter-spacing: 0.01em;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: background-color var(--sm-motion-fast), border-color var(--sm-motion-fast), color var(--sm-motion-fast),
+        transform var(--sm-motion-fast);
+    }
+
+    .ui-button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    .ui-button:disabled,
+    .ui-button[aria-disabled='true'] {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .ui-button__spinner {
+      width: 13px;
+      height: 13px;
+      border: 2px solid currentColor;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: ui-btn-spin 0.65s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes ui-btn-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .ui-button--primary {
+      border-color: var(--sm-color-primary);
+      background: var(--sm-color-primary);
+      color: #fff;
+    }
+
+    .ui-button--primary:hover:not(:disabled) {
+      border-color: var(--sm-color-primary-hover);
+      background: var(--sm-color-primary-hover);
+    }
+
+    .ui-button--secondary {
+      border-color: var(--sm-color-border-strong);
+      background: var(--sm-color-surface);
+      color: var(--sm-color-text);
+    }
+
+    .ui-button--secondary:hover:not(:disabled) {
+      border-color: var(--sm-color-primary);
+    }
+
+    .ui-button--tertiary {
+      border-color: transparent;
+      background: transparent;
+      color: var(--sm-color-primary);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .ui-button--tertiary:hover:not(:disabled) {
+      color: var(--sm-color-primary-hover);
+    }
+
+    .ui-button--destructive {
+      border-color: var(--sm-color-danger);
+      background: var(--sm-color-danger);
+      color: #fff;
+    }
+
+    .ui-button--destructive:hover:not(:disabled) {
+      border-color: var(--sm-color-danger-hover);
+      background: var(--sm-color-danger-hover);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .ui-button {
+        transition: none;
+      }
+
+      .ui-button__spinner {
+        animation: none;
+        border-top-color: currentColor;
+        opacity: 0.5;
+      }
+    }

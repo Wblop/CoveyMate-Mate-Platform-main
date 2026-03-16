@@ -1,0 +1,330 @@
+    <section class="sm-page-section calculators-page">
+      <div class="sm-container calculators-grid">
+        <header class="page-head">
+          <div class="page-head__copy">
+            <p class="sm-eyebrow">Property purchase tools</p>
+            <h1>Calculators</h1>
+            <p class="page-head__sub sm-muted">Estimate stamp duty, fees, and borrowing position.</p>
+          </div>
+          <ui-button type="button" variant="secondary" title="Reset calculator values" (pressed)="resetToDefaults()">
+            Reset defaults
+          </ui-button>
+        </header>
+
+        <article class="sm-surface input-bar" aria-label="Calculator inputs">
+          <header class="input-bar__header">
+            <h2>Inputs</h2>
+          </header>
+
+          <div class="input-bar__grid">
+            <ui-form-field label="State" forId="selectedState">
+              <select id="selectedState" name="selectedState" [(ngModel)]="selectedState" (ngModelChange)="onStateChanged($event)">
+                @for (state of stateOptions; track state.code) {
+                  <option [value]="state.code">{{ state.label }}</option>
+                }
+              </select>
+            </ui-form-field>
+
+            <ui-form-field label="Purchase price" forId="purchasePrice">
+              <input
+                id="purchasePrice"
+                name="purchasePrice"
+                type="number"
+                min="50000"
+                step="5000"
+                [(ngModel)]="purchasePrice"
+                (ngModelChange)="onInputChanged()"
+              />
+            </ui-form-field>
+
+            <ui-form-field label="Deposit (%)" forId="depositPercent">
+              <input
+                id="depositPercent"
+                name="depositPercent"
+                type="number"
+                min="0"
+                max="95"
+                step="1"
+                [(ngModel)]="depositPercent"
+                (ngModelChange)="onInputChanged()"
+              />
+            </ui-form-field>
+
+            <ui-form-field label="Interest rate (%)" forId="interestRate">
+              <input
+                id="interestRate"
+                name="interestRate"
+                type="number"
+                min="0"
+                max="20"
+                step="0.05"
+                [(ngModel)]="interestRate"
+                (ngModelChange)="onInputChanged()"
+              />
+            </ui-form-field>
+
+            <ui-form-field label="Loan term (years)" forId="loanTermYears">
+              <input
+                id="loanTermYears"
+                name="loanTermYears"
+                type="number"
+                min="5"
+                max="40"
+                step="1"
+                [(ngModel)]="loanTermYears"
+                (ngModelChange)="onInputChanged()"
+              />
+            </ui-form-field>
+          </div>
+
+          <label class="checkbox-row">
+            <input type="checkbox" name="firstHomeBuyer" [(ngModel)]="firstHomeBuyer" (ngModelChange)="onInputChanged()" />
+            <span>Apply first-home buyer concession estimate (where configured for this state).</span>
+          </label>
+
+          <details class="optional-costs">
+            <summary>
+              <span>Optional cost assumptions</span>
+              <small>Expand for conveyancer, due diligence, and moving assumptions.</small>
+            </summary>
+
+            <div class="form-grid form-grid--optional">
+              <ui-form-field label="Solicitor / conveyancer fee" forId="solicitorEstimate">
+                <input
+                  id="solicitorEstimate"
+                  name="solicitorEstimate"
+                  type="number"
+                  min="500"
+                  step="50"
+                  [(ngModel)]="solicitorEstimate"
+                  (ngModelChange)="onInputChanged()"
+                />
+              </ui-form-field>
+
+              <ui-form-field label="Building inspection" forId="buildingInspectionEstimate">
+                <input
+                  id="buildingInspectionEstimate"
+                  name="buildingInspectionEstimate"
+                  type="number"
+                  min="0"
+                  step="25"
+                  [(ngModel)]="buildingInspectionEstimate"
+                  (ngModelChange)="onInputChanged()"
+                />
+              </ui-form-field>
+
+              <ui-form-field label="Pest inspection" forId="pestInspectionEstimate">
+                <input
+                  id="pestInspectionEstimate"
+                  name="pestInspectionEstimate"
+                  type="number"
+                  min="0"
+                  step="25"
+                  [(ngModel)]="pestInspectionEstimate"
+                  (ngModelChange)="onInputChanged()"
+                />
+              </ui-form-field>
+
+              <ui-form-field label="Bank valuation / setup" forId="valuationEstimate">
+                <input
+                  id="valuationEstimate"
+                  name="valuationEstimate"
+                  type="number"
+                  min="0"
+                  step="25"
+                  [(ngModel)]="valuationEstimate"
+                  (ngModelChange)="onInputChanged()"
+                />
+              </ui-form-field>
+
+              <ui-form-field label="Moving + setup" forId="movingEstimate">
+                <input
+                  id="movingEstimate"
+                  name="movingEstimate"
+                  type="number"
+                  min="0"
+                  step="50"
+                  [(ngModel)]="movingEstimate"
+                  (ngModelChange)="onInputChanged()"
+                />
+              </ui-form-field>
+
+              <ui-form-field label="Other costs buffer" forId="otherEstimate">
+                <input
+                  id="otherEstimate"
+                  name="otherEstimate"
+                  type="number"
+                  min="0"
+                  step="50"
+                  [(ngModel)]="otherEstimate"
+                  (ngModelChange)="onInputChanged()"
+                />
+              </ui-form-field>
+            </div>
+          </details>
+        </article>
+
+        <section class="results-layout">
+          <article class="sm-surface card results-card" aria-label="Calculator outputs">
+            <header>
+              <h2>Results</h2>
+            </header>
+
+            <article class="result-hero">
+              <p class="result-hero__label">Cash needed before settlement</p>
+              <p class="result-hero__value">{{ cashRequiredEstimate | currency: 'AUD':'symbol':'1.0-0' }}</p>
+            </article>
+
+            <div class="totals-grid" aria-label="Topline totals">
+              <article class="metric">
+                <p class="metric__label">Stamp duty estimate</p>
+                <p class="metric__value">{{ stampDutyEstimate | currency: 'AUD':'symbol':'1.0-0' }}</p>
+              </article>
+
+              <article class="metric">
+                <p class="metric__label">Loan amount</p>
+                <p class="metric__value">{{ loanAmount | currency: 'AUD':'symbol':'1.0-0' }}</p>
+              </article>
+
+              <article class="metric">
+                <p class="metric__label">Monthly mortgage repayment</p>
+                <p class="metric__value">{{ monthlyRepayment | currency: 'AUD':'symbol':'1.0-0' }}</p>
+              </article>
+
+              <article class="metric">
+                <p class="metric__label">Total interest over loan term</p>
+                <p class="metric__value">{{ totalInterestEstimate | currency: 'AUD':'symbol':'1.0-0' }}</p>
+              </article>
+            </div>
+
+            <section class="results-details" aria-label="Detailed fee breakdown">
+              <header class="results-details__header">
+                <h3>Detailed fee breakdown</h3>
+              </header>
+              <div class="breakdown-grid">
+                <section class="breakdown-block">
+                  <h3>Government fees</h3>
+                  <dl>
+                    <div>
+                      <dt>Stamp duty</dt>
+                      <dd>{{ stampDutyEstimate | currency: 'AUD':'symbol':'1.0-0' }}</dd>
+                    </div>
+                    <div>
+                      <dt>Transfer registration</dt>
+                      <dd>{{ transferRegistrationFee | currency: 'AUD':'symbol':'1.0-0' }}</dd>
+                    </div>
+                    <div>
+                      <dt>Mortgage registration</dt>
+                      <dd>{{ mortgageRegistrationFee | currency: 'AUD':'symbol':'1.0-0' }}</dd>
+                    </div>
+                    <div>
+                      <dt>Government searches</dt>
+                      <dd>{{ governmentSearchesFee | currency: 'AUD':'symbol':'1.0-0' }}</dd>
+                    </div>
+                    <div class="breakdown-total">
+                      <dt>Total government fees</dt>
+                      <dd>{{ governmentFeesTotal | currency: 'AUD':'symbol':'1.0-0' }}</dd>
+                    </div>
+                  </dl>
+                </section>
+
+                <section class="breakdown-block">
+                  <h3>Professional + due diligence</h3>
+                  <dl>
+                    <div>
+                      <dt>Solicitor / conveyancer</dt>
+                      <dd>{{ solicitorEstimate | currency: 'AUD':'symbol':'1.0-0' }}</dd>
+                    </div>
+                    <div>
+                      <dt>Building inspection</dt>
+                      <dd>{{ buildingInspectionEstimate | currency: 'AUD':'symbol':'1.0-0' }}</dd>
+                    </div>
+                    <div>
+                      <dt>Pest inspection</dt>
+                      <dd>{{ pestInspectionEstimate | currency: 'AUD':'symbol':'1.0-0' }}</dd>
+                    </div>
+                    <div>
+                      <dt>Valuation / setup</dt>
+                      <dd>{{ valuationEstimate | currency: 'AUD':'symbol':'1.0-0' }}</dd>
+                    </div>
+                    <div>
+                      <dt>Moving + setup</dt>
+                      <dd>{{ movingEstimate | currency: 'AUD':'symbol':'1.0-0' }}</dd>
+                    </div>
+                    <div class="breakdown-total">
+                      <dt>Total professional fees</dt>
+                      <dd>{{ professionalFeesTotal | currency: 'AUD':'symbol':'1.0-0' }}</dd>
+                    </div>
+                  </dl>
+                </section>
+
+                <section class="breakdown-block">
+                  <h3>Loan + buyer position</h3>
+                  <dl>
+                    <div>
+                      <dt>Deposit</dt>
+                      <dd>{{ depositAmount | currency: 'AUD':'symbol':'1.0-0' }}</dd>
+                    </div>
+                    <div>
+                      <dt>LMI</dt>
+                      <dd>{{ lendersMortgageInsuranceEstimate | currency: 'AUD':'symbol':'1.0-0' }}</dd>
+                    </div>
+                    <div>
+                      <dt>Other costs buffer</dt>
+                      <dd>{{ otherEstimate | currency: 'AUD':'symbol':'1.0-0' }}</dd>
+                    </div>
+                    <div>
+                      <dt>Total</dt>
+                      <dd>{{ totalInterestEstimate | currency: 'AUD':'symbol':'1.0-0' }}</dd>
+                    </div>
+                  </dl>
+                </section>
+              </div>
+            </section>
+          </article>
+
+          <section class="sm-surface card table-card side-card" aria-label="Amortisation checkpoints">
+            <header>
+              <h2>Yearly payoff checkpoints</h2>
+            </header>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Year</th>
+                    <th scope="col">Balance</th>
+                    <th scope="col">Principal</th>
+                    <th scope="col">Interest</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (point of projectionTableRows.slice(0, 11); track point.label) {
+                    <tr>
+                      <td>{{ point.label }}</td>
+                      <td>{{ point.remainingBalance | currency: 'AUD':'symbol':'1.0-0' }}</td>
+                      <td>{{ point.cumulativePrincipal | currency: 'AUD':'symbol':'1.0-0' }}</td>
+                      <td>{{ point.cumulativeInterest | currency: 'AUD':'symbol':'1.0-0' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section class="graph-center">
+          <section class="sm-surface chart-card" aria-label="Mortgage payoff projection">
+            <header class="chart-card__header">
+              <div>
+                <h2>Mortgage payoff over time</h2>
+              </div>
+            </header>
+
+            <div class="chart-wrap">
+              <canvas #mortgageChart role="img" aria-label="Mortgage payoff projection"></canvas>
+            </div>
+          </section>
+        </section>
+      </div>
+    </section>

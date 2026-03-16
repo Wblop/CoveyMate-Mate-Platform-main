@@ -1,0 +1,247 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ConveyMate async AI review pipeline (S3, Lambda worker, IAM, alarms, SSM)
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    AllowedValues: [dev, staging, prod]
+    Default: dev
+  AppName:
+    Type: String
+    Default: conveymate
+  WorkerCodeS3Bucket:
+    Type: String
+    Description: S3 bucket containing the packaged Lambda worker zip.
+  WorkerCodeS3Key:
+    Type: String
+    Description: S3 key for the packaged Lambda worker zip.
+  WorkerCodeS3ObjectVersion:
+    Type: String
+    Default: ''
+    Description: Optional S3 object version for deterministic deployments.
+  AppBaseUrl:
+    Type: String
+    Default: http://localhost:4200
+  StripePriceAudCents:
+    Type: Number
+    Default: 1999
+  TextractEnabled:
+    Type: String
+    AllowedValues: ['true', 'false']
+    Default: 'true'
+  PostgresConnectionString:
+    Type: String
+    Default: ''
+    Description: Optional PostgreSQL connection string placeholder to ease later RDS/Aurora cutover.
+
+Conditions:
+  HasWorkerCodeVersion: !Not [!Equals [!Ref WorkerCodeS3ObjectVersion, '']]
+  HasPostgresConnectionString: !Not [!Equals [!Ref PostgresConnectionString, '']]
+
+Resources:
+  ReportsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${AppName}-${EnvironmentName}-reports-bucket'
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  WorkerLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${AppName}-${EnvironmentName}-reports-worker-lambda'
+      RetentionInDays: 30
+
+  EcsApiTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${AppName}-${EnvironmentName}-ecs-task-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub '${AppName}-${EnvironmentName}-ecs-api-policy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                  - ssm:GetParameters
+                  - ssm:GetParametersByPath
+                Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${AppName}/${EnvironmentName}/*'
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource: !Sub '${ReportsBucket.Arn}/*'
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource: !GetAtt ReportsBucket.Arn
+              - Effect: Allow
+                Action:
+                  - textract:AnalyzeDocument
+                  - textract:DetectDocumentText
+                  - textract:GetDocumentAnalysis
+                  - textract:GetDocumentTextDetection
+                  - textract:StartDocumentAnalysis
+                  - textract:StartDocumentTextDetection
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:*'
+
+  ReportsWorkerLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${AppName}-${EnvironmentName}-reports-worker-lambda-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub '${AppName}-${EnvironmentName}-reports-worker-policy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:*'
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                  - ssm:GetParameters
+                  - ssm:GetParametersByPath
+                Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${AppName}/${EnvironmentName}/*'
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource: !Sub '${ReportsBucket.Arn}/*'
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource: !GetAtt ReportsBucket.Arn
+              - Effect: Allow
+                Action:
+                  - textract:AnalyzeDocument
+                  - textract:DetectDocumentText
+                  - textract:GetDocumentAnalysis
+                  - textract:GetDocumentTextDetection
+                  - textract:StartDocumentAnalysis
+                  - textract:StartDocumentTextDetection
+                Resource: '*'
+
+  ReportsWorkerLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${AppName}-${EnvironmentName}-reports-worker-lambda'
+      Runtime: dotnet10
+      Handler: ConveyMate.ReportsWorker::ConveyMate.ReportsWorker.Function::FunctionHandler
+      MemorySize: 2048
+      Timeout: 900
+      Role: !GetAtt ReportsWorkerLambdaRole.Arn
+      Environment:
+        Variables:
+          CONVEYMATE_CONFIG_ENV: !Ref EnvironmentName
+      Code:
+        S3Bucket: !Ref WorkerCodeS3Bucket
+        S3Key: !Ref WorkerCodeS3Key
+        S3ObjectVersion: !If
+          - HasWorkerCodeVersion
+          - !Ref WorkerCodeS3ObjectVersion
+          - !Ref AWS::NoValue
+
+  ReportsLambdaErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${AppName}-${EnvironmentName}-reports-worker-errors'
+      AlarmDescription: Lambda worker is reporting execution errors.
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref ReportsWorkerLambda
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+
+  SsmReportsBucketName:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/${AppName}/${EnvironmentName}/s3/reportsBucketName'
+      Type: String
+      Value: !Ref ReportsBucket
+      Description: ConveyMate reports S3 bucket name
+
+  SsmStripePrice:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/${AppName}/${EnvironmentName}/stripe/priceAudCents'
+      Type: String
+      Value: !Ref StripePriceAudCents
+      Description: ConveyMate report price in AUD cents
+
+  SsmAppBaseUrl:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/${AppName}/${EnvironmentName}/app/baseUrl'
+      Type: String
+      Value: !Ref AppBaseUrl
+      Description: ConveyMate SPA base URL
+
+  SsmTextractEnabled:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/${AppName}/${EnvironmentName}/textract/enabled'
+      Type: String
+      Value: !Ref TextractEnabled
+      Description: ConveyMate Textract enablement flag
+
+  SsmPostgresConnectionString:
+    Type: AWS::SSM::Parameter
+    Condition: HasPostgresConnectionString
+    Properties:
+      Name: !Sub '/${AppName}/${EnvironmentName}/postgres/connectionString'
+      Type: String
+      Value: !Ref PostgresConnectionString
+      Description: ConveyMate PostgreSQL connection string (for future RDS/Aurora cutover)
+
+Outputs:
+  ReportsBucketName:
+    Description: Reports S3 bucket name
+    Value: !Ref ReportsBucket
+  ReportsWorkerLambdaName:
+    Description: Lambda worker name
+    Value: !Ref ReportsWorkerLambda
+  EcsApiTaskRoleArn:
+    Description: ECS task role ARN for API runtime access to SSM/S3/Textract
+    Value: !GetAtt EcsApiTaskRole.Arn
+  PostgresConnectionStringParameterName:
+    Description: SSM parameter name used for PostgreSQL connection string
+    Value: !Sub '/${AppName}/${EnvironmentName}/postgres/connectionString'

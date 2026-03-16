@@ -1,0 +1,375 @@
+<section class="sm-page-section">
+  <div class="sm-container page-grid">
+    @if (loading()) {
+      <ui-skeleton-block [height]="48"></ui-skeleton-block>
+      <ui-skeleton-block [height]="240"></ui-skeleton-block>
+    } @else if (errorMessage()) {
+      <ui-alert-banner tone="error" title="Could not load quote request" [message]="errorMessage()"></ui-alert-banner>
+    } @else if (request(); as detail) {
+      <ui-page-header
+        [title]="detail.propertyAddress"
+        [description]="serviceLabel(detail.serviceNeed)"
+        eyebrow="Quote workflow"
+      >
+        <div actions class="header-actions">
+          <a [routerLink]="['/reports', detail.reviewJobId]">
+            <ui-button variant="secondary">Back to report</ui-button>
+          </a>
+        </div>
+      </ui-page-header>
+
+      @if (detail.archivedAtUtc) {
+        <ui-alert-banner
+          tone="info"
+          title="This quote workflow is archived"
+          message="Archived workflows are hidden from standard quote views unless Show archived is enabled."
+        ></ui-alert-banner>
+      }
+
+      <section class="sm-surface detail-hero">
+        <div class="detail-hero__copy">
+          <div class="detail-hero__meta">
+            <span class="status-pill">{{ statusLabel(detail.status) }}</span>
+            <span class="status-pill status-pill--response">{{ responseCount(detail) }} / {{ detail.targets.length }} responses</span>
+          </div>
+          <h2>Quote comparison</h2>
+          <p>Review fees, scope, and turnaround in one place, then use the tabs below to track outstanding firms or revisit the brief that was sent.</p>
+        </div>
+
+        <div class="detail-hero__stats">
+          <article class="hero-stat">
+            <p class="hero-stat__label">Coverage</p>
+            <p class="hero-stat__value">{{ progressPercent(detail) }}%</p>
+            <p class="hero-stat__meta">Shortlist response rate</p>
+          </article>
+          <article class="hero-stat">
+            <p class="hero-stat__label">Lowest fee</p>
+            <p class="hero-stat__value hero-stat__value--compact">
+              {{ lowestProfessionalFee() !== null ? (lowestProfessionalFee() | currency: 'AUD' : 'symbol' : '1.0-0') : 'Pending' }}
+            </p>
+            <p class="hero-stat__meta">Professional fee only</p>
+          </article>
+          <article class="hero-stat">
+            <p class="hero-stat__label">Expires</p>
+            <p class="hero-stat__value hero-stat__value--compact">{{ detail.expiresAtUtc | date: 'd MMM yyyy' }}</p>
+            <p class="hero-stat__meta">Quote response window closes</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="sm-surface workspace-actions-card">
+        <div class="workspace-actions-card__copy">
+          <p class="quote-card__label">Workspace actions</p>
+          <h2>Manage this workflow</h2>
+          <p class="sm-muted">Archive hides this workflow from the main workspace. Delete removes the workflow and related records permanently.</p>
+        </div>
+
+        <div class="workspace-actions-card__controls">
+          @if (detail.archivedAtUtc) {
+            <span class="workspace-actions-card__status">Archived</span>
+          }
+          <ui-button variant="secondary" (pressed)="openArchiveDialog()">{{ archiveActionLabel() }}</ui-button>
+          <ui-button variant="secondary" (pressed)="openDeleteDialog()">Delete workflow</ui-button>
+        </div>
+      </section>
+
+      <div class="workflow-tabs sm-surface">
+        <nav class="workflow-tabs__nav" role="tablist" aria-label="Quote workflow sections">
+          @for (tab of workflowTabs; track tab.id) {
+            <button
+              type="button"
+              class="workflow-tabs__tab"
+              role="tab"
+              [id]="tabButtonId(tab.id)"
+              [class.is-active]="activeTab() === tab.id"
+              [attr.aria-selected]="activeTab() === tab.id"
+              [attr.aria-controls]="tabPanelId(tab.id)"
+              [attr.tabindex]="activeTab() === tab.id ? 0 : -1"
+              (click)="selectTab(tab.id)"
+              (keydown)="onTabKeydown($event, tab.id)"
+            >
+              {{ tab.label }}
+            </button>
+          }
+        </nav>
+      </div>
+
+      <section
+        class="tab-panel"
+        role="tabpanel"
+        tabindex="0"
+        [id]="tabPanelId(activeTab())"
+        [attr.aria-labelledby]="tabButtonId(activeTab())"
+      >
+        @switch (activeTab()) {
+          @case ('status') {
+            <div class="tab-stack">
+              <section class="sm-surface compare-card">
+                <div class="section-heading">
+                  <p class="sm-eyebrow">Responses</p>
+                  <h2>Returned quotes</h2>
+                  <p class="sm-muted">Responses are sorted by professional fee so you can compare firms quickly without digging through oversized cards.</p>
+                </div>
+
+                @if (respondedTargets().length === 0) {
+                  <div class="empty-panel">
+                    <h3>No quotes received yet</h3>
+                    <p class="sm-muted">This workflow has been sent, but none of the selected conveyancers have submitted a quote yet.</p>
+                  </div>
+                } @else {
+                  <div class="response-list">
+                    @for (target of respondedTargets(); track target.id) {
+                      <article class="response-item" [class.is-best-value]="isBestValue(target)">
+                        @if (target.response; as response) {
+                          <div class="response-item__top">
+                            <div class="response-item__identity">
+                              <div class="response-item__title">
+                                <h3>{{ targetDisplayName(target) }}</h3>
+                                @if (isBestValue(target)) {
+                                  <span class="response-item__marker">Lowest fee</span>
+                                }
+                              </div>
+                              <div class="response-item__byline">
+                                @if (target.contactName && target.contactName !== target.organizationName) {
+                                  <span>{{ target.contactName }}</span>
+                                }
+                                <span>{{ statusLabel(target.status) }}</span>
+                              </div>
+                            </div>
+
+                            <div class="response-item__fee">
+                              <p class="response-item__fee-value">{{ response.professionalFeeAud | currency: 'AUD' : 'symbol' : '1.0-0' }}</p>
+                              <p class="response-item__fee-label">Professional fee</p>
+                            </div>
+                          </div>
+
+                          <div class="response-item__meta sm-muted">
+                            <span>{{ includesMeta(response) }}</span>
+                            @if (response.disbursementsEstimateAud !== null) {
+                              <span>Disbursements {{ response.disbursementsEstimateAud | currency: 'AUD' : 'symbol' : '1.0-0' }}</span>
+                            }
+                            @if (response.turnaroundBusinessDays !== null) {
+                              <span>{{ response.turnaroundBusinessDays }} business day turnaround</span>
+                            }
+                            @if (response.validUntilUtc) {
+                              <span>Valid until {{ response.validUntilUtc | date: 'd MMM yyyy' }}</span>
+                            }
+                            <span>Submitted {{ response.submittedAtUtc | date: 'd MMM yyyy, h:mm a' }}</span>
+                          </div>
+
+                          <p class="response-item__summary">{{ response.scopeNotes }}</p>
+
+                          <div class="response-item__footer">
+                            <div class="response-item__contact">
+                              <span>{{ response.responderName }}</span>
+                              <a [href]="'mailto:' + response.responderEmail">{{ response.responderEmail }}</a>
+                              @if (response.responderPhone) {
+                                <a [href]="'tel:' + response.responderPhone">{{ response.responderPhone }}</a>
+                              }
+                            </div>
+
+                            <div class="response-item__links">
+                              @if (target.website) {
+                                <a [href]="target.website" target="_blank" rel="noreferrer">Website</a>
+                              }
+                              <a [href]="target.sourceUrl" target="_blank" rel="noreferrer">Directory</a>
+                            </div>
+                          </div>
+
+                          <details class="response-item__details">
+                            <summary class="response-item__details-summary">Full quote details</summary>
+
+                            <div class="response-item__details-grid">
+                              <div class="response-item__detail-card response-item__detail-card--wide">
+                                <p class="quote-card__label">Full scope notes</p>
+                                <p>{{ response.scopeNotes }}</p>
+                              </div>
+
+                              @if (response.excludedItems.length > 0) {
+                                <div class="response-item__detail-card">
+                                  <p class="quote-card__label">Excluded items</p>
+                                  <ul class="simple-list simple-list--tight">
+                                    @for (item of response.excludedItems; track item) {
+                                      <li>{{ item }}</li>
+                                    }
+                                  </ul>
+                                </div>
+                              }
+
+                              @if (detail.shareReportPdf) {
+                                <div class="response-item__detail-card">
+                                  <p class="quote-card__label">Document review</p>
+                                  <p>{{ documentAccessSummary(target) }}</p>
+                                  @if (target.documentAccess.lastDownloadedAtUtc) {
+                                    <p class="sm-muted">Last file opened {{ target.documentAccess.lastDownloadedAtUtc | date: 'd MMM yyyy, h:mm a' }}</p>
+                                  }
+                                </div>
+                              }
+
+                              <div class="response-item__detail-card">
+                                <p class="quote-card__label">Contact</p>
+                                <p>{{ response.responderName }}</p>
+                                <p>{{ response.responderEmail }}</p>
+                                @if (response.responderPhone) {
+                                  <p>{{ response.responderPhone }}</p>
+                                }
+                                @if (target.website) {
+                                  <p><a [href]="target.website" target="_blank" rel="noreferrer">Visit website</a></p>
+                                }
+                              </div>
+
+                              <div class="response-item__detail-card">
+                                <p class="quote-card__label">Quote timing</p>
+                                <p>Submitted {{ response.submittedAtUtc | date: 'd MMM yyyy, h:mm a' }}</p>
+                                @if (response.validUntilUtc) {
+                                  <p>Valid until {{ response.validUntilUtc | date: 'd MMM yyyy, h:mm a' }}</p>
+                                } @else {
+                                  <p class="sm-muted">No validity cut-off supplied.</p>
+                                }
+                              </div>
+                            </div>
+                          </details>
+                        }
+                      </article>
+                    }
+                  </div>
+                }
+              </section>
+
+              <section class="sm-surface pending-card">
+                <div class="section-heading">
+                  <p class="sm-eyebrow">Outstanding</p>
+                  <h2>Awaiting responses</h2>
+                  <p class="sm-muted">Track who has been sent the request, who has opened it, and whether anything needs a follow-up.</p>
+                </div>
+
+                @if (pendingTargets().length === 0) {
+                  <div class="empty-panel empty-panel--compact">
+                    <h3>All selected firms have responded</h3>
+                    <p class="sm-muted">There are no outstanding responses on this workflow.</p>
+                  </div>
+                } @else {
+                  <div class="pending-list">
+                    @for (target of pendingTargets(); track target.id) {
+                      <article class="pending-item" [class.has-issue]="!!target.deliveryError">
+                        <div class="pending-item__top">
+                          <div class="pending-item__identity">
+                            <h3>{{ targetDisplayName(target) }}</h3>
+                            @if (target.contactName && target.contactName !== target.organizationName) {
+                              <p class="sm-muted">{{ target.contactName }}</p>
+                            }
+                            <p class="sm-muted">{{ target.email }}</p>
+                            @if (target.phone) {
+                              <p class="sm-muted">{{ target.phone }}</p>
+                            }
+                          </div>
+
+                          <div class="pending-item__activity">
+                            <p class="pending-item__status">
+                              @if (target.deliveryError) {
+                                Delivery issue
+                              } @else if (target.openedAtUtc) {
+                                Opened
+                              } @else if (target.sentAtUtc) {
+                                Sent
+                              } @else {
+                                Preparing
+                              }
+                            </p>
+                            @if (target.sentAtUtc) {
+                              <p class="sm-muted">Sent {{ target.sentAtUtc | date: 'd MMM yyyy, h:mm a' }}</p>
+                            }
+                            @if (target.openedAtUtc) {
+                              <p>Opened {{ target.openedAtUtc | date: 'd MMM yyyy, h:mm a' }}</p>
+                            } @else {
+                              <p>Awaiting first open</p>
+                            }
+                            @if (detail.shareReportPdf) {
+                              <p>{{ documentAccessSummary(target) }}</p>
+                              @if (target.documentAccess.lastDownloadedAtUtc) {
+                                <p>Last file opened {{ target.documentAccess.lastDownloadedAtUtc | date: 'd MMM yyyy, h:mm a' }}</p>
+                              }
+                            }
+                          </div>
+                        </div>
+
+                        <div class="pending-item__footer">
+                          <div class="pending-item__links">
+                            @if (target.website) {
+                              <a [href]="target.website" target="_blank" rel="noreferrer">Website</a>
+                            }
+                            <a [href]="target.sourceUrl" target="_blank" rel="noreferrer">Directory</a>
+                          </div>
+                        </div>
+
+                        @if (target.deliveryError) {
+                          <ui-alert-banner tone="warn" title="Delivery issue" [message]="target.deliveryError"></ui-alert-banner>
+                        }
+                      </article>
+                    }
+                  </div>
+                }
+              </section>
+            </div>
+          }
+          @case ('brief') {
+            <section class="sm-surface brief-panel">
+              <div class="section-heading">
+                <p class="sm-eyebrow">Shared brief</p>
+                <h2>What firms received</h2>
+                <p class="sm-muted">Everything below is the brief and context sent with the quote request.</p>
+              </div>
+
+                <div class="brief-panel__meta">
+                  <span>{{ detail.stateOrTerritory }}</span>
+                  <span>{{ serviceLabel(detail.serviceNeed) }}</span>
+                  <span>{{ detail.shareReportPdf ? 'Report sharing enabled' : 'Report sharing off' }}</span>
+                  @if (detail.shareReportPdf && detail.targets.length > 0 && detail.targets[0].documentAccess.totalDocumentCount > 0) {
+                    <span>{{ detail.targets[0].documentAccess.totalDocumentCount }} shared files</span>
+                  }
+                </div>
+
+              @if (detail.message) {
+                <article class="brief-box">
+                  <p class="quote-card__label">Email introduction</p>
+                  <p>{{ detail.message }}</p>
+                </article>
+              }
+
+              <article class="brief-box">
+                <p class="quote-card__label">Summary</p>
+                <p>{{ detail.brief.summary }}</p>
+              </article>
+
+              <article class="brief-box">
+                <p class="quote-card__label">Questions for the conveyancer</p>
+                @if (detail.brief.conveyancerQuestions.length === 0) {
+                  <p class="sm-muted">No specific questions were included.</p>
+                } @else {
+                  <ul class="simple-list simple-list--tight">
+                    @for (item of detail.brief.conveyancerQuestions; track item) {
+                      <li>{{ item }}</li>
+                    }
+                  </ul>
+                }
+              </article>
+            </section>
+          }
+        }
+      </section>
+
+      @if (dialogState()) {
+        <app-confirm-action-dialog
+          [title]="dialogTitle()"
+          [description]="dialogDescription()"
+          [detail]="detail.propertyAddress"
+          [confirmLabel]="dialogConfirmLabel()"
+          [tone]="isDeleteDialog() ? 'danger' : 'neutral'"
+          [busy]="actionBusy()"
+          (confirmed)="confirmDialogAction()"
+          (cancelled)="closeDialog()"
+        ></app-confirm-action-dialog>
+      }
+    }
+  </div>
+</section>

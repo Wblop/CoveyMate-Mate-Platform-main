@@ -1,0 +1,83 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    container_name: conveymate-postgres
+    restart: unless-stopped
+    ports:
+      - "${CONVEYMATE_POSTGRES_PORT:-54329}:5432"
+    environment:
+      POSTGRES_DB: "${CONVEYMATE_POSTGRES_DB:?CONVEYMATE_POSTGRES_DB is required}"
+      POSTGRES_USER: "${CONVEYMATE_POSTGRES_USER:?CONVEYMATE_POSTGRES_USER is required}"
+      POSTGRES_PASSWORD: "${CONVEYMATE_POSTGRES_PASSWORD:?CONVEYMATE_POSTGRES_PASSWORD is required}"
+    volumes:
+      - conveymate-postgres-data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${CONVEYMATE_POSTGRES_USER} -d ${CONVEYMATE_POSTGRES_DB} -h 127.0.0.1 -p 5432"
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+
+  localstack:
+    image: localstack/localstack:4.3.0
+    container_name: conveymate-localstack
+    restart: unless-stopped
+    ports:
+      - "${CONVEYMATE_LOCALSTACK_PORT:-4566}:4566"
+    environment:
+      SERVICES: s3,sqs,lambda,iam,logs,cloudwatch,sts,ssm
+      AWS_DEFAULT_REGION: "${CONVEYMATE_AWS_REGION:-ap-southeast-2}"
+      AWS_ACCESS_KEY_ID: "${CONVEYMATE_LOCALSTACK_ACCESS_KEY_ID:-test}"
+      AWS_SECRET_ACCESS_KEY: "${CONVEYMATE_LOCALSTACK_SECRET_ACCESS_KEY:-test}"
+      LOCALSTACK_AUTH_TOKEN: "${LOCALSTACK_AUTH_TOKEN:-}"
+      DEBUG: "${CONVEYMATE_LOCALSTACK_DEBUG:-0}"
+      PERSISTENCE: "${CONVEYMATE_LOCALSTACK_PERSISTENCE:-1}"
+      CONVEYMATE_LOCALSTACK_REPORTS_BUCKET: "${CONVEYMATE_LOCALSTACK_REPORTS_BUCKET:-conveymate-dev-reports-bucket}"
+      LAMBDA_KEEPALIVE_MS: 0
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - conveymate-localstack-data:/var/lib/localstack
+      - ./localstack/init/ready.d:/etc/localstack/init/ready.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "HEALTH=\"$$(curl -fsS http://127.0.0.1:4566/_localstack/health)\" && echo \"$$HEALTH\" | grep -q '\"s3\": \"running\"' && echo \"$$HEALTH\" | grep -q '\"sqs\": \"running\"' && echo \"$$HEALTH\" | grep -Eq '\"lambda\": \"(running|available)\"'"]
+      interval: 5s
+      timeout: 3s
+      retries: 40
+      start_period: 15s
+
+  serena:
+    image: ghcr.io/oraios/serena:latest
+    container_name: conveymate-serena
+    restart: unless-stopped
+    ports:
+      - "${CONVEYMATE_SERENA_PORT:-3000}:3000"
+    volumes:
+      - ../..:/project
+      - ../..:/Users/daimen/Desktop/Projects/ConveyMate
+    command: "uv run --directory . serena-mcp-server --transport sse --port 3000 --host 0.0.0.0 --context claude-code --project /Users/daimen/Desktop/Projects/ConveyMate"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs --max-time 3 http://127.0.0.1:3000/sse -o /dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  smtp4dev:
+    image: rnwood/smtp4dev:v3
+    container_name: conveymate-smtp4dev
+    restart: unless-stopped
+    ports:
+      - "${CONVEYMATE_SMTP4DEV_SMTP_PORT:-2525}:25"
+      - "${CONVEYMATE_SMTP4DEV_WEB_PORT:-8025}:80"
+    volumes:
+      - conveymate-smtp4dev-data:/smtp4dev
+
+volumes:
+  conveymate-postgres-data:
+  conveymate-localstack-data:
+  conveymate-smtp4dev-data:

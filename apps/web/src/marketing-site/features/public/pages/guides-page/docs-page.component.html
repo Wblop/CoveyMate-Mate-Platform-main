@@ -1,0 +1,256 @@
+    <section class="sm-page-section">
+      <div class="sm-container docs-layout">
+        <ui-page-header
+          eyebrow="Docs"
+          [title]="currentPage().title"
+          [description]="currentPage().description"
+        ></ui-page-header>
+
+        <div class="docs-frame">
+          <article class="docs-content">
+            @for (section of currentPage().sections; track section.id) {
+              <section [id]="section.id" class="docs-section docs-anchor">
+                <h2>{{ section.title }}</h2>
+
+                @for (paragraph of section.paragraphs; track paragraph) {
+                  <p>{{ paragraph }}</p>
+                }
+
+                @if (section.bullets?.length) {
+                  <ul>
+                    @for (item of section.bullets; track item) {
+                      <li>{{ item }}</li>
+                    }
+                  </ul>
+                }
+
+                @if (currentPage().slug === 'ai-review-pipeline' && section.id === 'pipeline-overview') {
+                  <figure class="docs-pipeline-diagram">
+                    <svg
+                      viewBox="0 0 980 1400"
+                      role="img"
+                      aria-labelledby="pipeline-diagram-title pipeline-diagram-description"
+                    >
+                      <title id="pipeline-diagram-title">ConveyMate review workflow</title>
+                      <desc id="pipeline-diagram-description">
+                        Eight horizontal process gates over a vertical time axis with process descriptions between gates and an average completion window of seven to nine minutes.
+                      </desc>
+
+                      <defs>
+                        <marker id="pipeline-arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+                          <path d="M0,0 L10,4 L0,8 Z" fill="#3e5e74"></path>
+                        </marker>
+                      </defs>
+
+                      <text x="32" y="64" class="pipeline-heading">ConveyMate review journey</text>
+                      <text x="32" y="94" class="pipeline-subheading">Average workflow time: 7 to 9 minutes.</text>
+
+                      <line x1="92" y1="180" x2="92" y2="1330" class="pipeline-time-axis"></line>
+                      <line x1="84" y1="220" x2="100" y2="220" class="pipeline-time-tick"></line>
+                      <line x1="84" y1="342" x2="100" y2="342" class="pipeline-time-tick"></line>
+                      <line x1="84" y1="464" x2="100" y2="464" class="pipeline-time-tick"></line>
+                      <line x1="84" y1="586" x2="100" y2="586" class="pipeline-time-tick"></line>
+                      <line x1="84" y1="708" x2="100" y2="708" class="pipeline-time-tick"></line>
+                      <line x1="84" y1="830" x2="100" y2="830" class="pipeline-time-tick"></line>
+                      <line x1="84" y1="952" x2="100" y2="952" class="pipeline-time-tick"></line>
+                      <line x1="84" y1="1074" x2="100" y2="1074" class="pipeline-time-tick"></line>
+                      <line x1="84" y1="1196" x2="100" y2="1196" class="pipeline-time-tick"></line>
+                      <line x1="84" y1="1318" x2="100" y2="1318" class="pipeline-time-tick"></line>
+
+                      <text x="34" y="225" class="pipeline-time-label">0m</text>
+                      <text x="34" y="347" class="pipeline-time-label">1m</text>
+                      <text x="34" y="469" class="pipeline-time-label">2m</text>
+                      <text x="34" y="591" class="pipeline-time-label">3m</text>
+                      <text x="34" y="713" class="pipeline-time-label">4m</text>
+                      <text x="34" y="835" class="pipeline-time-label">5m</text>
+                      <text x="34" y="957" class="pipeline-time-label">6m</text>
+                      <text x="34" y="1079" class="pipeline-time-label">7m</text>
+                      <text x="34" y="1201" class="pipeline-time-label">8m</text>
+                      <text x="34" y="1323" class="pipeline-time-label">9m</text>
+
+                      <rect x="170" y="190" width="760" height="92" rx="16" class="pipeline-gate pipeline-gate--entry"></rect>
+                      <circle cx="202" cy="236" r="17" class="pipeline-badge"></circle>
+                      <text x="202" y="242" text-anchor="middle" class="pipeline-badge-number">1</text>
+                      <text x="240" y="226" class="pipeline-gate-title">Start review</text>
+                      <text x="240" y="248" class="pipeline-gate-copy">Customer opens a guided property review and confirms the core details.</text>
+                      <text x="240" y="269" class="pipeline-gate-copy">The journey begins with a structured intake experience.</text>
+
+                      <line x1="550" y1="282" x2="550" y2="338" class="pipeline-flow"></line>
+                      <rect x="572" y="296" width="250" height="24" rx="12" class="pipeline-transition-chip"></rect>
+                      <text x="697" y="312" text-anchor="middle" class="pipeline-transition">Onboarding and case setup</text>
+
+                      <rect x="170" y="340" width="760" height="92" rx="16" class="pipeline-gate pipeline-gate--entry"></rect>
+                      <circle cx="202" cy="386" r="17" class="pipeline-badge"></circle>
+                      <text x="202" y="392" text-anchor="middle" class="pipeline-badge-number">2</text>
+                      <text x="240" y="376" class="pipeline-gate-title">Upload contract pack</text>
+                      <text x="240" y="398" class="pipeline-gate-copy">Contracts, schedules, and support files are submitted into the review flow.</text>
+                      <text x="240" y="419" class="pipeline-gate-copy">Each document is staged for consistent downstream processing.</text>
+
+                      <line x1="550" y1="432" x2="550" y2="488" class="pipeline-flow"></line>
+                      <rect x="188" y="446" width="330" height="24" rx="12" class="pipeline-transition-chip"></rect>
+                      <text x="353" y="462" text-anchor="middle" class="pipeline-transition">OCR extraction and chunk normalisation</text>
+
+                      <rect x="170" y="490" width="760" height="92" rx="16" class="pipeline-gate pipeline-gate--trust"></rect>
+                      <circle cx="202" cy="536" r="17" class="pipeline-badge"></circle>
+                      <text x="202" y="542" text-anchor="middle" class="pipeline-badge-number">3</text>
+                      <text x="240" y="526" class="pipeline-gate-title">Pre-processing and evidence mapping</text>
+                      <text x="240" y="548" class="pipeline-gate-copy">Extracted text is mapped to pages and evidence blocks for retrieval.</text>
+                      <text x="240" y="569" class="pipeline-gate-copy">Low-clarity pages are recovered through OCR fallback paths.</text>
+
+                      <line x1="550" y1="582" x2="550" y2="638" class="pipeline-flow"></line>
+                      <rect x="572" y="596" width="320" height="24" rx="12" class="pipeline-transition-chip"></rect>
+                      <text x="732" y="612" text-anchor="middle" class="pipeline-transition">Pricing confirmation and payment release</text>
+
+                      <rect x="170" y="640" width="760" height="92" rx="16" class="pipeline-gate pipeline-gate--trust"></rect>
+                      <circle cx="202" cy="686" r="17" class="pipeline-badge"></circle>
+                      <text x="202" y="692" text-anchor="middle" class="pipeline-badge-number">4</text>
+                      <text x="240" y="676" class="pipeline-gate-title">Payment gateway approval</text>
+                      <text x="240" y="698" class="pipeline-gate-copy">Payment confirmation unlocks managed processing for the report.</text>
+                      <text x="240" y="719" class="pipeline-gate-copy">Each review follows a single trusted billing path.</text>
+
+                      <line x1="550" y1="732" x2="550" y2="788" class="pipeline-flow"></line>
+                      <rect x="188" y="746" width="320" height="24" rx="12" class="pipeline-transition-chip"></rect>
+                      <text x="348" y="762" text-anchor="middle" class="pipeline-transition">Secure handoff into background execution</text>
+
+                      <rect x="170" y="790" width="760" height="92" rx="16" class="pipeline-gate pipeline-gate--analysis"></rect>
+                      <circle cx="202" cy="836" r="17" class="pipeline-badge"></circle>
+                      <text x="202" y="842" text-anchor="middle" class="pipeline-badge-number">5</text>
+                      <text x="240" y="826" class="pipeline-gate-title">Jurisdiction framework routing</text>
+                      <text x="240" y="848" class="pipeline-gate-copy">The pipeline selects internal and state-specific review frameworks.</text>
+                      <text x="240" y="869" class="pipeline-gate-copy">Checklist, risk, and compliance lenses align to property jurisdiction.</text>
+
+                      <line x1="550" y1="882" x2="550" y2="938" class="pipeline-flow"></line>
+                      <rect x="558" y="896" width="388" height="24" rx="12" class="pipeline-transition-chip"></rect>
+                      <text x="752" y="912" text-anchor="middle" class="pipeline-transition">RAG retrieval: evidence + collections + web context</text>
+
+                      <rect x="170" y="940" width="760" height="92" rx="16" class="pipeline-gate pipeline-gate--analysis"></rect>
+                      <circle cx="202" cy="986" r="17" class="pipeline-badge"></circle>
+                      <text x="202" y="992" text-anchor="middle" class="pipeline-badge-number">6</text>
+                      <text x="240" y="976" class="pipeline-gate-title">Multi-source review reasoning</text>
+                      <text x="240" y="998" class="pipeline-gate-copy">The model evaluates contract evidence with jurisdiction-grounded context.</text>
+                      <text x="240" y="1019" class="pipeline-gate-copy">External public context is added as attribution, not primary evidence.</text>
+
+                      <line x1="550" y1="1032" x2="550" y2="1088" class="pipeline-flow"></line>
+                      <rect x="174" y="1046" width="364" height="24" rx="12" class="pipeline-transition-chip"></rect>
+                      <text x="356" y="1062" text-anchor="middle" class="pipeline-transition">Hallucination controls and consistency validation</text>
+
+                      <rect x="170" y="1090" width="760" height="92" rx="16" class="pipeline-gate pipeline-gate--quality"></rect>
+                      <circle cx="202" cy="1136" r="17" class="pipeline-badge"></circle>
+                      <text x="202" y="1142" text-anchor="middle" class="pipeline-badge-number">7</text>
+                      <text x="240" y="1126" class="pipeline-gate-title">Quality assurance and report shaping</text>
+                      <text x="240" y="1148" class="pipeline-gate-copy">Citation integrity, coherence, and completeness are verified.</text>
+                      <text x="240" y="1169" class="pipeline-gate-copy">Findings are refined into a customer-ready narrative structure.</text>
+
+                      <line x1="550" y1="1182" x2="550" y2="1238" class="pipeline-flow"></line>
+                      <rect x="572" y="1196" width="360" height="24" rx="12" class="pipeline-transition-chip"></rect>
+                      <text x="752" y="1212" text-anchor="middle" class="pipeline-transition">Report rendering and customer notification</text>
+
+                      <rect x="170" y="1240" width="760" height="92" rx="16" class="pipeline-gate pipeline-gate--delivery"></rect>
+                      <circle cx="202" cy="1286" r="17" class="pipeline-badge"></circle>
+                      <text x="202" y="1292" text-anchor="middle" class="pipeline-badge-number">8</text>
+                      <text x="240" y="1276" class="pipeline-gate-title">Report delivery</text>
+                      <text x="240" y="1298" class="pipeline-gate-copy">The customer receives practical findings and next-step guidance.</text>
+                      <text x="240" y="1319" class="pipeline-gate-copy">A download-ready report is available by the end of the workflow window.</text>
+                    </svg>
+                  </figure>
+                }
+
+                @if (currentPage().slug === 'ai-review-pipeline' && section.id === 'processing-stages') {
+                  <figure class="docs-stages-diagram">
+                    <svg
+                      viewBox="0 0 1260 200"
+                      role="img"
+                      aria-labelledby="stages-diagram-title stages-diagram-description"
+                    >
+                      <title id="stages-diagram-title">ConveyMate processing stages</title>
+                      <desc id="stages-diagram-description">
+                        Simplified horizontal flow of six processing stages: intake, extraction, grounding, review analysis, validation, and report delivery.
+                      </desc>
+
+                      <defs>
+                        <marker id="stage-arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+                          <path d="M0,0 L10,4 L0,8 Z" fill="#3f5f75"></path>
+                        </marker>
+                      </defs>
+
+                      <rect x="20" y="56" width="170" height="86" rx="14" class="stage-node"></rect>
+                      <text x="105" y="86" text-anchor="middle" class="stage-title">1. Intake</text>
+                      <text x="105" y="108" text-anchor="middle" class="stage-copy">Case setup</text>
+                      <text x="105" y="126" text-anchor="middle" class="stage-copy">and checks</text>
+
+                      <line x1="190" y1="99" x2="230" y2="99" class="stage-link"></line>
+
+                      <rect x="230" y="56" width="170" height="86" rx="14" class="stage-node"></rect>
+                      <text x="315" y="86" text-anchor="middle" class="stage-title">2. Extraction</text>
+                      <text x="315" y="108" text-anchor="middle" class="stage-copy">OCR and</text>
+                      <text x="315" y="126" text-anchor="middle" class="stage-copy">normalisation</text>
+
+                      <line x1="400" y1="99" x2="440" y2="99" class="stage-link"></line>
+
+                      <rect x="440" y="56" width="170" height="86" rx="14" class="stage-node"></rect>
+                      <text x="525" y="86" text-anchor="middle" class="stage-title">3. Grounding</text>
+                      <text x="525" y="108" text-anchor="middle" class="stage-copy">Evidence and</text>
+                      <text x="525" y="126" text-anchor="middle" class="stage-copy">collection retrieval</text>
+
+                      <line x1="610" y1="99" x2="650" y2="99" class="stage-link"></line>
+
+                      <rect x="650" y="56" width="170" height="86" rx="14" class="stage-node"></rect>
+                      <text x="735" y="86" text-anchor="middle" class="stage-title">4. Analysis</text>
+                      <text x="735" y="108" text-anchor="middle" class="stage-copy">Structured</text>
+                      <text x="735" y="126" text-anchor="middle" class="stage-copy">reasoning output</text>
+
+                      <line x1="820" y1="99" x2="860" y2="99" class="stage-link"></line>
+
+                      <rect x="860" y="56" width="170" height="86" rx="14" class="stage-node"></rect>
+                      <text x="945" y="86" text-anchor="middle" class="stage-title">5. Validation</text>
+                      <text x="945" y="108" text-anchor="middle" class="stage-copy">Citation and</text>
+                      <text x="945" y="126" text-anchor="middle" class="stage-copy">consistency checks</text>
+
+                      <line x1="1030" y1="99" x2="1070" y2="99" class="stage-link"></line>
+
+                      <rect x="1070" y="56" width="170" height="86" rx="14" class="stage-node stage-node--final"></rect>
+                      <text x="1155" y="86" text-anchor="middle" class="stage-title">6. Delivery</text>
+                      <text x="1155" y="108" text-anchor="middle" class="stage-copy">Customer-ready</text>
+                      <text x="1155" y="126" text-anchor="middle" class="stage-copy">report package</text>
+                    </svg>
+                  </figure>
+                }
+              </section>
+            }
+
+            <section class="docs-callout">
+              <h2>Need support now?</h2>
+              <p>Email support for account, payment, and report workflow issues.</p>
+              <p><a href="mailto:support@conveymate.com.au">support@conveymate.com.au</a></p>
+              <p><a routerLink="/legal/disclaimer">Read legal disclaimer</a></p>
+            </section>
+          </article>
+
+          <aside class="docs-right-rail" aria-label="Documentation navigation">
+            <section class="sm-surface docs-rail-card">
+              <p class="docs-rail-title">Guides</p>
+              <nav aria-label="Guide pages">
+                @for (page of docsPages; track page.slug) {
+                  <a [routerLink]="pageRoute(page)" [class.is-active]="currentPage().slug === page.slug">{{ page.navLabel }}</a>
+                }
+              </nav>
+            </section>
+
+            <section class="sm-surface docs-rail-card">
+              <p class="docs-rail-title">On this page</p>
+              <nav aria-label="Section navigation">
+                @for (section of currentPage().sections; track section.id) {
+                  <a
+                    [attr.href]="'#' + section.id"
+                    [class.is-active]="activeSectionId() === section.id"
+                    (click)="scrollToSection($event, section.id)"
+                    >{{ section.title }}</a
+                  >
+                }
+              </nav>
+              <p class="docs-updated">Updated {{ currentPage().lastUpdated }}</p>
+            </section>
+          </aside>
+        </div>
+      </div>
+    </section>

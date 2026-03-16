@@ -1,0 +1,17 @@
+    <ol class="ui-stepper" aria-label="Progress">
+      @for (step of steps; track $index) {
+        <li [ngClass]="statusClass($index)" [attr.aria-current]="$index === currentStepIndex ? 'step' : null">
+          <span class="ui-stepper__index">{{ $index + 1 }}</span>
+          <div>
+            <p class="ui-stepper__meta">Step {{ $index + 1 }}</p>
+            <p class="ui-stepper__label">{{ step }}</p>
+          </div>
+        </li>
+      }
+    </ol>
+    <div class="ui-stepper-compact" aria-hidden="true">
+      <div class="ui-stepper-compact__track">
+        <div class="ui-stepper-compact__fill" [style.width.%]="((currentStepIndex + 1) / steps.length) * 100"></div>
+      </div>
+      <p class="ui-stepper-compact__text">Step {{ currentStepIndex + 1 }} of {{ steps.length }} &middot; {{ steps[currentStepIndex] }}</p>
+    </div>

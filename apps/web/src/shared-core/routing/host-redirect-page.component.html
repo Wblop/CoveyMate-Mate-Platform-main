@@ -1,0 +1,28 @@
+<section class="host-redirect sm-page-section">
+  <div class="sm-container host-redirect__shell">
+    <article class="host-redirect__panel">
+      <div class="host-redirect__animation" aria-hidden="true">
+        <span class="host-redirect__orbit"></span>
+        <span class="host-redirect__glow"></span>
+        <div class="host-redirect__document">
+          <span class="host-redirect__document-fold"></span>
+          <span class="host-redirect__document-line host-redirect__document-line--strong"></span>
+          <span class="host-redirect__document-line"></span>
+          <span class="host-redirect__document-line host-redirect__document-line--short"></span>
+        </div>
+      </div>
+
+      <div class="host-redirect__copy">
+        <h1>{{ heading() }}</h1>
+        <p class="host-redirect__lead">{{ description() }}</p>
+      </div>
+
+      <p class="host-redirect__status" role="status" aria-live="polite">{{ statusLabel() }}</p>
+
+      <p class="host-redirect__manual">
+        If nothing happens,
+        <a [attr.href]="targetHref()">open it manually</a>.
+      </p>
+    </article>
+  </div>
+</section>

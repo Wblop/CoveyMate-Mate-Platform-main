@@ -1,0 +1,17 @@
+{
+  "/metadataconfiguration": {
+    "target": "http://localhost:5141",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/user": {
+    "target": "http://localhost:5141",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/health": {
+    "target": "http://localhost:5141",
+    "secure": false,
+    "changeOrigin": true
+  }
+}

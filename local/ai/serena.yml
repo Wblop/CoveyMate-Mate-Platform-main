@@ -1,0 +1,25 @@
+# Serena MCP server configuration for ConveyMate
+# https://github.com/oraios/serena
+
+project_root: /project
+
+# Primary languages in this monorepo
+language_server_config:
+  - language: csharp
+    root: /project/ConveyMate-AI
+  - language: csharp
+    root: /project/ConveyMate/apps/apis/conveymate-api
+  - language: typescript
+    root: /project/ConveyMate/apps/web
+
+# Paths to index for semantic search
+index:
+  include:
+    - ConveyMate-AI/src/**/*.cs
+    - ConveyMate/apps/apis/conveymate-api/src/**/*.cs
+    - ConveyMate/apps/web/src/**/*.ts
+  exclude:
+    - "**/bin/**"
+    - "**/obj/**"
+    - "**/node_modules/**"
+    - "**/.angular/**"

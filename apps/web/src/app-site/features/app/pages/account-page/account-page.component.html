@@ -1,0 +1,86 @@
+    <section class="sm-page-section">
+      <div class="sm-container page-grid">
+        <ui-page-header
+          title="Account"
+          description="Review account details and manage your current session."
+          eyebrow="Profile"
+        >
+          <div actions>
+            <ui-button variant="secondary" [disabled]="loading()" (pressed)="loadProfile(true)">
+              {{ loading() ? 'Refreshing...' : 'Refresh profile' }}
+            </ui-button>
+          </div>
+        </ui-page-header>
+
+        @if (loading()) {
+          <section class="sm-surface account-panel account-panel--loading">
+            <ui-skeleton-block [height]="84"></ui-skeleton-block>
+            <ui-skeleton-block [height]="22"></ui-skeleton-block>
+            <ui-skeleton-block [height]="22"></ui-skeleton-block>
+            <ui-skeleton-block [height]="22"></ui-skeleton-block>
+          </section>
+        } @else if (errorMessage()) {
+          <section class="sm-surface account-panel">
+            <ui-alert-banner tone="error" title="Could not load account" [message]="errorMessage()"></ui-alert-banner>
+            <div class="action-row">
+              <ui-button variant="secondary" (pressed)="loadProfile(true)">Retry</ui-button>
+              <ui-button variant="destructive" (pressed)="signOut()">Sign out</ui-button>
+            </div>
+          </section>
+        } @else if (user()) {
+          <section class="sm-surface account-panel">
+            <header class="account-top">
+              <div class="identity-block">
+                <div class="hero-avatar" aria-hidden="true">{{ initials(user()!.fullName) }}</div>
+                <div>
+                  <p class="sm-eyebrow">Signed in</p>
+                  <h2>{{ user()!.fullName }}</h2>
+                  <p class="sm-muted">{{ user()!.email }}</p>
+                </div>
+              </div>
+              <p class="member-since">Member since {{ user()!.createdAt | date: 'd MMM yyyy' }}</p>
+            </header>
+
+            <section class="account-section">
+              <h3>Profile details</h3>
+              <dl class="profile-list">
+                <div>
+                  <dt>Full name</dt>
+                  <dd>{{ user()!.fullName }}</dd>
+                </div>
+                <div>
+                  <dt>Email</dt>
+                  <dd>{{ user()!.email }}</dd>
+                </div>
+                <div>
+                  <dt>Member since</dt>
+                  <dd>{{ user()!.createdAt | date: 'd MMM yyyy, h:mm a' }}</dd>
+                </div>
+              </dl>
+            </section>
+
+            <section class="account-section account-section--muted">
+              <div class="session-row">
+                <div>
+                  <h3>Session</h3>
+                  <p class="sm-muted">Sign out when you finish on a shared or public device.</p>
+                </div>
+                <ui-button variant="destructive" (pressed)="signOut()">Sign out</ui-button>
+              </div>
+            </section>
+          </section>
+        } @else {
+          <section class="sm-surface account-panel">
+            <ui-alert-banner
+              tone="info"
+              title="No account data available"
+              message="Refresh profile details or sign in again."
+            ></ui-alert-banner>
+            <div class="action-row">
+              <ui-button variant="secondary" (pressed)="loadProfile(true)">Refresh profile</ui-button>
+              <ui-button variant="destructive" (pressed)="signOut()">Sign out</ui-button>
+            </div>
+          </section>
+        }
+      </div>
+    </section>

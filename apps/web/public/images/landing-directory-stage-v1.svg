@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 560" fill="none" aria-hidden="true">
+  <defs>
+    <filter id="directory-shadow" x="-20%" y="-20%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="#123248" flood-opacity="0.14" />
+    </filter>
+    <radialGradient id="directory-glow-a" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#d7ebf8" stop-opacity="0.84" />
+      <stop offset="68%" stop-color="#d7ebf8" stop-opacity="0.14" />
+      <stop offset="100%" stop-color="#d7ebf8" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="directory-glow-b" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#bed8ea" stop-opacity="0.58" />
+      <stop offset="70%" stop-color="#bed8ea" stop-opacity="0.1" />
+      <stop offset="100%" stop-color="#bed8ea" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <circle cx="154" cy="452" r="186" fill="url(#directory-glow-a)" />
+  <circle cx="720" cy="128" r="184" fill="url(#directory-glow-b)" />
+
+  <g opacity="0.2">
+    <path d="M42 434c154-82 308-98 464-48 156 50 292 58 408 18" stroke="#bfd4e4" stroke-width="1.6" stroke-linecap="round" />
+    <path d="M86 122c126-40 252-46 380-16s240 38 354 14" stroke="#bfd4e4" stroke-width="1.5" stroke-linecap="round" />
+    <circle cx="676" cy="166" r="174" stroke="#e1eef7" stroke-width="1.2" />
+    <circle cx="194" cy="414" r="146" stroke="#e1eef7" stroke-width="1.1" />
+  </g>
+
+  <g transform="translate(52 104)" filter="url(#directory-shadow)">
+    <rect x="14" y="18" width="328" height="316" rx="34" fill="#123248" fill-opacity="0.08" />
+    <rect x="0" y="0" width="328" height="316" rx="34" fill="#fbfdff" stroke="#d1dfe9" stroke-width="1.8" />
+    <rect x="28" y="28" width="116" height="24" rx="12" fill="#edf5fa" stroke="#d7e4ed" />
+    <text x="86" y="44" fill="#284c64" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle">All jurisdictions</text>
+
+    <g transform="translate(28 82)">
+      <rect width="58" height="40" rx="14" fill="#ffffff" stroke="#cfdeea" />
+      <text x="29" y="25" fill="#1e4e68" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle">ACT</text>
+    </g>
+    <g transform="translate(100 82)">
+      <rect width="58" height="40" rx="14" fill="#ffffff" stroke="#cfdeea" />
+      <text x="29" y="25" fill="#1e4e68" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle">NSW</text>
+    </g>
+    <g transform="translate(172 82)">
+      <rect width="58" height="40" rx="14" fill="#ffffff" stroke="#cfdeea" />
+      <text x="29" y="25" fill="#1e4e68" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle">VIC</text>
+    </g>
+    <g transform="translate(244 82)">
+      <rect width="58" height="40" rx="14" fill="#ffffff" stroke="#cfdeea" />
+      <text x="29" y="25" fill="#1e4e68" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle">QLD</text>
+    </g>
+    <g transform="translate(28 136)">
+      <rect width="58" height="40" rx="14" fill="#ffffff" stroke="#cfdeea" />
+      <text x="29" y="25" fill="#1e4e68" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle">WA</text>
+    </g>
+    <g transform="translate(100 136)">
+      <rect width="58" height="40" rx="14" fill="#ffffff" stroke="#cfdeea" />
+      <text x="29" y="25" fill="#1e4e68" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle">SA</text>
+    </g>
+    <g transform="translate(172 136)">
+      <rect width="58" height="40" rx="14" fill="#ffffff" stroke="#cfdeea" />
+      <text x="29" y="25" fill="#1e4e68" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle">TAS</text>
+    </g>
+    <g transform="translate(244 136)">
+      <rect width="58" height="40" rx="14" fill="#ffffff" stroke="#cfdeea" />
+      <text x="29" y="25" fill="#1e4e68" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle">NT</text>
+    </g>
+
+    <rect x="28" y="214" width="272" height="70" rx="22" fill="#f4f8fb" stroke="#d4e2ec" />
+    <rect x="48" y="234" width="94" height="24" rx="12" fill="#0b3c5d" />
+    <text x="95" y="250" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="700" text-anchor="middle">Public source</text>
+    <rect x="156" y="234" width="100" height="24" rx="12" fill="#edf5fa" stroke="#d7e4ed" />
+    <text x="206" y="250" fill="#31536b" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="700" text-anchor="middle">Website</text>
+    <rect x="48" y="262" width="118" height="10" rx="5" fill="#c9dae6" />
+    <rect x="180" y="262" width="82" height="10" rx="5" fill="#dce8ef" />
+  </g>
+
+  <g transform="translate(412 56)" filter="url(#directory-shadow)">
+    <rect x="18" y="20" width="426" height="386" rx="36" fill="#123248" fill-opacity="0.1" />
+    <rect x="0" y="0" width="426" height="386" rx="36" fill="#ffffff" stroke="#d0dee9" stroke-width="2" />
+    <rect x="28" y="28" width="132" height="24" rx="12" fill="#edf5fa" stroke="#d7e4ed" />
+    <text x="94" y="44" fill="#284c64" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle">Shortlist after review</text>
+
+    <g transform="translate(28 86)">
+      <rect width="370" height="82" rx="24" fill="#f8fbfd" stroke="#d6e3ec" />
+      <rect x="20" y="18" width="52" height="24" rx="12" fill="#0b3c5d" />
+      <text x="46" y="34" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="700" text-anchor="middle">NSW</text>
+      <rect x="84" y="18" width="122" height="24" rx="12" fill="#edf5fa" stroke="#d7e4ed" />
+      <text x="145" y="34" fill="#31536b" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="700" text-anchor="middle">Law Society source</text>
+      <rect x="20" y="52" width="184" height="10" rx="5" fill="#9fb9cb" />
+      <rect x="218" y="52" width="94" height="10" rx="5" fill="#d8e5ee" />
+    </g>
+
+    <g transform="translate(28 188)">
+      <rect width="370" height="82" rx="24" fill="#f8fbfd" stroke="#d6e3ec" />
+      <rect x="20" y="18" width="52" height="24" rx="12" fill="#0b3c5d" />
+      <text x="46" y="34" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="700" text-anchor="middle">VIC</text>
+      <rect x="84" y="18" width="132" height="24" rx="12" fill="#edf5fa" stroke="#d7e4ed" />
+      <text x="150" y="34" fill="#31536b" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="700" text-anchor="middle">Regulator register</text>
+      <rect x="20" y="52" width="172" height="10" rx="5" fill="#9fb9cb" />
+      <rect x="206" y="52" width="106" height="10" rx="5" fill="#d8e5ee" />
+    </g>
+
+    <g transform="translate(28 290)">
+      <rect width="370" height="82" rx="24" fill="#f8fbfd" stroke="#d6e3ec" />
+      <rect x="20" y="18" width="52" height="24" rx="12" fill="#0b3c5d" />
+      <text x="46" y="34" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="700" text-anchor="middle">QLD</text>
+      <rect x="84" y="18" width="120" height="24" rx="12" fill="#edf5fa" stroke="#d7e4ed" />
+      <text x="144" y="34" fill="#31536b" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="700" text-anchor="middle">Source tracked</text>
+      <rect x="20" y="52" width="194" height="10" rx="5" fill="#9fb9cb" />
+      <rect x="228" y="52" width="84" height="10" rx="5" fill="#d8e5ee" />
+    </g>
+  </g>
+</svg>

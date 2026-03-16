@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 240" fill="none" aria-hidden="true">
+  <defs>
+    <filter id="st-shadow" x="-5%" y="-5%" width="114%" height="122%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#0f2a3c" flood-opacity="0.09"/>
+    </filter>
+    <radialGradient id="st-glow" cx="20%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#d9ebf6" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#d9ebf6" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="st-track-done" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0b3c5d"/>
+      <stop offset="100%" stop-color="#1a7ba4"/>
+    </linearGradient>
+    <linearGradient id="st-track-future" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#cadbe7"/>
+      <stop offset="100%" stop-color="#dce9f1"/>
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="140" cy="130" rx="200" ry="130" fill="url(#st-glow)"/>
+
+  <!-- Card -->
+  <rect x="20" y="10" width="560" height="220" rx="22" fill="#ffffff" stroke="#d0dce7" stroke-width="1.5" filter="url(#st-shadow)"/>
+
+  <!-- Header band -->
+  <rect x="20" y="10" width="560" height="56" rx="22" fill="#f0f6fb"/>
+  <rect x="20" y="46" width="560" height="20" fill="#f0f6fb"/>
+
+  <text x="50" y="44" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="700" fill="#0b3c5d" letter-spacing="-0.01em">Property Purchase Timeline</text>
+  <rect x="390" y="26" width="82" height="22" rx="11" fill="#edf7f2" stroke="#b8d9c6" stroke-width="1"/>
+  <text x="431" y="41" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9.5" font-weight="700" fill="#1f7a3d" letter-spacing="0.03em">VIC · 90 DAYS</text>
+
+  <!--
+    5 milestones at x = 80, 170, 280, 390, 520
+    Line y = 132
+  -->
+
+  <!-- Track: step 1 → 2 (active/done) -->
+  <rect x="80" y="129" width="90" height="6" rx="3" fill="url(#st-track-done)"/>
+  <!-- Track: step 2 → 3 -->
+  <rect x="170" y="129" width="110" height="6" rx="3" fill="url(#st-track-future)"/>
+  <!-- Track: step 3 → 4 -->
+  <rect x="280" y="129" width="110" height="6" rx="3" fill="url(#st-track-future)"/>
+  <!-- Track: step 4 → 5 -->
+  <rect x="390" y="129" width="130" height="6" rx="3" fill="url(#st-track-future)"/>
+
+  <!-- Duration labels above track (between milestones) -->
+  <text x="125" y="116" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#1f7a3d" font-weight="700">Same day</text>
+  <text x="225" y="116" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#425667">5 days</text>
+  <text x="335" y="116" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#425667">~4 weeks</text>
+  <text x="455" y="116" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#425667">~6 weeks</text>
+
+  <!-- Milestone 1: ConveyMate review (active - large brand dot) -->
+  <circle cx="80" cy="132" r="14" fill="#0b3c5d"/>
+  <circle cx="80" cy="132" r="6" fill="#ffffff"/>
+  <text x="80" y="158" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="700" fill="#0b3c5d">ConveyMate</text>
+  <text x="80" y="170" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#425667">Review</text>
+  <!-- ConveyMate tag -->
+  <rect x="40" y="182" width="80" height="18" rx="9" fill="#eaf2f8" stroke="#cadbe7" stroke-width="1"/>
+  <text x="80" y="195" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9" font-weight="700" fill="#2b5f78" letter-spacing="0.03em">YOU ARE HERE</text>
+
+  <!-- Milestone 2: Exchange -->
+  <circle cx="170" cy="132" r="10" fill="#ffffff" stroke="#cadbe7" stroke-width="2"/>
+  <circle cx="170" cy="132" r="4" fill="#cadbe7"/>
+  <text x="170" y="158" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#425667">Exchange</text>
+  <text x="170" y="170" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#8aa5b8">Day 0</text>
+
+  <!-- Milestone 3: Cooling off ends -->
+  <circle cx="280" cy="132" r="10" fill="#ffffff" stroke="#cadbe7" stroke-width="2"/>
+  <circle cx="280" cy="132" r="4" fill="#cadbe7"/>
+  <text x="280" y="158" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#425667">Cooling off</text>
+  <text x="280" y="170" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#8aa5b8">Day 5</text>
+
+  <!-- Milestone 4: Finance approved -->
+  <circle cx="390" cy="132" r="10" fill="#ffffff" stroke="#cadbe7" stroke-width="2"/>
+  <circle cx="390" cy="132" r="4" fill="#cadbe7"/>
+  <text x="390" y="158" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#425667">Finance</text>
+  <text x="390" y="170" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#8aa5b8">~Day 30</text>
+
+  <!-- Milestone 5: Settlement -->
+  <circle cx="520" cy="132" r="10" fill="#ffffff" stroke="#cadbe7" stroke-width="2"/>
+  <circle cx="520" cy="132" r="4" fill="#cadbe7"/>
+  <text x="520" y="158" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#425667">Settlement</text>
+  <text x="520" y="170" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#8aa5b8">~Day 90</text>
+</svg>

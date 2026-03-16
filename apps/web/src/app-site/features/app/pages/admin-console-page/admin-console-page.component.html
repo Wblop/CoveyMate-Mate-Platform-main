@@ -1,0 +1,1381 @@
+    <section class="sm-page-section">
+      <div class="sm-container admin-grid">
+        <ui-page-header
+          title="Admin console"
+          description="Manage jobs, review generated artifacts, administer user access, and publish global platform notifications."
+          eyebrow="Operational controls"
+        ></ui-page-header>
+
+        <nav class="admin-tabs" aria-label="Admin sections">
+          <button
+            type="button"
+            class="admin-tab"
+            [class.is-active]="activeTab() === 'jobs'"
+            [attr.aria-selected]="activeTab() === 'jobs'"
+            (click)="switchTab('jobs')"
+          >
+            Job Management
+          </button>
+          <button
+            type="button"
+            class="admin-tab"
+            [class.is-active]="activeTab() === 'audit'"
+            [attr.aria-selected]="activeTab() === 'audit'"
+            (click)="switchTab('audit')"
+          >
+            Audit Trail
+          </button>
+          <button
+            type="button"
+            class="admin-tab"
+            [class.is-active]="activeTab() === 'feedback'"
+            [attr.aria-selected]="activeTab() === 'feedback'"
+            (click)="switchTab('feedback')"
+          >
+            Feedback
+          </button>
+          <button
+            type="button"
+            class="admin-tab"
+            [class.is-active]="activeTab() === 'users'"
+            [attr.aria-selected]="activeTab() === 'users'"
+            (click)="switchTab('users')"
+          >
+            User Management
+          </button>
+          <button
+            type="button"
+            class="admin-tab"
+            [class.is-active]="activeTab() === 'conveyancers'"
+            [attr.aria-selected]="activeTab() === 'conveyancers'"
+            (click)="switchTab('conveyancers')"
+          >
+            Conveyancers
+          </button>
+          <button
+            type="button"
+            class="admin-tab"
+            [class.is-active]="activeTab() === 'notifications'"
+            [attr.aria-selected]="activeTab() === 'notifications'"
+            (click)="switchTab('notifications')"
+          >
+            Notifications
+          </button>
+        </nav>
+
+        @if (activeTab() === 'jobs') {
+        <section class="sm-surface section-card">
+          <header class="section-header">
+            <div>
+              <h2>Jobs</h2>
+              <p class="sm-muted">All jobs across the platform.</p>
+            </div>
+            <ui-button variant="secondary" [disabled]="jobsLoading()" (pressed)="refreshJobs()">Refresh</ui-button>
+          </header>
+
+          <div class="toolbar">
+            <input
+              type="search"
+              name="jobSearch"
+              placeholder="Search job ID, user, or address"
+              [(ngModel)]="jobSearch"
+              (keyup.enter)="applyJobFilters()"
+            />
+            <select name="jobStatusFilter" [(ngModel)]="jobStatus" (change)="applyJobFilters()">
+              <option value="">All statuses</option>
+              <option value="AwaitingUpload">AwaitingUpload</option>
+              <option value="AwaitingPayment">AwaitingPayment</option>
+              <option value="Queued">Queued</option>
+              <option value="Extracting">Extracting</option>
+              <option value="Indexing">Indexing</option>
+              <option value="Analyzing">Analyzing</option>
+              <option value="Validating">Validating</option>
+              <option value="Rendering">Rendering</option>
+              <option value="Completed">Completed</option>
+              <option value="Failed">Failed</option>
+            </select>
+            <ui-button variant="secondary" [disabled]="jobsLoading()" (pressed)="applyJobFilters()">Apply</ui-button>
+          </div>
+
+          @if (jobsLoading()) {
+            <ui-skeleton-block [height]="48"></ui-skeleton-block>
+            <ui-skeleton-block [height]="48"></ui-skeleton-block>
+          } @else if (jobsError()) {
+            <ui-alert-banner tone="error" title="Could not load jobs" [message]="jobsError()"></ui-alert-banner>
+          } @else if (jobs().length === 0) {
+            <ui-alert-banner tone="info" title="No jobs found" message="No jobs matched the current filters."></ui-alert-banner>
+          } @else {
+            <div class="table-wrap" (scroll)="onTableWrapScroll()">
+              <table class="admin-table admin-table--jobs">
+                <caption class="sm-sr-only">
+                  Platform jobs
+                </caption>
+                <colgroup>
+                  <col class="col-job" />
+                  <col class="col-user" />
+                  <col class="col-status" />
+                  <col class="col-payment" />
+                  <col class="col-amount" />
+                  <col class="col-created" />
+                  <col class="col-action" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th scope="col">Job</th>
+                    <th scope="col">User</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Payment</th>
+                    <th scope="col">Amount</th>
+                    <th scope="col">Created</th>
+                    <th scope="col">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (job of jobs(); track job.id) {
+                    <tr [class.is-selected]="selectedJobId() === job.id">
+                      <td>
+                        <p class="table-title">{{ job.propertyAddress || 'Address unavailable' }}</p>
+                        <p class="table-meta table-meta--strong">Job {{ shortJobId(job.id) }}</p>
+                      </td>
+                      <td>
+                        <p class="table-title table-title--secondary">{{ job.userFullName || 'Unknown user' }}</p>
+                        <p class="table-meta">{{ job.userEmail }}</p>
+                      </td>
+                      <td>
+                        <span class="status-pill" [attr.data-tone]="jobStatusTone(job.status)">
+                          {{ formatAdminLabel(job.status) }}
+                        </span>
+                      </td>
+                      <td>
+                        <span class="status-pill" [attr.data-tone]="paymentStatusTone(job.paymentStatus)">
+                          {{ formatAdminLabel(job.paymentStatus) }}
+                        </span>
+                      </td>
+                      <td class="cell-nowrap">{{ formatCurrency(job.amountAudCents) }}</td>
+                      <td class="cell-nowrap">
+                        <p class="table-title table-title--secondary">{{ job.createdAt | date: 'd MMM yyyy' }}</p>
+                        <p class="table-meta">{{ job.createdAt | date: 'h:mm a' }}</p>
+                      </td>
+                      <td class="actions-cell">
+                        <button
+                          #jobActionsTrigger
+                          type="button"
+                          class="admin-actions-trigger"
+                          [disabled]="isJobBusy(job.id)"
+                          aria-haspopup="menu"
+                          [attr.aria-expanded]="isActionsMenuOpen('job', job.id)"
+                          [attr.aria-controls]="isActionsMenuOpen('job', job.id) ? actionsMenuId : null"
+                          (click)="toggleActionsMenu('job', job.id, jobActionsTrigger, 'Job ' + shortJobId(job.id))"
+                          (keydown)="onActionsTriggerKeydown($event, 'job', job.id, jobActionsTrigger, 'Job ' + shortJobId(job.id))"
+                        >
+                          <span class="admin-actions-trigger__dots" aria-hidden="true">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                          </span>
+                          <span class="sm-sr-only">Open actions for job {{ shortJobId(job.id) }}</span>
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <footer class="pagination">
+              <p class="sm-muted">Showing {{ jobs().length }} of {{ jobsTotalCount() }} jobs.</p>
+              <div class="pagination-actions">
+                <ui-button variant="secondary" [disabled]="jobsPage() <= 1 || jobsLoading()" (pressed)="prevJobsPage()">
+                  Previous
+                </ui-button>
+                <p>Page {{ jobsPage() }} / {{ jobsTotalPages() || 1 }}</p>
+                <ui-button
+                  variant="secondary"
+                  [disabled]="jobsPage() >= jobsTotalPages() || jobsTotalPages() === 0 || jobsLoading()"
+                  (pressed)="nextJobsPage()"
+                >
+                  Next
+                </ui-button>
+              </div>
+            </footer>
+          }
+        </section>
+
+        }
+
+        @if (activeTab() === 'audit') {
+        <section class="sm-surface section-card">
+          <header class="section-header">
+            <div>
+              <h2>Audit trail</h2>
+              <p class="sm-muted">High-signal user, conveyancer, and admin actions captured across auth, reports, and quote workflows.</p>
+            </div>
+            <ui-button variant="secondary" [disabled]="auditLoading()" (pressed)="refreshAudit()">Refresh</ui-button>
+          </header>
+
+          @if (auditSummary()) {
+            <div class="audit-summary-grid">
+              <article class="audit-stat">
+                <p class="audit-stat__label">Events, 24h</p>
+                <p class="audit-stat__value">{{ auditSummary()!.eventsLast24Hours }}</p>
+              </article>
+              <article class="audit-stat">
+                <p class="audit-stat__label">Events, 7d</p>
+                <p class="audit-stat__value">{{ auditSummary()!.eventsLast7Days }}</p>
+              </article>
+              <article class="audit-stat">
+                <p class="audit-stat__label">Active actors, 7d</p>
+                <p class="audit-stat__value">{{ auditSummary()!.uniqueActorsLast7Days }}</p>
+              </article>
+              <article class="audit-stat">
+                <p class="audit-stat__label">Sign-ins, 7d</p>
+                <p class="audit-stat__value">{{ auditSummary()!.signInsLast7Days }}</p>
+              </article>
+              <article class="audit-stat">
+                <p class="audit-stat__label">Reports started, 7d</p>
+                <p class="audit-stat__value">{{ auditSummary()!.reportsStartedLast7Days }}</p>
+              </article>
+              <article class="audit-stat">
+                <p class="audit-stat__label">Quote touches, 7d</p>
+                <p class="audit-stat__value">{{ auditSummary()!.quoteInteractionsLast7Days }}</p>
+              </article>
+            </div>
+
+            @if (auditSummary()!.topActions.length > 0) {
+              <div class="audit-top-actions">
+                <p class="sm-muted">Most common actions in the last 7 days:</p>
+                <div class="flag-list">
+                  @for (action of auditSummary()!.topActions; track action.actionCode) {
+                    <span class="metric-pill">{{ action.actionLabel }} · {{ action.count }}</span>
+                  }
+                </div>
+              </div>
+            }
+          }
+
+          <div class="toolbar">
+            <input
+              type="search"
+              name="auditSearch"
+              placeholder="Search user, email, address, or description"
+              [(ngModel)]="auditSearch"
+              (keyup.enter)="applyAuditFilters()"
+            />
+            <select name="auditActionCode" [(ngModel)]="auditActionCode" (change)="applyAuditFilters()">
+              @for (option of auditActionOptions; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+            <select name="auditActorType" [(ngModel)]="auditActorType" (change)="applyAuditFilters()">
+              @for (option of auditActorTypeOptions; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+            <ui-button variant="secondary" [disabled]="auditLoading()" (pressed)="applyAuditFilters()">Apply</ui-button>
+          </div>
+
+          @if (auditLoading()) {
+            <ui-skeleton-block [height]="48"></ui-skeleton-block>
+            <ui-skeleton-block [height]="48"></ui-skeleton-block>
+          } @else if (auditError()) {
+            <ui-alert-banner tone="error" title="Could not load audit trail" [message]="auditError()"></ui-alert-banner>
+          } @else if (auditEvents().length === 0) {
+            <ui-alert-banner tone="info" title="No audit events found" message="No audit events matched the current filters."></ui-alert-banner>
+          } @else {
+            <div class="table-wrap" (scroll)="onTableWrapScroll()">
+              <table class="admin-table admin-table--audit">
+                <caption class="sm-sr-only">
+                  Audit trail
+                </caption>
+                <colgroup>
+                  <col class="col-created" />
+                  <col class="col-status" />
+                  <col class="col-user" />
+                  <col class="col-user" />
+                  <col class="col-feedback" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th scope="col">When</th>
+                    <th scope="col">Action</th>
+                    <th scope="col">Actor</th>
+                    <th scope="col">Customer</th>
+                    <th scope="col">Context</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (event of auditEvents(); track event.id) {
+                    <tr>
+                      <td class="cell-nowrap">
+                        <p class="table-title table-title--secondary">{{ event.occurredAt | date: 'd MMM yyyy' }}</p>
+                        <p class="table-meta">{{ event.occurredAt | date: 'h:mm a' }}</p>
+                      </td>
+                      <td>
+                        <span class="status-pill" [attr.data-tone]="auditActionTone(event.actionGroup)">
+                          {{ event.actionLabel }}
+                        </span>
+                        <p class="table-meta">{{ formatAdminLabel(event.actionCode) }}</p>
+                      </td>
+                      <td>
+                        <p class="table-title table-title--secondary">{{ auditActorDisplay(event) }}</p>
+                        <p class="table-meta">{{ auditActorTypeLabel(event.actorType) }} · {{ auditSourceLabel(event.source) }}</p>
+                        @if (event.actorEmail && event.actorEmail !== auditActorDisplay(event)) {
+                          <p class="table-meta">{{ event.actorEmail }}</p>
+                        }
+                      </td>
+                      <td>
+                        <p class="table-title table-title--secondary">{{ auditSubjectDisplay(event) }}</p>
+                        @if (event.subjectEmail && auditSubjectDisplay(event) !== 'Self') {
+                          <p class="table-meta">{{ event.subjectEmail }}</p>
+                        }
+                      </td>
+                      <td class="feedback-cell">
+                        <p class="feedback-message">{{ event.description || event.actionLabel }}</p>
+                        <p class="table-meta feedback-meta">{{ auditContextMeta(event) }}</p>
+                        @if (event.ipAddress) {
+                          <p class="table-meta feedback-meta">IP: {{ event.ipAddress }}</p>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <footer class="pagination">
+              <p class="sm-muted">Showing {{ auditEvents().length }} of {{ auditTotalCount() }} audit events.</p>
+              <div class="pagination-actions">
+                <ui-button variant="secondary" [disabled]="auditPage() <= 1 || auditLoading()" (pressed)="prevAuditPage()">
+                  Previous
+                </ui-button>
+                <p>Page {{ auditPage() }} / {{ auditTotalPages() || 1 }}</p>
+                <ui-button
+                  variant="secondary"
+                  [disabled]="auditPage() >= auditTotalPages() || auditTotalPages() === 0 || auditLoading()"
+                  (pressed)="nextAuditPage()"
+                >
+                  Next
+                </ui-button>
+              </div>
+            </footer>
+          }
+        </section>
+        }
+
+        @if (activeTab() === 'feedback') {
+        <section class="sm-surface section-card">
+          <header class="section-header">
+            <div>
+              <h2>Feedback</h2>
+              <p class="sm-muted">Newest product feedback submitted through the app.</p>
+            </div>
+            <ui-button variant="secondary" [disabled]="feedbackLoading()" (pressed)="refreshFeedback()">Refresh</ui-button>
+          </header>
+
+          <div class="toolbar">
+            <select name="feedbackTypeFilter" [(ngModel)]="feedbackType" (change)="applyFeedbackFilters()">
+              <option value="">All types</option>
+              <option value="bug">Bug report</option>
+              <option value="suggestion">Suggestion</option>
+              <option value="general">General feedback</option>
+            </select>
+            <ui-button variant="secondary" [disabled]="feedbackLoading()" (pressed)="applyFeedbackFilters()">Apply</ui-button>
+          </div>
+
+          @if (feedbackLoading()) {
+            <ui-skeleton-block [height]="48"></ui-skeleton-block>
+            <ui-skeleton-block [height]="48"></ui-skeleton-block>
+          } @else if (feedbackError()) {
+            <ui-alert-banner tone="error" title="Could not load feedback" [message]="feedbackError()"></ui-alert-banner>
+          } @else if (feedback().length === 0) {
+            <ui-alert-banner tone="info" title="No feedback found" message="No feedback matched the current filter."></ui-alert-banner>
+          } @else {
+            <div class="table-wrap" (scroll)="onTableWrapScroll()">
+              <table class="admin-table admin-table--feedback">
+                <caption class="sm-sr-only">
+                  Product feedback
+                </caption>
+                <colgroup>
+                  <col class="col-submitted" />
+                  <col class="col-user" />
+                  <col class="col-type" />
+                  <col class="col-feedback" />
+                  <col class="col-action" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th scope="col">Submitted</th>
+                    <th scope="col">User</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Feedback</th>
+                    <th scope="col">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of feedback(); track item.id) {
+                    <tr>
+                      <td class="cell-nowrap">
+                        <p class="table-title table-title--secondary">{{ item.createdAt | date: 'd MMM yyyy' }}</p>
+                        <p class="table-meta">{{ item.createdAt | date: 'h:mm a' }}</p>
+                      </td>
+                      <td>
+                        <p class="table-title table-title--secondary">{{ item.userFullName || 'Unknown user' }}</p>
+                        <p class="table-meta">{{ item.userEmail }}</p>
+                      </td>
+                      <td>
+                        <span class="status-pill" [attr.data-tone]="feedbackTypeTone(item.type)">
+                          {{ formatFeedbackType(item.type) }}
+                        </span>
+                      </td>
+                      <td class="feedback-cell">
+                        <p class="feedback-message">{{ item.message }}</p>
+                        <p class="table-meta feedback-meta">Page: {{ item.pageUrl }}</p>
+                        @if (item.userAgent) {
+                          <p class="table-meta feedback-meta">UA: {{ item.userAgent }}</p>
+                        }
+                      </td>
+                      <td class="actions-cell">
+                        <button
+                          #feedbackActionsTrigger
+                          type="button"
+                          class="admin-actions-trigger"
+                          [disabled]="!item.pageUrl || !item.pageUrl.trim()"
+                          aria-haspopup="menu"
+                          [attr.aria-expanded]="isActionsMenuOpen('feedback', item.id)"
+                          [attr.aria-controls]="isActionsMenuOpen('feedback', item.id) ? actionsMenuId : null"
+                          (click)="toggleActionsMenu('feedback', item.id, feedbackActionsTrigger, 'Feedback from ' + (item.userEmail || 'unknown user'))"
+                          (keydown)="
+                            onActionsTriggerKeydown(
+                              $event,
+                              'feedback',
+                              item.id,
+                              feedbackActionsTrigger,
+                              'Feedback from ' + (item.userEmail || 'unknown user')
+                            )
+                          "
+                        >
+                          <span class="admin-actions-trigger__dots" aria-hidden="true">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                          </span>
+                          <span class="sm-sr-only">Open actions for feedback from {{ item.userEmail }}</span>
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <footer class="pagination">
+              <p class="sm-muted">Showing {{ feedback().length }} of {{ feedbackTotalCount() }} feedback items.</p>
+              <div class="pagination-actions">
+                <ui-button
+                  variant="secondary"
+                  [disabled]="feedbackPage() <= 1 || feedbackLoading()"
+                  (pressed)="prevFeedbackPage()"
+                >
+                  Previous
+                </ui-button>
+                <p>Page {{ feedbackPage() }} / {{ feedbackTotalPages() || 1 }}</p>
+                <ui-button
+                  variant="secondary"
+                  [disabled]="feedbackPage() >= feedbackTotalPages() || feedbackTotalPages() === 0 || feedbackLoading()"
+                  (pressed)="nextFeedbackPage()"
+                >
+                  Next
+                </ui-button>
+              </div>
+            </footer>
+          }
+        </section>
+        }
+
+        @if (activeTab() === 'users') {
+        <section class="sm-surface section-card">
+          <header class="section-header">
+            <div>
+              <h2>Users</h2>
+              <p class="sm-muted">Account lifecycle, spend, activity, and suspension controls.</p>
+            </div>
+            <ui-button variant="secondary" [disabled]="usersLoading()" (pressed)="refreshUsers()">Refresh</ui-button>
+          </header>
+
+          @if (usersActionSuccess()) {
+            <ui-alert-banner tone="success" title="User updated" [message]="usersActionSuccess()"></ui-alert-banner>
+          }
+
+          @if (usersActionError()) {
+            <ui-alert-banner tone="error" title="User update failed" [message]="usersActionError()"></ui-alert-banner>
+          }
+
+          <div class="toolbar">
+            <input
+              type="search"
+              name="userSearch"
+              placeholder="Search name or email"
+              [(ngModel)]="userSearch"
+              (keyup.enter)="applyUserFilters()"
+            />
+            <ui-button variant="secondary" [disabled]="usersLoading()" (pressed)="applyUserFilters()">Apply</ui-button>
+          </div>
+
+          @if (usersLoading()) {
+            <ui-skeleton-block [height]="48"></ui-skeleton-block>
+            <ui-skeleton-block [height]="48"></ui-skeleton-block>
+          } @else if (usersError()) {
+            <ui-alert-banner tone="error" title="Could not load users" [message]="usersError()"></ui-alert-banner>
+          } @else if (users().length === 0) {
+            <ui-alert-banner tone="info" title="No users found" message="No user matched the current filter."></ui-alert-banner>
+          } @else {
+            <div class="table-wrap" (scroll)="onTableWrapScroll()">
+              <table class="admin-table admin-table--users">
+                <caption class="sm-sr-only">
+                  User administration
+                </caption>
+                <colgroup>
+                  <col class="col-user" />
+                  <col class="col-created" />
+                  <col class="col-login" />
+                  <col class="col-jobs" />
+                  <col class="col-amount" />
+                  <col class="col-flags" />
+                  <col class="col-action" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th scope="col">User</th>
+                    <th scope="col">Created</th>
+                    <th scope="col">Last login</th>
+                    <th scope="col">Jobs</th>
+                    <th scope="col">Spend</th>
+                    <th scope="col">Flags</th>
+                    <th scope="col">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (user of users(); track user.id) {
+                    <tr>
+                      <td>
+                        <p class="table-title table-title--secondary">{{ user.fullName || 'Unknown user' }}</p>
+                        <p class="table-meta">{{ user.email }}</p>
+                      </td>
+                      <td class="cell-nowrap">
+                        <p class="table-title table-title--secondary">{{ user.createdAt | date: 'd MMM yyyy' }}</p>
+                        <p class="table-meta">{{ user.createdAt | date: 'h:mm a' }}</p>
+                      </td>
+                      <td class="cell-nowrap">
+                        @if (user.lastLoginAtUtc) {
+                          <p class="table-title table-title--secondary">{{ user.lastLoginAtUtc | date: 'd MMM yyyy' }}</p>
+                          <p class="table-meta">{{ user.lastLoginAtUtc | date: 'h:mm a' }}</p>
+                        } @else {
+                          <p class="table-title table-title--secondary">Never</p>
+                        }
+                      </td>
+                      <td>
+                        <span class="metric-pill">{{ user.jobsRunCount }}</span>
+                      </td>
+                      <td class="cell-nowrap">{{ formatCurrency(user.totalSpentAudCents) }}</td>
+                      <td>
+                        <div class="flag-list">
+                          <span class="status-pill" [attr.data-tone]="adminFlagTone(user.isAdmin)">
+                            {{ user.isAdmin ? 'Admin access' : 'Standard user' }}
+                          </span>
+                          <span class="status-pill" [attr.data-tone]="suspensionTone(user.isSuspended)">
+                            {{ user.isSuspended ? 'Suspended' : 'Active' }}
+                          </span>
+                        </div>
+                      </td>
+                      <td class="actions-cell">
+                        <button
+                          #userActionsTrigger
+                          type="button"
+                          class="admin-actions-trigger"
+                          [disabled]="isUserBusy(user.id)"
+                          aria-haspopup="menu"
+                          [attr.aria-expanded]="isActionsMenuOpen('user', user.id)"
+                          [attr.aria-controls]="isActionsMenuOpen('user', user.id) ? actionsMenuId : null"
+                          (click)="toggleActionsMenu('user', user.id, userActionsTrigger, 'User ' + user.email)"
+                          (keydown)="onActionsTriggerKeydown($event, 'user', user.id, userActionsTrigger, 'User ' + user.email)"
+                        >
+                          <span class="admin-actions-trigger__dots" aria-hidden="true">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                          </span>
+                          <span class="sm-sr-only">Open actions for {{ user.email }}</span>
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <footer class="pagination">
+              <p class="sm-muted">Showing {{ users().length }} of {{ usersTotalCount() }} users.</p>
+              <div class="pagination-actions">
+                <ui-button variant="secondary" [disabled]="usersPage() <= 1 || usersLoading()" (pressed)="prevUsersPage()">
+                  Previous
+                </ui-button>
+                <p>Page {{ usersPage() }} / {{ usersTotalPages() || 1 }}</p>
+                <ui-button
+                  variant="secondary"
+                  [disabled]="usersPage() >= usersTotalPages() || usersTotalPages() === 0 || usersLoading()"
+                  (pressed)="nextUsersPage()"
+                >
+                  Next
+                </ui-button>
+              </div>
+            </footer>
+          }
+        </section>
+        }
+
+        @if (activeTab() === 'conveyancers') {
+        <section class="sm-surface section-card">
+          <header class="section-header">
+            <div>
+              <h2>Conveyancers</h2>
+              <p class="sm-muted">Add directory entries, remove firms from the public directory, and control whether they can be shortlisted for quote requests.</p>
+            </div>
+            <div class="section-header__actions">
+              <ui-button [disabled]="conveyancersLoading()" (pressed)="openCreateConveyancerModal()">Add conveyancer</ui-button>
+              <ui-button variant="secondary" [disabled]="conveyancersLoading()" (pressed)="refreshConveyancers()">Refresh</ui-button>
+            </div>
+          </header>
+
+          @if (conveyancersActionSuccess()) {
+            <ui-alert-banner tone="success" title="Conveyancer saved" [message]="conveyancersActionSuccess()"></ui-alert-banner>
+          }
+
+          @if (conveyancersActionError()) {
+            <ui-alert-banner tone="error" title="Conveyancer save failed" [message]="conveyancersActionError()"></ui-alert-banner>
+          }
+
+          <div class="toolbar">
+            <input
+              type="search"
+              name="conveyancerSearch"
+              placeholder="Search name, contact, email, or source ID"
+              [(ngModel)]="conveyancerSearch"
+              (keyup.enter)="applyConveyancerFilters()"
+            />
+            <select name="conveyancerJurisdiction" [(ngModel)]="conveyancerJurisdiction" (change)="applyConveyancerFilters()">
+              <option value="">All jurisdictions</option>
+              <option value="ACT">ACT</option>
+              <option value="NSW">NSW</option>
+              <option value="VIC">VIC</option>
+              <option value="QLD">QLD</option>
+              <option value="WA">WA</option>
+              <option value="SA">SA</option>
+              <option value="TAS">TAS</option>
+              <option value="NT">NT</option>
+            </select>
+            <ui-button variant="secondary" [disabled]="conveyancersLoading()" (pressed)="applyConveyancerFilters()">Apply</ui-button>
+          </div>
+
+          @if (conveyancersLoading()) {
+            <ui-skeleton-block [height]="48"></ui-skeleton-block>
+            <ui-skeleton-block [height]="48"></ui-skeleton-block>
+          } @else if (conveyancersError()) {
+            <ui-alert-banner tone="error" title="Could not load conveyancers" [message]="conveyancersError()"></ui-alert-banner>
+          } @else if (conveyancers().length === 0) {
+            <ui-alert-banner tone="info" title="No conveyancers found" message="No conveyancer matched the current filters."></ui-alert-banner>
+          } @else {
+            <div class="table-wrap" (scroll)="onTableWrapScroll()">
+              <table class="admin-table admin-table--conveyancers">
+                <caption class="sm-sr-only">
+                  Conveyancer administration
+                </caption>
+                <colgroup>
+                  <col class="col-user" />
+                  <col class="col-status" />
+                  <col class="col-status" />
+                  <col class="col-message" />
+                  <col class="col-updated" />
+                  <col class="col-action" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th scope="col">Conveyancer</th>
+                    <th scope="col">Directory</th>
+                    <th scope="col">Quote requests</th>
+                    <th scope="col">Details</th>
+                    <th scope="col">Updated</th>
+                    <th scope="col">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (conveyancer of conveyancers(); track conveyancer.id) {
+                    <tr>
+                      <td>
+                        <p class="table-title table-title--secondary">{{ conveyancer.organizationName || conveyancer.name }}</p>
+                        <p class="table-meta">
+                          {{ conveyancer.jurisdiction }} · {{ formatAdminLabel(conveyancer.regulatorType) }}
+                          @if (conveyancer.contactName) {
+                            <span> · {{ conveyancer.contactName }}</span>
+                          }
+                        </p>
+                        <p class="table-meta">{{ conveyancer.email || 'No email listed' }}</p>
+                      </td>
+                      <td>
+                        <span class="status-pill" [attr.data-tone]="conveyancerActiveTone(conveyancer.isActive)">
+                          {{ conveyancer.isActive ? 'Listed' : 'Removed' }}
+                        </span>
+                      </td>
+                      <td>
+                        <span class="status-pill" [attr.data-tone]="conveyancerQuoteRequestTone(conveyancer.quoteRequestsEnabled)">
+                          {{ conveyancer.quoteRequestsEnabled ? 'Shortlist enabled' : 'Shortlist blocked' }}
+                        </span>
+                        @if (conveyancer.quoteRequestsDisabledAtUtc) {
+                          <p class="table-meta">Disabled {{ conveyancer.quoteRequestsDisabledAtUtc | date: 'd MMM yyyy' }}</p>
+                        }
+                      </td>
+                      <td class="notification-message-cell">
+                        <p class="notification-message">
+                          {{ conveyancer.phone || 'No phone listed' }}
+                          @if (conveyancer.website) {
+                            <span> · {{ conveyancer.website }}</span>
+                          }
+                        </p>
+                        @if (conveyancer.address) {
+                          <p class="table-meta">{{ conveyancer.address }}</p>
+                        }
+                        @if (conveyancer.areasOfPractice.length > 0) {
+                          <p class="table-meta">{{ conveyancer.areasOfPractice.join(' · ') }}</p>
+                        }
+                      </td>
+                      <td class="cell-nowrap">
+                        <p class="table-title table-title--secondary">{{ conveyancer.lastSeenUtc | date: 'd MMM yyyy' }}</p>
+                        <p class="table-meta">{{ conveyancer.lastSeenUtc | date: 'h:mm a' }}</p>
+                      </td>
+                      <td class="actions-cell">
+                        <button
+                          #conveyancerActionsTrigger
+                          type="button"
+                          class="admin-actions-trigger"
+                          [disabled]="isConveyancerBusy(conveyancer.id)"
+                          aria-haspopup="menu"
+                          [attr.aria-expanded]="isActionsMenuOpen('conveyancer', conveyancer.id)"
+                          [attr.aria-controls]="isActionsMenuOpen('conveyancer', conveyancer.id) ? actionsMenuId : null"
+                          (click)="
+                            toggleActionsMenu(
+                              'conveyancer',
+                              conveyancer.id,
+                              conveyancerActionsTrigger,
+                              conveyancer.organizationName || conveyancer.name
+                            )
+                          "
+                          (keydown)="
+                            onActionsTriggerKeydown(
+                              $event,
+                              'conveyancer',
+                              conveyancer.id,
+                              conveyancerActionsTrigger,
+                              conveyancer.organizationName || conveyancer.name
+                            )
+                          "
+                        >
+                          <span class="admin-actions-trigger__dots" aria-hidden="true">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                          </span>
+                          <span class="sm-sr-only">Open actions for {{ conveyancer.organizationName || conveyancer.name }}</span>
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <footer class="pagination">
+              <p class="sm-muted">Showing {{ conveyancers().length }} of {{ conveyancersTotalCount() }} conveyancers.</p>
+              <div class="pagination-actions">
+                <ui-button
+                  variant="secondary"
+                  [disabled]="conveyancersPage() <= 1 || conveyancersLoading()"
+                  (pressed)="prevConveyancersPage()"
+                >
+                  Previous
+                </ui-button>
+                <p>Page {{ conveyancersPage() }} / {{ conveyancersTotalPages() || 1 }}</p>
+                <ui-button
+                  variant="secondary"
+                  [disabled]="conveyancersPage() >= conveyancersTotalPages() || conveyancersTotalPages() === 0 || conveyancersLoading()"
+                  (pressed)="nextConveyancersPage()"
+                >
+                  Next
+                </ui-button>
+              </div>
+            </footer>
+          }
+        </section>
+        }
+
+        @if (activeTab() === 'notifications') {
+        <section class="sm-surface section-card">
+          <header class="section-header">
+            <div>
+              <h2>Notifications</h2>
+              <p class="sm-muted">Publish global banners above the public header, the dashboard header, or both.</p>
+            </div>
+            <ui-button variant="secondary" [disabled]="notificationsLoading()" (pressed)="refreshNotifications()">
+              Refresh
+            </ui-button>
+          </header>
+
+          <ui-alert-banner
+            tone="info"
+            title="Placement"
+            message="Enabled notifications appear above the selected header. If more than one is enabled for a surface, they stack in newest-first order."
+          ></ui-alert-banner>
+
+          @if (notificationActionSuccess()) {
+            <ui-alert-banner tone="success" title="Notification updated" [message]="notificationActionSuccess()"></ui-alert-banner>
+          }
+
+          @if (notificationActionError()) {
+            <ui-alert-banner tone="error" title="Notification update failed" [message]="notificationActionError()"></ui-alert-banner>
+          }
+
+          <section class="notification-form-card">
+            <div class="notification-form">
+              <label class="field">
+                <span class="field__label">Notification type</span>
+                <select name="notificationTone" [(ngModel)]="notificationTone">
+                  <option value="info">Information (blue)</option>
+                  <option value="warning">Warning (red)</option>
+                </select>
+              </label>
+
+              <label class="field">
+                <span class="field__label">Display area</span>
+                <select name="notificationAudience" [(ngModel)]="notificationAudience">
+                  <option value="dashboard">Dashboard only</option>
+                  <option value="public">Public site only</option>
+                  <option value="both">Public + dashboard</option>
+                </select>
+              </label>
+
+              <label class="field field--wide">
+                <span class="field__label">Message</span>
+                <textarea
+                  name="notificationMessage"
+                  rows="4"
+                  maxlength="600"
+                  placeholder="Example: Scheduled maintenance starts at 8:00 PM AEDT. Report processing may be delayed for up to 30 minutes."
+                  [(ngModel)]="notificationMessage"
+                ></textarea>
+                <span class="field__meta">{{ normalizedNotificationMessage().length }} / 600 rendered characters</span>
+                <span class="field__hint">Notifications are published as a single paragraph. Extra line breaks and spacing are condensed automatically.</span>
+              </label>
+
+              <label class="checkbox-field">
+                <input type="checkbox" name="notificationEnabled" [(ngModel)]="notificationEnabled" />
+                <span>Enable immediately</span>
+              </label>
+
+              <section class="notification-preview" aria-live="polite">
+                <div class="notification-preview__header">
+                  <p class="notification-preview__eyebrow">Banner preview</p>
+                  <p class="notification-preview__hint">This uses the same notification component shown on the selected surface.</p>
+                </div>
+
+                @if (notificationPreview(); as preview) {
+                  <div class="notification-preview__surface">
+                    <ui-site-notification-stack [notifications]="[preview]"></ui-site-notification-stack>
+                  </div>
+                } @else {
+                  <p class="notification-preview__empty">Start typing a message to preview the published banner.</p>
+                }
+              </section>
+            </div>
+
+            <div class="notification-form__actions">
+              <ui-button
+                [loading]="notificationCreateBusy()"
+                [disabled]="notificationCreateBusy() || !normalizedNotificationMessage()"
+                (pressed)="createNotification()"
+              >
+                Create notification
+              </ui-button>
+            </div>
+          </section>
+
+          @if (notificationsLoading()) {
+            <ui-skeleton-block [height]="56"></ui-skeleton-block>
+            <ui-skeleton-block [height]="56"></ui-skeleton-block>
+          } @else if (notificationsError()) {
+            <ui-alert-banner tone="error" title="Could not load notifications" [message]="notificationsError()"></ui-alert-banner>
+          } @else if (notifications().length === 0) {
+            <ui-alert-banner
+              tone="info"
+              title="No notifications published"
+              message="Create a public or dashboard notification above when you need to show a global platform message."
+            ></ui-alert-banner>
+          } @else {
+            <div class="table-wrap" (scroll)="onTableWrapScroll()">
+              <table class="admin-table admin-table--notifications">
+                <caption class="sm-sr-only">
+                  Global site notifications
+                </caption>
+                <colgroup>
+                  <col class="col-tone" />
+                  <col class="col-surface" />
+                  <col class="col-status" />
+                  <col class="col-message" />
+                  <col class="col-updated" />
+                  <col class="col-action" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th scope="col">Type</th>
+                    <th scope="col">Audience</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Message</th>
+                    <th scope="col">Updated</th>
+                    <th scope="col">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (notification of notifications(); track notification.id) {
+                    <tr>
+                      <td>
+                        <span class="status-pill" [attr.data-tone]="notificationTonePillTone(notification.tone)">
+                          {{ notificationToneLabel(notification.tone) }}
+                        </span>
+                      </td>
+                      <td>
+                        <p class="table-title table-title--secondary">{{ notificationAudienceLabel(notification.audience) }}</p>
+                      </td>
+                      <td>
+                        <span class="status-pill" [attr.data-tone]="notificationEnabledTone(notification.isEnabled)">
+                          {{ notification.isEnabled ? 'Enabled' : 'Disabled' }}
+                        </span>
+                      </td>
+                      <td class="notification-message-cell">
+                        <p class="notification-message">{{ formatNotificationMessage(notification.message) }}</p>
+                      </td>
+                      <td class="cell-nowrap">
+                        <p class="table-title table-title--secondary">{{ notification.updatedAt | date: 'd MMM yyyy' }}</p>
+                        <p class="table-meta">{{ notification.updatedAt | date: 'h:mm a' }}</p>
+                      </td>
+                      <td class="actions-cell">
+                        <button
+                          #notificationActionsTrigger
+                          type="button"
+                          class="admin-actions-trigger"
+                          [disabled]="isNotificationBusy(notification.id)"
+                          aria-haspopup="menu"
+                          [attr.aria-expanded]="isActionsMenuOpen('notification', notification.id)"
+                          [attr.aria-controls]="isActionsMenuOpen('notification', notification.id) ? actionsMenuId : null"
+                          (click)="
+                            toggleActionsMenu(
+                              'notification',
+                              notification.id,
+                              notificationActionsTrigger,
+                              notificationAudienceLabel(notification.audience) + ' notification'
+                            )
+                          "
+                          (keydown)="
+                            onActionsTriggerKeydown(
+                              $event,
+                              'notification',
+                              notification.id,
+                              notificationActionsTrigger,
+                              notificationAudienceLabel(notification.audience) + ' notification'
+                            )
+                          "
+                        >
+                          <span class="admin-actions-trigger__dots" aria-hidden="true">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                          </span>
+                          <span class="sm-sr-only">Open actions for {{ notificationAudienceLabel(notification.audience) }} notification</span>
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </section>
+        }
+      </div>
+    </section>
+
+    @if (actionsMenu(); as menu) {
+      <div
+        #actionsMenuPanel
+        [id]="actionsMenuId"
+        class="actions-menu__pane actions-menu__pane--floating"
+        role="menu"
+        [attr.aria-label]="menu.label"
+        [style.top.px]="menu.top"
+        [style.left.px]="menu.left"
+        (keydown)="onActionsMenuKeydown($event)"
+      >
+        <p class="actions-menu__context">{{ menu.label }}</p>
+
+        @switch (menu.kind) {
+          @case ('job') {
+            @if (jobById(menu.entityId); as job) {
+              <button type="button" class="actions-menu__item" role="menuitem" (click)="inspectJobFromMenu(job.id)">
+                Inspect job
+              </button>
+              <button
+                type="button"
+                class="actions-menu__item actions-menu__item--danger"
+                role="menuitem"
+                [disabled]="isJobBusy(job.id)"
+                (click)="deleteJobFromMenu(job)"
+              >
+                Delete job
+              </button>
+              @if (job.hasQuoteWorkflow) {
+                <button
+                  type="button"
+                  class="actions-menu__item actions-menu__item--danger"
+                  role="menuitem"
+                  [disabled]="isJobBusy(job.id)"
+                  (click)="deleteQuoteWorkflowFromMenu(job)"
+                >
+                  Delete quote workflow
+                </button>
+              }
+            }
+          }
+          @case ('feedback') {
+            @if (feedbackById(menu.entityId); as item) {
+              <button
+                type="button"
+                class="actions-menu__item"
+                role="menuitem"
+                [disabled]="!item.pageUrl || !item.pageUrl.trim()"
+                (click)="openFeedbackPageFromMenu(item.pageUrl)"
+              >
+                Open originating page
+              </button>
+            }
+          }
+          @case ('user') {
+            @if (userById(menu.entityId); as user) {
+              <button
+                type="button"
+                class="actions-menu__item"
+                [class.actions-menu__item--danger]="!user.isSuspended"
+                role="menuitem"
+                [disabled]="isUserBusy(user.id)"
+                (click)="toggleSuspensionFromMenu(user)"
+              >
+                {{ user.isSuspended ? 'Unsuspend user' : 'Suspend user' }}
+              </button>
+            }
+          }
+          @case ('conveyancer') {
+            @if (conveyancerById(menu.entityId); as conveyancer) {
+              <button
+                type="button"
+                class="actions-menu__item"
+                role="menuitem"
+                [disabled]="isConveyancerBusy(conveyancer.id)"
+                (click)="openEditConveyancerFromMenu(conveyancer)"
+              >
+                Edit details
+              </button>
+              <button
+                type="button"
+                class="actions-menu__item"
+                role="menuitem"
+                [disabled]="isConveyancerBusy(conveyancer.id)"
+                (click)="toggleConveyancerQuoteRequestsFromMenu(conveyancer)"
+              >
+                {{ conveyancer.quoteRequestsEnabled ? 'Disable quote requests' : 'Enable quote requests' }}
+              </button>
+              <button
+                type="button"
+                class="actions-menu__item"
+                [class.actions-menu__item--danger]="conveyancer.isActive"
+                role="menuitem"
+                [disabled]="isConveyancerBusy(conveyancer.id)"
+                (click)="toggleConveyancerActiveFromMenu(conveyancer)"
+              >
+                {{ conveyancer.isActive ? 'Remove from directory' : 'Restore to directory' }}
+              </button>
+            }
+          }
+          @case ('notification') {
+            @if (notificationById(menu.entityId); as notification) {
+              <button
+                type="button"
+                class="actions-menu__item"
+                role="menuitem"
+                [disabled]="isNotificationBusy(notification.id)"
+                (click)="toggleNotificationEnabledFromMenu(notification)"
+              >
+                {{ notification.isEnabled ? 'Disable notification' : 'Enable notification' }}
+              </button>
+              <button
+                type="button"
+                class="actions-menu__item actions-menu__item--danger"
+                role="menuitem"
+                [disabled]="isNotificationBusy(notification.id)"
+                (click)="deleteNotificationFromMenu(notification)"
+              >
+                Delete notification
+              </button>
+            }
+          }
+          @case ('document') {
+            @if (documentById(menu.entityId); as document) {
+              <button
+                type="button"
+                class="actions-menu__item"
+                role="menuitem"
+                [disabled]="jobDetailBusy()"
+                (click)="openDocumentFromMenu(document)"
+              >
+                Open document
+              </button>
+            }
+          }
+        }
+      </div>
+    }
+
+    @if (conveyancerEditorOpen()) {
+      <div class="conveyancer-editor-overlay" (click)="onConveyancerEditorOverlayClick($event)" role="presentation">
+        <div class="conveyancer-editor-dialog" role="dialog" aria-modal="true" aria-labelledby="conveyancer-editor-title">
+          <div class="conveyancer-editor-dialog__header">
+            <div>
+              <h2 id="conveyancer-editor-title" class="conveyancer-editor-dialog__title">
+                {{ conveyancerEditorMode() === 'edit' ? 'Edit conveyancer' : 'Add conveyancer' }}
+              </h2>
+              <p class="conveyancer-editor-dialog__subtitle">
+                {{
+                  conveyancerEditorMode() === 'edit'
+                    ? 'Update directory details and shortlist availability.'
+                    : 'Create a manual directory entry and enable it when ready.'
+                }}
+              </p>
+            </div>
+            <button
+              type="button"
+              class="conveyancer-editor-dialog__close"
+              aria-label="Close conveyancer editor"
+              [disabled]="conveyancerEditorBusy()"
+              (click)="closeConveyancerEditor()"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div class="conveyancer-editor-dialog__body">
+            @if (conveyancersActionError()) {
+              <ui-alert-banner tone="error" title="Could not save conveyancer" [message]="conveyancersActionError()"></ui-alert-banner>
+            }
+
+            <div class="conveyancer-editor-dialog__intro">
+              <p class="sm-eyebrow">{{ conveyancerEditorMode() === 'edit' ? 'Directory entry' : 'Manual directory entry' }}</p>
+              <h3>{{ newConveyancerOrganizationName || 'Conveyancer details' }}</h3>
+              <p class="sm-muted">
+                Manual entries stay in the same directory but are tagged with a manual source. Quote requests can be enabled immediately or left off until ready.
+              </p>
+            </div>
+
+            <div class="conveyancer-form">
+              <label class="field">
+                <span class="field__label">Jurisdiction</span>
+                <select
+                  name="newConveyancerJurisdiction"
+                  [(ngModel)]="newConveyancerJurisdiction"
+                  [disabled]="conveyancerEditorMode() === 'edit'"
+                >
+                  <option value="ACT">ACT</option>
+                  <option value="NSW">NSW</option>
+                  <option value="VIC">VIC</option>
+                  <option value="QLD">QLD</option>
+                  <option value="WA">WA</option>
+                  <option value="SA">SA</option>
+                  <option value="TAS">TAS</option>
+                  <option value="NT">NT</option>
+                </select>
+                @if (conveyancerEditorMode() === 'edit') {
+                  <span class="field__hint">Jurisdiction stays fixed on existing records.</span>
+                }
+              </label>
+
+              <label class="field">
+                <span class="field__label">Organization name</span>
+                <input type="text" name="newConveyancerOrganizationName" [(ngModel)]="newConveyancerOrganizationName" />
+              </label>
+
+              <label class="field">
+                <span class="field__label">Contact name</span>
+                <input type="text" name="newConveyancerContactName" [(ngModel)]="newConveyancerContactName" />
+              </label>
+
+              <label class="field">
+                <span class="field__label">Email</span>
+                <input type="email" name="newConveyancerEmail" [(ngModel)]="newConveyancerEmail" />
+              </label>
+
+              <label class="field">
+                <span class="field__label">Phone</span>
+                <input type="text" name="newConveyancerPhone" [(ngModel)]="newConveyancerPhone" />
+              </label>
+
+              <label class="field">
+                <span class="field__label">Website</span>
+                <input type="text" name="newConveyancerWebsite" [(ngModel)]="newConveyancerWebsite" placeholder="example.com" />
+              </label>
+
+              <label class="field field--wide">
+                <span class="field__label">Address</span>
+                <input type="text" name="newConveyancerAddress" [(ngModel)]="newConveyancerAddress" />
+              </label>
+
+              <label class="field field--wide">
+                <span class="field__label">Areas of practice</span>
+                <input
+                  type="text"
+                  name="newConveyancerAreasOfPractice"
+                  [(ngModel)]="newConveyancerAreasOfPractice"
+                  placeholder="Conveyancing, Property law"
+                />
+                <span class="field__hint">Comma-separated. Defaults to Conveyancing if left blank.</span>
+              </label>
+
+              <label class="checkbox-field field--wide">
+                <input type="checkbox" name="newConveyancerQuoteRequestsEnabled" [(ngModel)]="newConveyancerQuoteRequestsEnabled" />
+                <span>Allow this conveyancer to be shortlisted for quote requests.</span>
+              </label>
+            </div>
+
+            <div class="conveyancer-editor-dialog__actions">
+              <ui-button variant="secondary" [disabled]="conveyancerEditorBusy()" (pressed)="closeConveyancerEditor()">Cancel</ui-button>
+              <ui-button [loading]="conveyancerEditorBusy()" (pressed)="submitConveyancerEditor()">
+                {{ conveyancerEditorMode() === 'edit' ? 'Save changes' : 'Add conveyancer' }}
+              </ui-button>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (jobDetailOpen()) {
+      <div class="jd-overlay" (click)="onDetailOverlayClick($event)" role="presentation">
+        <div class="jd-dialog" role="dialog" aria-modal="true" aria-labelledby="jd-title">
+          <div class="jd-dialog__header">
+            <div>
+              <h2 id="jd-title" class="jd-dialog__title">Job detail</h2>
+              @if (selectedJob(); as job) {
+                <p class="jd-dialog__subtitle">{{ job.id }}</p>
+              }
+            </div>
+            <button type="button" class="jd-dialog__close" aria-label="Close" (click)="closeJobDetail()">✕</button>
+          </div>
+
+          <div class="jd-dialog__body">
+            @if (jobDetailLoading()) {
+              <ui-skeleton-block [height]="120"></ui-skeleton-block>
+            } @else if (jobDetailError()) {
+              <ui-alert-banner tone="error" title="Could not load job detail" [message]="jobDetailError()"></ui-alert-banner>
+            } @else if (selectedJob(); as job) {
+              <dl class="detail-list">
+                <div><dt>Job ID</dt><dd>{{ job.id }}</dd></div>
+                <div><dt>User</dt><dd>{{ job.userEmail }}</dd></div>
+                <div><dt>Status</dt><dd>{{ job.status }}</dd></div>
+                <div><dt>Current step</dt><dd>{{ job.currentStep }} · {{ job.currentSubStep || 'n/a' }}</dd></div>
+                <div><dt>Progress</dt><dd>{{ job.percentComplete }}%</dd></div>
+                <div><dt>Updated</dt><dd>{{ job.updatedAt | date: 'd MMM yyyy, h:mm a' }}</dd></div>
+              </dl>
+
+              <div class="artifact-actions">
+                <ui-button variant="secondary" [disabled]="jobDetailBusy()" (pressed)="openArtifact('report-pdf')">
+                  Open report.pdf
+                </ui-button>
+                <ui-button variant="secondary" [disabled]="jobDetailBusy()" (pressed)="openArtifact('report-json')">
+                  Open report.json
+                </ui-button>
+              </div>
+
+              @if (job.hasQuoteWorkflow) {
+                <div class="quote-workflow-admin">
+                  <div>
+                    <p class="table-title table-title--secondary">Quote workflow</p>
+                    <p class="table-meta">{{ quoteWorkflowSummary(job) }}</p>
+                  </div>
+                  <ui-button variant="destructive" [disabled]="jobDetailBusy()" (pressed)="deleteQuoteWorkflow(job)">
+                    Delete quote workflow
+                  </ui-button>
+                </div>
+              }
+
+              @if (job.uploadedDocuments.length === 0) {
+                <p class="sm-muted">No uploaded documents were recorded for this job.</p>
+              } @else {
+                <div class="table-wrap" (scroll)="onTableWrapScroll()">
+                  <table class="admin-table admin-table--documents">
+                    <caption class="sm-sr-only">
+                      Uploaded documents for the selected job
+                    </caption>
+                    <thead>
+                      <tr>
+                        <th scope="col">Document</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Uploaded</th>
+                        <th scope="col">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (document of job.uploadedDocuments; track document.id) {
+                        <tr>
+                          <td>
+                            <p class="table-title table-title--secondary">{{ document.fileName }}</p>
+                            <p class="table-meta">{{ document.contentType }}</p>
+                          </td>
+                          <td>{{ document.docType }}</td>
+                          <td class="cell-nowrap">
+                            <p class="table-title table-title--secondary">{{ document.uploadedAt | date: 'd MMM yyyy' }}</p>
+                            <p class="table-meta">{{ document.uploadedAt | date: 'h:mm a' }}</p>
+                          </td>
+                          <td class="actions-cell">
+                            <button
+                              #documentActionsTrigger
+                              type="button"
+                              class="admin-actions-trigger"
+                              [disabled]="jobDetailBusy()"
+                              aria-haspopup="menu"
+                              [attr.aria-expanded]="isActionsMenuOpen('document', document.id)"
+                              [attr.aria-controls]="isActionsMenuOpen('document', document.id) ? actionsMenuId : null"
+                              (click)="toggleActionsMenu('document', document.id, documentActionsTrigger, 'Document ' + document.fileName)"
+                              (keydown)="
+                                onActionsTriggerKeydown($event, 'document', document.id, documentActionsTrigger, 'Document ' + document.fileName)
+                              "
+                            >
+                              <span class="admin-actions-trigger__dots" aria-hidden="true">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                              </span>
+                              <span class="sm-sr-only">Open actions for document {{ document.fileName }}</span>
+                            </button>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+            }
+          </div>
+        </div>
+      </div>
+    }

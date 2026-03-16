@@ -1,0 +1,56 @@
+:host {
+  display: block;
+}
+
+.auth-topbar {
+  height: 52px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-inline: clamp(16px, 4vw, 48px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.auth-topbar__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.auth-topbar__mark {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  display: block;
+}
+
+.auth-topbar__name {
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.auth-topbar__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 140ms ease-out;
+}
+
+.auth-topbar__back:hover,
+.auth-topbar__back:focus-visible {
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.auth-topbar__back-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}

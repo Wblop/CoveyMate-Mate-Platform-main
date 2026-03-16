@@ -1,0 +1,21 @@
+.saml-stub {
+  display: grid;
+  gap: 18px;
+}
+
+.saml-stub__form {
+  gap: 16px;
+}
+
+.saml-stub__role {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--sm-color-text);
+}
+
+.saml-stub__role input {
+  width: 16px;
+  height: 16px;
+}

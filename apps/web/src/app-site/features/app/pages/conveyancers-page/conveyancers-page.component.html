@@ -1,0 +1,211 @@
+    <section class="sm-page-section">
+      <div class="sm-container conveyancers-layout">
+        <ui-page-header
+          eyebrow="Directory"
+          title="Conveyancers"
+          description="Search live directory records sourced from regulators and law society registers."
+        ></ui-page-header>
+
+        @if (viewModel$ | async; as vm) {
+          <section class="sm-surface conveyancers-controls">
+            <div class="control-row">
+              <label for="jurisdiction" class="control-label">Jurisdiction</label>
+              <select
+                id="jurisdiction"
+                class="control-select"
+                [value]="vm.jurisdiction"
+                (change)="onJurisdictionChange($event)"
+              >
+                @for (jurisdiction of jurisdictions; track jurisdiction) {
+                  <option [value]="jurisdiction">{{ jurisdiction }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="control-row control-row--grow">
+              <label for="directory-search" class="control-label">Search</label>
+              <input
+                id="directory-search"
+                type="search"
+                class="control-input"
+                [value]="vm.query"
+                placeholder="Name, suburb, address, email, area of practice..."
+                (input)="onSearchInput($event)"
+              />
+            </div>
+
+            <div class="control-row">
+              <label for="regulator-type" class="control-label">Source</label>
+              <select
+                id="regulator-type"
+                class="control-select"
+                [value]="vm.selectedRegulatorType"
+                (change)="onRegulatorTypeChange($event)"
+              >
+                <option [value]="allRegulatorsValue">All sources</option>
+                @for (regulatorType of vm.regulatorTypes; track regulatorType) {
+                  <option [value]="regulatorType">{{ formatRegulator(regulatorType) }}</option>
+                }
+              </select>
+            </div>
+          </section>
+
+          @if (!vm.loading && !vm.error) {
+            <p class="results-meta">
+              @if (vm.totalCount > 0) {
+                Showing {{ vm.rangeStart }}-{{ vm.rangeEnd }} of {{ vm.totalCount }} active entries.
+              } @else {
+                No matching active entries.
+              }
+            </p>
+          }
+
+          @if (vm.loading) {
+            <section
+              class="sm-surface conveyancers-state conveyancers-state--loading"
+              data-testid="conveyancers-loading-state"
+              role="status"
+              aria-live="polite"
+            >
+              <h2>Loading directory</h2>
+              <p>Fetching active conveyancers for {{ vm.jurisdiction }}.</p>
+              <div class="conveyancer-grid conveyancer-grid--loading" aria-hidden="true">
+                @for (placeholder of loadingCardPlaceholders; track placeholder) {
+                  <article class="sm-surface conveyancer-card conveyancer-card--skeleton">
+                    <header class="conveyancer-card__header">
+                      <div class="skeleton-meta">
+                        <ui-skeleton-block [height]="12"></ui-skeleton-block>
+                      </div>
+                      <div class="skeleton-title">
+                        <ui-skeleton-block [height]="22"></ui-skeleton-block>
+                      </div>
+                      <div class="skeleton-contact">
+                        <ui-skeleton-block [height]="16"></ui-skeleton-block>
+                      </div>
+                    </header>
+
+                    <div class="conveyancer-card__details">
+                      <div class="conveyancer-card__detail-row">
+                        <span class="conveyancer-card__detail-label">Website</span>
+                        <div class="skeleton-detail">
+                          <ui-skeleton-block [height]="16"></ui-skeleton-block>
+                        </div>
+                      </div>
+                      <div class="conveyancer-card__detail-row">
+                        <span class="conveyancer-card__detail-label">Email</span>
+                        <div class="skeleton-detail skeleton-detail--short">
+                          <ui-skeleton-block [height]="16"></ui-skeleton-block>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="skeleton-footnote">
+                      <ui-skeleton-block [height]="12"></ui-skeleton-block>
+                    </div>
+                  </article>
+                }
+              </div>
+            </section>
+          } @else if (vm.error) {
+            <section class="sm-surface conveyancers-state" data-testid="conveyancers-error-state">
+              <h2>Directory unavailable</h2>
+              <p>{{ vm.error }}</p>
+              <p>Try again in a few moments or adjust the filters.</p>
+            </section>
+          } @else if (vm.rows.length === 0) {
+            <section class="sm-surface conveyancers-state" data-testid="conveyancers-empty-state">
+              <h2>No active records found</h2>
+              <p>
+                No active conveyancers match your filters for {{ vm.jurisdiction }}.
+                Try clearing search text or selecting another source.
+              </p>
+              <div class="conveyancers-state__actions">
+                <a [routerLink]="emptyStatePrimaryLink">{{ emptyStatePrimaryLabel }}</a>
+                <a [routerLink]="emptyStateSecondaryLink">{{ emptyStateSecondaryLabel }}</a>
+              </div>
+            </section>
+          } @else {
+            <section class="conveyancer-grid" data-testid="conveyancers-directory-grid">
+              @for (item of vm.rows; track item.sourceIdentifier) {
+                <article class="sm-surface conveyancer-card">
+                  <header class="conveyancer-card__header">
+                    <p class="conveyancer-card__meta">{{ item.jurisdiction }} · {{ formatRegulator(item.regulatorType) }}</p>
+                    <h2>{{ displayPrimaryName(item) }}</h2>
+                    @if (hasDistinctContact(item)) {
+                      <p class="conveyancer-card__contact">Handled by {{ item.contactName }}</p>
+                    }
+                  </header>
+
+                  <div class="conveyancer-card__details">
+                    <div class="conveyancer-card__detail-row">
+                      <span class="conveyancer-card__detail-label">Website</span>
+                      @if (item.website) {
+                        <a
+                          class="conveyancer-card__detail-value"
+                          [href]="item.website"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          [attr.aria-label]="'Visit website: ' + websiteLabel(item.website)"
+                          [attr.title]="item.website"
+                        >
+                          {{ websiteLabel(item.website) }}
+                        </a>
+                      } @else {
+                        <span class="conveyancer-card__detail-value conveyancer-card__detail-value--muted">Not listed</span>
+                      }
+                    </div>
+
+                    <div class="conveyancer-card__detail-row">
+                      <span class="conveyancer-card__detail-label">Email</span>
+                      @if (item.email) {
+                        <a class="conveyancer-card__detail-value" [href]="'mailto:' + item.email" [attr.title]="item.email">{{ item.email }}</a>
+                      } @else {
+                        <span class="conveyancer-card__detail-value conveyancer-card__detail-value--muted">Not listed</span>
+                      }
+                    </div>
+                  </div>
+
+                  <p class="conveyancer-card__footnote">Updated {{ item.lastSeenUtc | date: 'd MMM yyyy' }}</p>
+                </article>
+              }
+            </section>
+
+            @if (vm.totalPages > 1) {
+              <section class="pagination" data-testid="conveyancers-pagination">
+                <button
+                  type="button"
+                  class="pagination__button"
+                  [disabled]="vm.page <= 1"
+                  (click)="goToPage(vm.page - 1)"
+                >
+                  Previous
+                </button>
+
+                <div class="pagination__pages">
+                  @for (pageNumber of pageNumbers(vm.page, vm.totalPages); track pageNumber) {
+                    <button
+                      type="button"
+                      class="pagination__page"
+                      [class.pagination__page--active]="pageNumber === vm.page"
+                      [attr.aria-current]="pageNumber === vm.page ? 'page' : null"
+                      (click)="goToPage(pageNumber)"
+                    >
+                      {{ pageNumber }}
+                    </button>
+                  }
+                </div>
+
+                <button
+                  type="button"
+                  class="pagination__button"
+                  [disabled]="vm.page >= vm.totalPages"
+                  (click)="goToPage(vm.page + 1)"
+                >
+                  Next
+                </button>
+              </section>
+            }
+          }
+        }
+      </div>
+    </section>
